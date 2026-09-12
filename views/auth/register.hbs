@@ -1,0 +1,160 @@
+<div style="max-width: 600px; margin: 2rem auto; padding: 0 1rem;">
+  <div class="card" style="box-shadow: var(--shadow-lg); border-color: rgba(59, 130, 246, 0.3);">
+    <div class="card-header" style="text-align: center; flex-direction: column; gap: 0.5rem; padding: 2rem 1.5rem 1rem;">
+      <div class="brand-icon" style="width: 52px; height: 52px; margin: 0 auto; background: linear-gradient(135deg, #10b981, #3b82f6); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center;">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5">
+          <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/>
+        </svg>
+      </div>
+      <h1 style="font-size: 1.6rem; font-weight: 800; color: #ffffff;">Register Your Company</h1>
+      <p style="font-size: 0.85rem; color: var(--color-text-muted);">
+        Creates a new tenant account with <strong style="color: #60a5fa;">SUPER_ADMIN</strong> privileges and initial garage facility
+      </p>
+    </div>
+
+    <div class="card-body" style="padding: 1.5rem 2rem 2rem;">
+      {{#if error}}
+        <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: var(--radius-md); padding: 0.75rem 1rem; margin-bottom: 1.25rem; font-size: 0.85rem; color: #f87171;">
+          {{error}}
+        </div>
+      {{/if}}
+
+      <form action="/register" method="POST">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+          <div class="form-group">
+            <label class="form-label" for="regName" style="display: block; margin-bottom: 0.35rem; font-size: 0.85rem; font-weight: 600;">Owner / Contact Name *</label>
+            <input
+              type="text"
+              id="regName"
+              name="name"
+              class="form-control"
+              required
+              placeholder="e.g. Alexander Vance"
+              value="{{formData.name}}"
+              style="width: 100%; padding: 0.7rem; border-radius: var(--radius-md); background: rgba(15, 23, 42, 0.8); border: 1px solid var(--color-border); color: #fff;"
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="regCompanyName" style="display: block; margin-bottom: 0.35rem; font-size: 0.85rem; font-weight: 600;">Company Name *</label>
+            <input
+              type="text"
+              id="regCompanyName"
+              name="companyName"
+              class="form-control"
+              required
+              placeholder="e.g. Apex Auto Solutions Ltd."
+              value="{{formData.companyName}}"
+              style="width: 100%; padding: 0.7rem; border-radius: var(--radius-md); background: rgba(15, 23, 42, 0.8); border: 1px solid var(--color-border); color: #fff;"
+            />
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+          <div class="form-group">
+            <label class="form-label" for="regEmail" style="display: block; margin-bottom: 0.35rem; font-size: 0.85rem; font-weight: 600;">Business Email Address *</label>
+            <input
+              type="email"
+              id="regEmail"
+              name="email"
+              class="form-control"
+              required
+              placeholder="admin@company.com"
+              value="{{formData.email}}"
+              style="width: 100%; padding: 0.7rem; border-radius: var(--radius-md); background: rgba(15, 23, 42, 0.8); border: 1px solid var(--color-border); color: #fff;"
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="regPassword" style="display: block; margin-bottom: 0.35rem; font-size: 0.85rem; font-weight: 600;">Password *</label>
+            <input
+              type="password"
+              id="regPassword"
+              name="password"
+              class="form-control"
+              required
+              minlength="6"
+              placeholder="Min 6 characters"
+              style="width: 100%; padding: 0.7rem; border-radius: var(--radius-md); background: rgba(15, 23, 42, 0.8); border: 1px solid var(--color-border); color: #fff;"
+            />
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+          <div class="form-group">
+            <label class="form-label" for="regPhone" style="display: block; margin-bottom: 0.35rem; font-size: 0.85rem; font-weight: 600;">Phone Number *</label>
+            <input
+              type="text"
+              id="regPhone"
+              name="phoneNumber"
+              class="form-control"
+              required
+              placeholder="+1-555-0199"
+              value="{{formData.phoneNumber}}"
+              style="width: 100%; padding: 0.7rem; border-radius: var(--radius-md); background: rgba(15, 23, 42, 0.8); border: 1px solid var(--color-border); color: #fff;"
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="regAddress" style="display: block; margin-bottom: 0.35rem; font-size: 0.85rem; font-weight: 600;">Company Headquarters Address *</label>
+            <input
+              type="text"
+              id="regAddress"
+              name="address"
+              class="form-control"
+              required
+              placeholder="Suite 400, Industrial District"
+              value="{{formData.address}}"
+              style="width: 100%; padding: 0.7rem; border-radius: var(--radius-md); background: rgba(15, 23, 42, 0.8); border: 1px solid var(--color-border); color: #fff;"
+            />
+          </div>
+        </div>
+
+        <!-- Optional Initial Garage Section -->
+        <div style="background: rgba(15, 23, 42, 0.5); border: 1px dashed var(--color-border); border-radius: var(--radius-md); padding: 1rem 1.25rem; margin-top: 1.25rem; margin-bottom: 1.5rem;">
+          <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            </svg>
+            <span style="font-size: 0.9rem; font-weight: 600; color: #fff;">Initial Garage Facility (Optional)</span>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label" for="initGarageName" style="display: block; margin-bottom: 0.3rem; font-size: 0.8rem; color: var(--color-text-muted);">Garage Name</label>
+              <input
+                type="text"
+                id="initGarageName"
+                name="initialGarageName"
+                class="form-control"
+                placeholder="e.g. Central Workshop Bay"
+                value="{{formData.initialGarageName}}"
+                style="width: 100%; padding: 0.65rem; border-radius: var(--radius-md); background: rgba(15, 23, 42, 0.8); border: 1px solid var(--color-border); color: #fff;"
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="initGarageAddress" style="display: block; margin-bottom: 0.3rem; font-size: 0.8rem; color: var(--color-text-muted);">Garage Address</label>
+              <input
+                type="text"
+                id="initGarageAddress"
+                name="initialGarageAddress"
+                class="form-control"
+                placeholder="e.g. Bay 12, West Industrial District"
+                value="{{formData.initialGarageAddress}}"
+                style="width: 100%; padding: 0.65rem; border-radius: var(--radius-md); background: rgba(15, 23, 42, 0.8); border: 1px solid var(--color-border); color: #fff;"
+              />
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.85rem; font-weight: 700; font-size: 1rem;">
+          Register Company &amp; Start Operating
+        </button>
+      </form>
+
+      <div style="text-align: center; margin-top: 1.5rem; font-size: 0.85rem; color: var(--color-text-muted);">
+        Already registered? <a href="/login" style="color: var(--color-primary); font-weight: 600;">Sign in to your account</a>
+      </div>
+    </div>
+  </div>
+</div>

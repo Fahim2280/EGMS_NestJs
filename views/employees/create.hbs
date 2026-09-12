@@ -1,0 +1,138 @@
+<div class="container" style="max-width: 650px; padding-top: 2rem; padding-bottom: 3rem;">
+  <div class="card" style="box-shadow: var(--shadow-lg);">
+    <div class="card-header" style="border-bottom: 1px solid var(--color-border); padding: 1.5rem 2rem;">
+      <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <div style="width: 44px; height: 44px; background: rgba(16, 185, 129, 0.15); color: #10b981; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="8.5" cy="7" r="4"/>
+            <line x1="20" y1="8" x2="20" y2="14"/>
+            <line x1="23" y1="11" x2="17" y2="11"/>
+          </svg>
+        </div>
+        <div>
+          <h1 style="font-size: 1.35rem; font-weight: 700; margin: 0; color: #fff;">Add New Employee</h1>
+          <p style="font-size: 0.85rem; color: var(--color-text-muted); margin: 0.2rem 0 0 0;">
+            Registers staff member with <strong style="color: #34d399;">GENERAL</strong> role connected to your company
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-body" style="padding: 2rem;">
+      {{#if error}}
+        <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: var(--radius-md); padding: 0.75rem 1rem; margin-bottom: 1.5rem; font-size: 0.85rem; color: #f87171;">
+          {{error}}
+        </div>
+      {{/if}}
+
+      <form action="/employees" method="POST">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
+          <div class="form-group">
+            <label class="form-label" for="empName" style="display: block; margin-bottom: 0.35rem; font-size: 0.85rem; font-weight: 600;">Full Name *</label>
+            <input
+              type="text"
+              id="empName"
+              name="name"
+              class="form-control"
+              required
+              placeholder="e.g. Johnathan Doe"
+              value="{{formData.name}}"
+              style="width: 100%; padding: 0.7rem; border-radius: var(--radius-md); background: rgba(15, 23, 42, 0.8); border: 1px solid var(--color-border); color: #fff;"
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="empNid" style="display: block; margin-bottom: 0.35rem; font-size: 0.85rem; font-weight: 600;">National ID (NID Number) *</label>
+            <input
+              type="text"
+              id="empNid"
+              name="nidNumber"
+              class="form-control"
+              required
+              placeholder="e.g. 1992837465012"
+              value="{{formData.nidNumber}}"
+              style="width: 100%; padding: 0.7rem; border-radius: var(--radius-md); background: rgba(15, 23, 42, 0.8); border: 1px solid var(--color-border); color: #fff;"
+            />
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
+          <div class="form-group">
+            <label class="form-label" for="empEmail" style="display: block; margin-bottom: 0.35rem; font-size: 0.85rem; font-weight: 600;">Employee Email *</label>
+            <input
+              type="email"
+              id="empEmail"
+              name="email"
+              class="form-control"
+              required
+              placeholder="john.doe@company.com"
+              value="{{formData.email}}"
+              style="width: 100%; padding: 0.7rem; border-radius: var(--radius-md); background: rgba(15, 23, 42, 0.8); border: 1px solid var(--color-border); color: #fff;"
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="empPassword" style="display: block; margin-bottom: 0.35rem; font-size: 0.85rem; font-weight: 600;">Initial Password *</label>
+            <input
+              type="password"
+              id="empPassword"
+              name="password"
+              class="form-control"
+              required
+              minlength="6"
+              placeholder="Min 6 characters"
+              style="width: 100%; padding: 0.7rem; border-radius: var(--radius-md); background: rgba(15, 23, 42, 0.8); border: 1px solid var(--color-border); color: #fff;"
+            />
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
+          <div class="form-group">
+            <label class="form-label" for="empPhone" style="display: block; margin-bottom: 0.35rem; font-size: 0.85rem; font-weight: 600;">Phone Number *</label>
+            <input
+              type="text"
+              id="empPhone"
+              name="phoneNumber"
+              class="form-control"
+              required
+              placeholder="+1-555-0144"
+              value="{{formData.phoneNumber}}"
+              style="width: 100%; padding: 0.7rem; border-radius: var(--radius-md); background: rgba(15, 23, 42, 0.8); border: 1px solid var(--color-border); color: #fff;"
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" style="display: block; margin-bottom: 0.35rem; font-size: 0.85rem; font-weight: 600;">Assigned Role</label>
+            <input
+              type="text"
+              value="GENERAL (Automated Default)"
+              disabled
+              style="width: 100%; padding: 0.7rem; border-radius: var(--radius-md); background: rgba(15, 23, 42, 0.4); border: 1px solid var(--color-border); color: #94a3b8;"
+            />
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 2rem;">
+          <label class="form-label" for="empAddress" style="display: block; margin-bottom: 0.35rem; font-size: 0.85rem; font-weight: 600;">Residential Address *</label>
+          <textarea
+            id="empAddress"
+            name="address"
+            class="form-control"
+            rows="2"
+            required
+            placeholder="e.g. 15 Elm Street, North Suburb"
+            style="width: 100%; padding: 0.7rem; border-radius: var(--radius-md); background: rgba(15, 23, 42, 0.8); border: 1px solid var(--color-border); color: #fff; resize: vertical;"
+          >{{formData.address}}</textarea>
+        </div>
+
+        <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+          <a href="/employees" class="btn btn-secondary">Cancel</a>
+          <button type="submit" class="btn btn-primary" style="padding: 0.75rem 1.75rem; font-weight: 600;">
+            Add Employee to Roster
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

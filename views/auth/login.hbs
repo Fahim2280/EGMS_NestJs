@@ -1,0 +1,76 @@
+<div style="max-width: 480px; margin: 3rem auto; padding: 0 1rem;">
+  <div class="card" style="box-shadow: var(--shadow-lg); border-color: rgba(79, 70, 229, 0.3);">
+    <div class="card-header" style="text-align: center; flex-direction: column; gap: 0.5rem; padding: 2rem 1.5rem 1rem;">
+      <div class="brand-icon" style="width: 52px; height: 52px; margin: 0 auto; background: linear-gradient(135deg, #3b82f6, #6366f1); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center;">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        </svg>
+      </div>
+      <h1 style="font-size: 1.5rem; font-weight: 800; color: #ffffff;">Sign in to Garage Portal</h1>
+      <p style="font-size: 0.85rem; color: var(--color-text-muted);">
+        Enterprise Company (Super Admin) &amp; Employee Authentication
+      </p>
+    </div>
+
+    <div class="card-body" style="padding: 1.5rem 2rem 2rem;">
+      {{#if error}}
+        <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: var(--radius-md); padding: 0.75rem 1rem; margin-bottom: 1.25rem; font-size: 0.85rem; color: #f87171;">
+          {{error}}
+        </div>
+      {{/if}}
+
+      <form action="/login" method="POST">
+        <div class="form-group" style="margin-bottom: 1.25rem;">
+          <label class="form-label" for="loginEmail" style="display: block; margin-bottom: 0.4rem; font-size: 0.875rem; font-weight: 600;">Email Address</label>
+          <input
+            type="email"
+            id="loginEmail"
+            name="email"
+            class="form-control"
+            required
+            placeholder="admin@apexauto.com"
+            value="{{email}}"
+            style="width: 100%; padding: 0.75rem; border-radius: var(--radius-md); background: rgba(15, 23, 42, 0.8); border: 1px solid var(--color-border); color: #fff;"
+          />
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+          <label class="form-label" for="loginPassword" style="display: block; margin-bottom: 0.4rem; font-size: 0.875rem; font-weight: 600;">Password</label>
+          <input
+            type="password"
+            id="loginPassword"
+            name="password"
+            class="form-control"
+            required
+            placeholder="••••••••"
+            style="width: 100%; padding: 0.75rem; border-radius: var(--radius-md); background: rgba(15, 23, 42, 0.8); border: 1px solid var(--color-border); color: #fff;"
+          />
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.75rem; font-weight: 600; font-size: 0.95rem;">
+          Authenticate &amp; Sign In
+        </button>
+      </form>
+
+      <!-- Demo Quick Fill Buttons -->
+      <div style="margin-top: 1.75rem; padding-top: 1.25rem; border-top: 1px solid var(--color-border);">
+        <span style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-dim); display: block; margin-bottom: 0.75rem; text-align: center;">
+          Demo Accounts (MySQL Pre-seeded)
+        </span>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+          <button type="button" class="btn btn-secondary btn-sm quick-fill-btn" data-email="admin@apexauto.com" data-pass="Admin@123">
+            🏢 Super Admin (Company)
+          </button>
+          <button type="button" class="btn btn-secondary btn-sm quick-fill-btn" data-email="john.doe@apexauto.com" data-pass="Employee@123">
+            👤 General Employee
+          </button>
+        </div>
+      </div>
+
+      <div style="text-align: center; margin-top: 1.5rem; font-size: 0.85rem; color: var(--color-text-muted);">
+        Want to register a new company? <a href="/register" style="color: var(--color-primary); font-weight: 600;">Register here</a>
+      </div>
+    </div>
+  </div>
+</div>
