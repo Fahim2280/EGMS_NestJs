@@ -3,27 +3,44 @@ import {
   Controller,
   Get,
   Post,
+  Query,
   Req,
   Res,
+  UseGuards,
 } from '@nestjs/common';
-import { CommandBus } from '@nestjs/cqrs';
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { Response, Request } from 'express';
 import { LoginDto } from '@application/dtos/auth.dto';
-import { RegisterCompanyDto } from '@application/dtos/company.dto';
+import { RegisterCompanyDto, UpdateCompanyDto } from '@application/dtos/company.dto';
 import { LoginCommand } from '@application/commands/impl/login.command';
 import { RegisterCompanyCommand } from '@application/commands/impl/register-company.command';
+import { ForgotPasswordCommand } from '@application/commands/impl/forgot-password.command';
+import { ResetPasswordCommand } from '@application/commands/impl/reset-password.command';
+import { UpdateCompanyCommand } from '@application/commands/impl/update-company.command';
+import { GetCompanyByIdQuery } from '@application/queries/impl/get-company-by-id.query';
+import { JwtAuthGuard } from '@infrastructure/auth/jwt-auth.guard';
+import { RolesGuard } from '@infrastructure/auth/roles.guard';
+import { Roles } from '@infrastructure/auth/roles.decorator';
 
 @Controller()
 export class AuthController {
-  constructor(private readonly commandBus: CommandBus) {}
+  constructor(
+    private readonly commandBus: CommandBus,
+    private readonly queryBus: QueryBus,
+  ) {}
 
   @Get('login')
-  renderLogin(@Req() req: Request, @Res() res: Response) {
+  renderLogin(
+    @Query('message') message: string,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
     if ((req as any).user) {
       return res.redirect('/');
     }
     return res.render('auth/login', {
       title: 'Sign In - Garage Portal',
+      successMessage: message,
     });
   }
 
@@ -86,6 +103,132 @@ export class AuthController {
     }
   }
 
+  @Get('forgot-password')
+  renderForgotPassword(@Req() req: Request, @Res() res: Response) {
+    return res.render('auth/forgot-password', {
+      title: 'Forgot Password - Garage Portal',
+    });
+  }
+
+  @Post('forgot-password')
+  async handleForgotPassword(
+    @Body('email') email: string,
+    @Res() res: Response,
+  ) {
+    try {
+      await this.commandBus.execute(new ForgotPasswordCommand(email));
+      return res.redirect('/forgot-password-confirmation');
+    } catch (err: any) {
+      return res.render('auth/forgot-password', {
+        title: 'Forgot Password - Garage Portal',
+        error: err.message || 'Error processing request.',
+        email,
+      });
+    }
+  }
+
+  @Get('forgot-password-confirmation')
+  renderForgotPasswordConfirmation(@Res() res: Response) {
+    return res.render('auth/forgot-password-confirmation', {
+      title: 'Password Reset Requested - Garage Portal',
+    });
+  }
+
+  @Get('reset-password')
+  renderResetPassword(
+    @Query('token') token: string,
+    @Query('email') email: string,
+    @Res() res: Response,
+  ) {
+    if (!token || !email) {
+      return res.redirect('/login');
+    }
+
+    return res.render('auth/reset-password', {
+      title: 'Reset Password - Garage Portal',
+      token,
+      email,
+    });
+  }
+
+  @Post('reset-password')
+  async handleResetPassword(
+    @Body('token') token: string,
+    @Body('email') email: string,
+    @Body('password') password: string,
+    @Res() res: Response,
+  ) {
+    try {
+      await this.commandBus.execute(
+        new ResetPasswordCommand(email, token, password),
+      );
+      return res.redirect('/login?message=Password+has+been+reset+successfully.+Please+sign+in.');
+    } catch (err: any) {
+      return res.render('auth/reset-password', {
+        title: 'Reset Password - Garage Portal',
+        error: err.message || 'Failed to reset password.',
+        token,
+        email,
+      });
+    }
+  }
+
+  @Get('profile/edit')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SUPER_ADMIN')
+  async renderProfileEdit(@Req() req: Request, @Res() res: Response) {
+    const user = (req as any).user;
+    if (!user) return res.redirect('/login');
+
+    const company = await this.queryBus.execute(
+      new GetCompanyByIdQuery(user.companyId),
+    );
+
+    return res.render('auth/edit', {
+      title: 'Edit Profile - Garage Portal',
+      activeNav: 'profile',
+      user,
+      company,
+    });
+  }
+
+  @Post('profile/edit')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SUPER_ADMIN')
+  async handleProfileEdit(
+    @Body() body: any,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    const user = (req as any).user;
+    if (!user) return res.redirect('/login');
+
+    try {
+      await this.commandBus.execute(
+        new UpdateCompanyCommand(
+          user.companyId,
+          body.name,
+          body.companyName,
+          body.phoneNumber,
+          body.address,
+          `${user.sub || user.companyId}|${user.role || 'SUPER_ADMIN'}`,
+          body.unitRate !== undefined && body.unitRate !== '' ? Number(body.unitRate) : undefined,
+        ),
+      );
+      return res.redirect('/profile/edit?success=Profile+updated+successfully');
+    } catch (err: any) {
+      const company = await this.queryBus.execute(
+        new GetCompanyByIdQuery(user.companyId),
+      ).catch(() => null);
+      return res.render('auth/edit', {
+        title: 'Edit Profile - EGMS Portal',
+        activeNav: 'profile',
+        user,
+        company,
+        error: err.message || 'Failed to update profile.',
+      });
+    }
+  }
 
   @Get('logout')
   handleLogout(@Res() res: Response) {

@@ -20,7 +20,7 @@ export class Employee extends AuditableEntity {
   public email: string;
   public password: string;
   public phoneNumber: string;
-  public readonly role: string;
+  public role: string;
   public nidNumber: string;
 
   constructor(props: CreateEmployeeProps) {
@@ -72,6 +72,19 @@ export class Employee extends AuditableEntity {
   public updatePassword(hashedPassword: string, updatedByStamp?: string): void {
     if (!hashedPassword) throw new Error('Password hash cannot be empty.');
     this.password = hashedPassword;
+    if (updatedByStamp) {
+      this.markModified(updatedByStamp);
+    } else {
+      this.modifiedDate = new Date();
+    }
+  }
+
+  public updateRole(newRole: string, updatedByStamp?: string): void {
+    const validRoles = ['SUPER_ADMIN', 'GENERAL'];
+    if (!validRoles.includes(newRole)) {
+      throw new Error(`Invalid role '${newRole}'. Allowed roles: ${validRoles.join(', ')}`);
+    }
+    this.role = newRole;
     if (updatedByStamp) {
       this.markModified(updatedByStamp);
     } else {

@@ -57,5 +57,23 @@ export class GarageResponseDto {
   editByName?: string;
 
   companyName?: string;
+  customerCount?: number;
+}
+
+export class GarageMetricsDto {
+  totalCustomers: number;
+  totalUnitsConsumed: number;
+  totalElectricAmount: number;
+  totalBilledAmount: number;
+  totalCollectedRevenue: number;
+  totalOutstandingDues: number;
+  averageUnitsPerCustomer: number;
+}
+
+export class GarageDashboardDto {
+  garage: GarageResponseDto;
+  metrics: GarageMetricsDto;
+  customers: any[];
+  recentBills: any[];
 }
 

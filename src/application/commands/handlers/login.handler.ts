@@ -64,6 +64,11 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
     if (employee) {
       const isMatch = await bcrypt.compare(password, employee.password);
       if (isMatch) {
+        if (!employee.isActive || employee.isDeleted) {
+          throw new UnauthorizedException(
+            'Your employee account has been deactivated or suspended. Please contact your company administrator.',
+          );
+        }
         const companyOfEmployee = await this.companyRepo.findById(employee.companyId);
         const payload = {
           id: employee.id,

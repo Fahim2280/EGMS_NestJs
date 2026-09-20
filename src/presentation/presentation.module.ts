@@ -4,6 +4,9 @@ import { AuthController } from './controllers/auth.controller';
 import { DashboardController } from './controllers/dashboard.controller';
 import { GarageController } from './controllers/garage.controller';
 import { EmployeeController } from './controllers/employee.controller';
+import { CustomerController } from './controllers/customer.controller';
+import { ElectricBillController } from './controllers/electric-bill.controller';
+import { ErrorController } from './controllers/error.controller';
 
 @Module({
   imports: [ApplicationModule],
@@ -12,6 +15,9 @@ import { EmployeeController } from './controllers/employee.controller';
     DashboardController,
     GarageController,
     EmployeeController,
+    CustomerController,
+    ElectricBillController,
+    ErrorController,
   ],
 })
 export class PresentationModule {}

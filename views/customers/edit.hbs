@@ -1,0 +1,79 @@
+<div class="page-header">
+  <div class="header-content">
+    <a href="/customers/{{customer.id}}" style="color: var(--color-text-muted); text-decoration: none; font-size: 0.875rem; display: inline-flex; align-items: center; gap: 0.25rem; margin-bottom: 0.5rem;">
+      &larr; {{t 'common.back'}}
+    </a>
+    <h1 class="page-title">{{t 'customers.editTitle'}}</h1>
+    <p class="page-subtitle">{{t 'customers.createSubtitle'}}</p>
+  </div>
+</div>
+
+<div class="card" style="max-width: 800px; margin: 0 auto;">
+  {{#if error}}
+    <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem; color: #ef4444; font-size: 0.9rem;">
+      {{error}}
+    </div>
+  {{/if}}
+
+  <form action="/customers/{{customer.id}}/edit" method="POST">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
+      <div class="form-group" style="grid-column: 1 / -1;">
+        <label class="form-label" for="garageId">{{t 'customers.garage'}} *</label>
+        <select id="garageId" name="garageId" class="form-input" required>
+          <option value="" disabled>{{t 'common.selectGarage'}}</option>
+          {{#each garages}}
+            <option value="{{this.id}}" {{#if (eq this.id ../selectedGarageId)}}selected{{/if}}>
+              {{this.garageName}} ({{this.address}})
+            </option>
+          {{/each}}
+        </select>
+        <span style="font-size: 0.75rem; color: var(--color-text-muted);">Required: Each customer must be associated with exactly one garage facility.</span>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="name">{{t 'customers.name'}} *</label>
+        <input type="text" id="name" name="name" class="form-input" required value="{{customer.name}}">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="mobileNumber">{{t 'customers.mobile'}} *</label>
+        <input type="tel" id="mobileNumber" name="mobileNumber" class="form-input" required value="{{customer.mobileNumber}}">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="fatherName">{{t 'customers.fatherName'}}</label>
+        <input type="text" id="fatherName" name="fatherName" class="form-input" value="{{customer.fatherName}}">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="motherName">{{t 'customers.motherName'}}</label>
+        <input type="text" id="motherName" name="motherName" class="form-input" value="{{customer.motherName}}">
+      </div>
+
+      <div class="form-group" style="grid-column: 1 / -1;">
+        <label class="form-label" for="nidNumber">{{t 'customers.nid'}} *</label>
+        <input type="text" id="nidNumber" name="nidNumber" class="form-input" required value="{{customer.nidNumber}}">
+      </div>
+
+      <div class="form-group" style="grid-column: 1 / -1;">
+        <label class="form-label" for="address">{{t 'customers.address'}} *</label>
+        <textarea id="address" name="address" class="form-input" rows="2" required>{{customer.address}}</textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="previousUnit">{{t 'customers.baselineMeter'}} *</label>
+        <input type="number" step="0.01" min="0" id="previousUnit" name="previousUnit" class="form-input" required value="{{customer.previousUnit}}">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="advanceMoney">{{t 'customers.advanceMoney'}} (৳) *</label>
+        <input type="number" step="0.01" id="advanceMoney" name="advanceMoney" class="form-input" required value="{{customer.advanceMoney}}">
+      </div>
+    </div>
+
+    <div class="form-actions" style="margin-top: 2rem; display: flex; gap: 0.75rem; justify-content: flex-end; flex-wrap: wrap;">
+      <a href="/customers/{{customer.id}}" class="btn btn-secondary">{{t 'common.cancel'}}</a>
+      <button type="submit" class="btn btn-primary">{{t 'customers.updateProfile'}}</button>
+    </div>
+  </form>
+</div>

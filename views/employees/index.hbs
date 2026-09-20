@@ -1,19 +1,27 @@
-<div class="container" style="padding-top: 2rem; padding-bottom: 3rem;">
-  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+<div style="padding-top: 1rem; padding-bottom: 2rem;">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
     <div>
-      <h1 style="font-size: 1.75rem; font-weight: 700; color: #fff; margin: 0;">Employee Roster</h1>
+      <h1 style="font-size: 1.75rem; font-weight: 700; color: var(--color-text-primary); margin: 0;">{{t 'employees.title'}}</h1>
       <p style="color: var(--color-text-muted); margin: 0.25rem 0 0 0; font-size: 0.95rem;">
-        Staff members, technicians, and general personnel connected to your company
+        {{t 'employees.subtitle'}}
       </p>
     </div>
     {{#if isSuperAdmin}}
-      <a href="/employees/new" class="btn btn-primary">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="12" y1="5" x2="12" y2="19"/>
-          <line x1="5" y1="12" x2="19" y2="12"/>
-        </svg>
-        Add New Employee
-      </a>
+      <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;" class="header-actions">
+        <a href="/employees/permissions" class="btn btn-secondary" style="display: inline-flex; align-items: center; gap: 0.4rem;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+          {{t 'employees.managePermissions'}}
+        </a>
+        <a href="/employees/new" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 0.4rem;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          {{t 'employees.addEmployee'}}
+        </a>
+      </div>
     {{/if}}
   </div>
 
@@ -23,13 +31,13 @@
         <table class="data-table" style="width: 100%; border-collapse: collapse;">
           <thead>
             <tr style="background: rgba(15, 23, 42, 0.8); border-bottom: 1px solid var(--color-border); text-align: left;">
-              <th style="padding: 1rem;">Employee Name</th>
-              <th style="padding: 1rem;">Email Address</th>
-              <th style="padding: 1rem;">Phone Number</th>
-              <th style="padding: 1rem;">Role</th>
-              <th style="padding: 1rem;">NID Number</th>
-              <th style="padding: 1rem;">Residential Address</th>
-              <th style="padding: 1rem;">Joined Date</th>
+              <th style="padding: 1rem;">{{t 'employees.name'}}</th>
+              <th style="padding: 1rem;">{{t 'employees.email'}}</th>
+              <th style="padding: 1rem;">{{t 'employees.phone'}}</th>
+              <th style="padding: 1rem;">{{t 'employees.role'}}</th>
+              <th style="padding: 1rem;">{{t 'employees.status'}}</th>
+              <th style="padding: 1rem;">{{t 'employees.nid'}}</th>
+              <th style="padding: 1rem; text-align: right;">{{t 'common.actions'}}</th>
             </tr>
           </thead>
           <tbody>
@@ -41,7 +49,7 @@
                       {{this.name.[0]}}
                     </div>
                     <div>
-                      <div style="color: #fff;">{{this.name}}</div>
+                      <a href="/employees/{{this.id}}" style="color: var(--color-text-primary); font-weight: 600;">{{this.name}}</a>
                       <div style="font-size: 0.75rem; color: var(--color-text-muted); font-family: monospace;">UUID: {{this.id}}</div>
                     </div>
                   </div>
@@ -50,12 +58,24 @@
                 <td style="padding: 1rem; color: var(--color-text-secondary);">{{this.phoneNumber}}</td>
                 <td style="padding: 1rem;">{{{roleBadge this.role}}}</td>
                 <td style="padding: 1rem;">
+                  {{#if this.isActive}}
+                    <span class="badge badge-active"><span class="badge-dot"></span>{{t 'common.active'}}</span>
+                  {{else}}
+                    <span class="badge" style="background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2);"><span class="badge-dot" style="background: #ef4444;"></span>{{t 'employees.suspended'}}</span>
+                  {{/if}}
+                </td>
+                <td style="padding: 1rem;">
                   <span style="font-family: monospace; background: rgba(59, 130, 246, 0.1); color: #93c5fd; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem; border: 1px solid rgba(59, 130, 246, 0.2);">
                     {{this.nidNumber}}
                   </span>
                 </td>
-                <td style="padding: 1rem; color: var(--color-text-muted); font-size: 0.85rem;">{{this.address}}</td>
-                <td style="padding: 1rem; color: var(--color-text-muted); font-size: 0.85rem;">{{this.createdAt}}</td>
+                <td style="padding: 1rem; text-align: right;">
+                  <div style="display: flex; gap: 0.4rem; justify-content: flex-end;">
+                    <a href="/employees/{{this.id}}" class="btn btn-secondary btn-sm" title="{{t 'common.view'}}">{{t 'common.view'}}</a>
+                    <a href="/employees/{{this.id}}/edit" class="btn btn-secondary btn-sm" title="{{t 'common.edit'}}">{{t 'common.edit'}}</a>
+                    <a href="/employees/permissions" class="btn btn-primary btn-sm" title="{{t 'employees.managePermissions'}}" style="background: rgba(99, 102, 241, 0.2); border-color: rgba(99, 102, 241, 0.4); color: #a5b4fc;">🛡️ {{t 'nav.permissions'}}</a>
+                  </div>
+                </td>
               </tr>
             {{/each}}
           </tbody>
@@ -70,12 +90,12 @@
           <circle cx="9" cy="7" r="4"/>
         </svg>
       </div>
-      <h2 style="font-size: 1.25rem; font-weight: 700; margin: 0 0 0.5rem 0;">No Employees Registered</h2>
+      <h2 style="font-size: 1.25rem; font-weight: 700; margin: 0 0 0.5rem 0;">{{t 'employees.noEmployees'}}</h2>
       <p style="color: var(--color-text-muted); max-width: 400px; margin: 0 auto 1.5rem;">
-        There are currently no staff members or employees associated with this company in the directory.
+        {{t 'employees.noEmployeesSub'}}
       </p>
       {{#if isSuperAdmin}}
-        <a href="/employees/new" class="btn btn-primary">Add First Employee</a>
+        <a href="/employees/new" class="btn btn-primary">{{t 'employees.addFirst'}}</a>
       {{/if}}
     </div>
   {{/if}}

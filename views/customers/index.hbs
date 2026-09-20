@@ -1,0 +1,106 @@
+<div class="page-header">
+  <div class="header-content">
+    <h1 class="page-title">{{t 'customers.title'}}</h1>
+    <p class="page-subtitle">{{t 'customers.subtitle'}}</p>
+  </div>
+  <div class="header-actions">
+    <a href="/customers/new" class="btn btn-primary">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <line x1="12" y1="5" x2="12" y2="19"/>
+        <line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+      {{t 'customers.addCustomer'}}
+    </a>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+    <h2 class="card-title" style="margin: 0;">{{t 'customers.registeredCount'}} ({{bnNum customerCount}})</h2>
+    <form method="GET" action="/customers" style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+      <select name="garageId" class="form-input" style="width: auto; padding: 0.4rem 0.75rem; font-size: 0.85rem;" onchange="this.form.submit()">
+        <option value="">{{t 'common.allGarages'}}</option>
+        {{#each garages}}
+          <option value="{{this.id}}" {{#if (eq this.id ../selectedGarageId)}}selected{{/if}}>
+            {{this.garageName}}
+          </option>
+        {{/each}}
+      </select>
+      <input type="text" name="search" class="form-input" placeholder="{{t 'customers.searchPlaceholder'}}" value="{{search}}" style="width: 200px; padding: 0.4rem 0.75rem; font-size: 0.85rem;">
+      <button type="submit" class="btn btn-secondary btn-sm">{{t 'common.search'}}</button>
+      {{#if (or selectedGarageId search)}}
+        <a href="/customers" class="btn btn-secondary btn-sm" style="color: #ef4444;">{{t 'common.reset'}}</a>
+      {{/if}}
+    </form>
+  </div>
+
+  {{#if customers.length}}
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>{{t 'customers.id'}}</th>
+            <th>{{t 'customers.name'}}</th>
+            <th>{{t 'customers.garage'}}</th>
+            <th>{{t 'customers.mobile'}}</th>
+            <th>{{t 'customers.nid'}}</th>
+            <th>{{t 'customers.initialMeter'}}</th>
+            <th>{{t 'customers.advanceMoney'}}</th>
+            <th>{{t 'common.registered'}}</th>
+            <th style="text-align: right;">{{t 'common.actions'}}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each customers}}
+            <tr>
+              <td><span class="badge" style="background: rgba(99, 102, 241, 0.15); color: #818cf8;">#{{#if this.cId}}{{bnNum this.cId}}{{else}}{{this.id}}{{/if}}</span></td>
+              <td>
+                <div style="font-weight: 600;">{{this.name}}</div>
+                {{#if this.fatherName}}<div style="font-size: 0.8rem; color: var(--color-text-muted);">{{../t 'customers.fatherName'}}: {{this.fatherName}}</div>{{/if}}
+              </td>
+              <td>
+                {{#if this.garageId}}
+                  <a href="/garages/{{this.garageId}}" style="text-decoration: none;">
+                    <span class="badge" style="background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); font-weight: 500;">
+                      🏢 {{#if this.garageName}}{{this.garageName}}{{else}}{{../t 'garages.viewDashboard'}}{{/if}}
+                    </span>
+                  </a>
+                {{else}}
+                  <span class="badge" style="background: rgba(148, 163, 184, 0.1); color: #94a3b8;">{{../t 'common.na'}}</span>
+                {{/if}}
+              </td>
+              <td>{{this.mobileNumber}}</td>
+              <td><code>{{this.nidNumber}}</code></td>
+              <td><strong>{{bnNum this.previousUnit}}</strong> {{../t 'common.units'}}</td>
+              <td><span style="color: #10b981; font-weight: 600;">৳{{bnNum this.advanceMoney}}</span></td>
+              <td style="color: var(--color-text-muted); font-size: 0.85rem;">{{tDate this.createdDate}}</td>
+              <td style="text-align: right;">
+                <div style="display: inline-flex; gap: 0.5rem; justify-content: flex-end;">
+                  <a href="/customers/{{this.id}}" class="btn btn-secondary btn-sm" title="View Customer Details &amp; Ledger">
+                    {{../t 'common.view'}}
+                  </a>
+                  <a href="/bills/new?customerId={{this.id}}" class="btn btn-primary btn-sm" style="background: #10b981; border-color: #10b981;" title="Create Bill for Customer">
+                    + Bill
+                  </a>
+                  <a href="/customers/{{this.id}}/edit" class="btn btn-secondary btn-sm" title="Edit Customer Profile">
+                    {{../t 'common.edit'}}
+                  </a>
+                  <form action="/customers/{{this.id}}/delete" method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this customer?');">
+                    <button type="submit" class="btn btn-danger btn-sm">{{../t 'common.delete'}}</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
+  {{else}}
+    <div style="text-align: center; padding: 4rem 1rem;">
+      <div style="font-size: 3rem; margin-bottom: 1rem;">👥</div>
+      <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">{{t 'customers.noCustomers'}}</h3>
+      <p style="color: var(--color-text-muted); margin-bottom: 1.5rem;">You have not registered any customers in this garage system yet.</p>
+      <a href="/customers/new" class="btn btn-primary">{{t 'customers.addCustomer'}}</a>
+    </div>
+  {{/if}}
+</div>

@@ -1,23 +1,60 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{#if lang}}{{lang}}{{else}}en{{/if}}" data-theme="{{#if theme}}{{theme}}{{else}}dark{{/if}}">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{{title}}</title>
-  <!-- Google Fonts: Plus Jakarta Sans -->
+  <script>
+    // Immediate zero-flicker hydration of theme and language
+    (function() {
+      try {
+        var t = localStorage.getItem('egms_theme');
+        if (t) document.documentElement.setAttribute('data-theme', t);
+        var l = localStorage.getItem('egms_lang');
+        if (l) document.documentElement.setAttribute('lang', l);
+      } catch (e) {}
+    })();
+  </script>
+  <!-- Google Fonts: Plus Jakarta Sans & Hind Siliguri (Bengali) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
 </head>
-<body>
-  {{> navbar}}
+<body class="{{#if currentUser}}has-sidebar{{else}}has-standalone{{/if}}">
+  {{#if currentUser}}
+    <!-- Enterprise Dashboard Layout with Left Sidebar & Mobile Bottom Dock -->
+    <div class="app-layout">
+      {{> sidebar}}
 
-  <main class="main-content">
-    <div class="container">
-      {{{body}}}
+      <div class="app-main">
+        {{> topbar}}
+
+        <main class="main-content">
+          <div class="container-fluid app-container">
+            {{{body}}}
+          </div>
+        </main>
+
+        {{> footer}}
+      </div>
+
+      {{> bottom_nav}}
     </div>
-  </main>
+  {{else}}
+    <!-- Standalone Layout for Public / Auth Pages -->
+    <div class="standalone-layout">
+      {{> navbar}}
+
+      <main class="main-content">
+        <div class="container">
+          {{{body}}}
+        </div>
+      </main>
+
+      {{> footer}}
+    </div>
+  {{/if}}
 
   {{#if toast}}
     <div class="toast-container">
@@ -29,8 +66,6 @@
       </div>
     </div>
   {{/if}}
-
-  {{> footer}}
 
   <script src="/js/main.js"></script>
 </body>

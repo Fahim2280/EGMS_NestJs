@@ -11,6 +11,7 @@ import {
   GARAGE_REPOSITORY_TOKEN,
   IGarageRepository,
 } from '@domain/index';
+import { EmailService } from '@infrastructure/email/email.service';
 
 @CommandHandler(RegisterCompanyCommand)
 export class RegisterCompanyHandler implements ICommandHandler<RegisterCompanyCommand> {
@@ -19,6 +20,7 @@ export class RegisterCompanyHandler implements ICommandHandler<RegisterCompanyCo
     private readonly companyRepo: ICompanyRepository,
     @Inject(GARAGE_REPOSITORY_TOKEN)
     private readonly garageRepo: IGarageRepository,
+    private readonly emailService: EmailService,
   ) {}
 
   async execute(command: RegisterCompanyCommand): Promise<Company> {
@@ -58,6 +60,8 @@ export class RegisterCompanyHandler implements ICommandHandler<RegisterCompanyCo
       await this.garageRepo.save(garage);
     }
 
+    // Send welcome email (fire-and-forget — don't block registration on email failure)
+    this.emailService.sendWelcomeEmail(dto.email, dto.companyName).catch(() => {});
 
     return company;
   }

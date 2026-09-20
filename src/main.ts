@@ -3,9 +3,15 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { ValidationPipe, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { join } from 'path';
+import { existsSync, readdirSync, readFileSync } from 'fs';
 import * as hbs from 'hbs';
 import * as cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
+import {
+  translate,
+  formatNumberWithLang,
+  formatDateWithLang,
+} from './infrastructure/i18n/i18n.service';
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
@@ -14,9 +20,19 @@ async function bootstrap() {
   // Parse HTTP cookies
   app.use(cookieParser());
 
-  // Attach user to res.locals for Handlebars template rendering
+  // Attach user, language, and theme to res.locals for Handlebars template rendering
   const jwtService = app.get(JwtService);
   app.use((req: any, res: any, next: any) => {
+    const lang: 'en' | 'bn' = req.cookies?.lang === 'bn' ? 'bn' : 'en';
+    const theme: 'dark' | 'light' = req.cookies?.theme === 'light' ? 'light' : 'dark';
+
+    res.locals.lang = lang;
+    res.locals.isBn = lang === 'bn';
+    res.locals.isEn = lang === 'en';
+    res.locals.theme = theme;
+    res.locals.isLight = theme === 'light';
+    res.locals.isDark = theme === 'dark';
+
     const token =
       req.cookies?.jwt_token ||
       req.cookies?.jwt ||
@@ -36,9 +52,19 @@ async function bootstrap() {
     next();
   });
 
-  const viewsPath = join(process.cwd(), 'views');
-  const partialsPath = join(process.cwd(), 'views', 'partials');
-  const publicPath = join(process.cwd(), 'public');
+  // Determine root directory robustly (supports running from repo root or src/)
+  const candidateDirs = [
+    process.cwd(),
+    join(process.cwd(), '..'),
+    join(__dirname, '..'),
+    join(__dirname, '../..'),
+  ];
+  const rootDir =
+    candidateDirs.find((dir) => existsSync(join(dir, 'views'))) || process.cwd();
+
+  const viewsPath = join(rootDir, 'views');
+  const partialsPath = join(rootDir, 'views', 'partials');
+  const publicPath = join(rootDir, 'public');
 
   // Configure Express MVC settings
   app.useStaticAssets(publicPath);
@@ -46,7 +72,21 @@ async function bootstrap() {
   app.setViewEngine('hbs');
   app.set('view options', { layout: 'layouts/main' });
 
-  // Register Handlebars partials
+  // Synchronously register all partials with exact, hyphenated, and underscored aliases
+  if (existsSync(partialsPath)) {
+    const files = readdirSync(partialsPath);
+    for (const file of files) {
+      if (file.endsWith('.hbs') || file.endsWith('.html')) {
+        const partialName = file.replace(/\.(hbs|html)$/, '');
+        const partialContent = readFileSync(join(partialsPath, file), 'utf8');
+        hbs.registerPartial(partialName, partialContent);
+        hbs.registerPartial(partialName.replace(/-/g, '_'), partialContent);
+        hbs.registerPartial(partialName.replace(/_/g, '-'), partialContent);
+      }
+    }
+  }
+
+  // Also register with hbs default walker
   hbs.registerPartials(partialsPath);
 
   // Register Handlebars helpers
@@ -56,6 +96,32 @@ async function bootstrap() {
   hbs.registerHelper('or', (a: any, b: any) => Boolean(a || b));
   hbs.registerHelper('not', (a: any) => !a);
   hbs.registerHelper('json', (context: any) => JSON.stringify(context, null, 2));
+
+  // Translation & Numeral formatting helpers
+  hbs.registerHelper('t', function (key: string, options: any) {
+    const lang = options?.data?.root?.lang || 'en';
+    return translate(key, lang);
+  });
+
+  hbs.registerHelper('bnNum', function (val: any, options: any) {
+    const lang = options?.data?.root?.lang || 'en';
+    return formatNumberWithLang(val, lang);
+  });
+
+  hbs.registerHelper('tDate', function (date: any, options: any) {
+    const lang = options?.data?.root?.lang || 'en';
+    return formatDateWithLang(date, lang);
+  });
+
+  hbs.registerHelper('formatDate', (date: any) => {
+    if (!date) return 'N/A';
+    try {
+      const d = new Date(date);
+      return isNaN(d.getTime()) ? 'N/A' : d.toISOString().split('T')[0];
+    } catch {
+      return String(date);
+    }
+  });
 
   hbs.registerHelper('roleBadge', (role: string) => {
     const isSuperAdmin = role === 'SUPER_ADMIN';

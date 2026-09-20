@@ -1,0 +1,57 @@
+<div class="page-header">
+  <div class="header-content">
+    <div style="display: inline-flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+      <span class="badge" style="background: rgba(99, 102, 241, 0.15); color: #818cf8; border: 1px solid rgba(99, 102, 241, 0.3);">Super Admin Only</span>
+    </div>
+    <h1 class="page-title">Manage Company Profile &amp; Billing Settings</h1>
+    <p class="page-subtitle">Configure company details and baseline electricity billing rate</p>
+  </div>
+</div>
+
+<div class="card" style="max-width: 650px; margin: 0 auto;">
+  <form action="/profile/edit" method="POST">
+    <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+      <div class="form-group">
+        <label class="form-label" for="companyName">Business / Company Name</label>
+        <input type="text" id="companyName" name="companyName" class="form-input" required value="{{company.companyName}}">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="name">Owner / Primary Contact Name</label>
+        <input type="text" id="name" name="name" class="form-input" required value="{{company.name}}">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="email">Email Address</label>
+        <input type="email" id="email" class="form-input" readonly value="{{company.email}}" style="background: rgba(255,255,255,0.03); color: #94a3b8;">
+        <span style="font-size: 0.75rem; color: #94a3b8;">Primary account email cannot be altered directly.</span>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="phoneNumber">Contact Phone Number</label>
+        <input type="tel" id="phoneNumber" name="phoneNumber" class="form-input" required value="{{company.phoneNumber}}">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="address">Commercial Address</label>
+        <textarea id="address" name="address" class="form-input" rows="2" required>{{company.address}}</textarea>
+      </div>
+
+      <div class="form-group" style="background: rgba(99, 102, 241, 0.05); border: 1px solid rgba(99, 102, 241, 0.2); border-radius: 8px; padding: 1rem;">
+        <label class="form-label" for="unitRate" style="display: flex; align-items: center; justify-content: space-between;">
+          <span>Default Electricity Rate (৳ / Unit) *</span>
+          <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">Admin Only</span>
+        </label>
+        <input type="number" step="0.01" min="0.01" id="unitRate" name="unitRate" class="form-input" required value="{{#if company.unitRate}}{{company.unitRate}}{{else}}15.00{{/if}}">
+        <span style="font-size: 0.75rem; color: #94a3b8; display: block; margin-top: 0.35rem;">
+          Only Super Admins can set this number. This rate applies as default when generating new electric bills.
+        </span>
+      </div>
+    </div>
+
+    <div style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: flex-end;">
+      <a href="/" class="btn btn-secondary">Cancel</a>
+      <button type="submit" class="btn btn-primary">Save Changes</button>
+    </div>
+  </form>
+</div>

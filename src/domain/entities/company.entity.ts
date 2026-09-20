@@ -9,6 +9,7 @@ export interface CreateCompanyProps extends AuditableProps {
   phoneNumber: string;
   address: string;
   role?: string;
+  unitRate?: number;
 }
 
 export class Company extends AuditableEntity {
@@ -20,6 +21,7 @@ export class Company extends AuditableEntity {
   public phoneNumber: string;
   public readonly role: string;
   public address: string;
+  public unitRate: number;
 
   constructor(props: CreateCompanyProps) {
     super(props);
@@ -32,6 +34,7 @@ export class Company extends AuditableEntity {
     this.phoneNumber = props.phoneNumber.trim();
     this.role = props.role || 'SUPER_ADMIN';
     this.address = props.address.trim();
+    this.unitRate = props.unitRate !== undefined && props.unitRate !== null ? Number(props.unitRate) : 15;
   }
 
   public static create(props: CreateCompanyProps): Company {
@@ -49,6 +52,7 @@ export class Company extends AuditableEntity {
     companyName: string,
     phoneNumber: string,
     address: string,
+    unitRate?: number,
     updatedByStamp?: string,
   ): void {
     if (!name || name.trim().length < 2) throw new Error('Name must be at least 2 characters.');
@@ -57,6 +61,10 @@ export class Company extends AuditableEntity {
     this.companyName = companyName.trim();
     this.phoneNumber = phoneNumber.trim();
     this.address = address.trim();
+    if (unitRate !== undefined && unitRate !== null) {
+      if (Number(unitRate) <= 0) throw new Error('Unit rate must be greater than 0.');
+      this.unitRate = Number(unitRate);
+    }
     if (updatedByStamp) {
       this.markModified(updatedByStamp);
     } else {

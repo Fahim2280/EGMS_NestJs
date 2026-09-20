@@ -1,9 +1,9 @@
-<div class="container" style="padding-top: 2rem; padding-bottom: 3rem;">
-  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+<div style="padding-top: 1rem; padding-bottom: 2rem;">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
     <div>
-      <h1 style="font-size: 1.75rem; font-weight: 700; color: #fff; margin: 0;">Company Garages</h1>
+      <h1 style="font-size: 1.75rem; font-weight: 700; color: var(--color-text-primary); margin: 0;">{{t 'garages.title'}}</h1>
       <p style="color: var(--color-text-muted); margin: 0.25rem 0 0 0; font-size: 0.95rem;">
-        Managed workshop locations, service bays, and physical facilities
+        {{t 'garages.subtitle'}}
       </p>
     </div>
     {{#if isSuperAdmin}}
@@ -12,38 +12,63 @@
           <line x1="12" y1="5" x2="12" y2="19"/>
           <line x1="5" y1="12" x2="19" y2="12"/>
         </svg>
-        Register New Garage
+        {{t 'garages.newGarage'}}
       </a>
     {{/if}}
   </div>
 
   {{#if garages.length}}
-    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem;">
+    <div class="garages-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.25rem;">
       {{#each garages}}
         <div class="card" style="padding: 1.5rem; display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.2s, box-shadow 0.2s;">
           <div>
-            <div style="display: flex; align-items: flex-start; gap: 1rem; margin-bottom: 1rem;">
-              <div style="width: 44px; height: 44px; background: rgba(59, 130, 246, 0.15); color: #3b82f6; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-                  <polyline points="9 22 9 12 15 12 15 22"/>
-                </svg>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+              <div style="display: flex; align-items: flex-start; gap: 0.75rem;">
+                <div style="width: 44px; height: 44px; background: rgba(59, 130, 246, 0.15); color: #3b82f6; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                    <polyline points="9 22 9 12 15 12 15 22"/>
+                  </svg>
+                </div>
+                <div>
+                  <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--color-text-primary); margin: 0 0 0.25rem 0;">{{this.garageName}}</h3>
+                  <span style="display: inline-block; background: rgba(59, 130, 246, 0.15); color: #60a5fa; padding: 2px 8px; border-radius: 9999px; font-size: 0.75rem; font-weight: 600;">
+                    👥 {{bnNum this.customerCount}} {{t 'garages.customersBadge'}}
+                  </span>
+                </div>
               </div>
-              <div>
-                <h3 style="font-size: 1.15rem; font-weight: 700; color: #fff; margin: 0 0 0.25rem 0;">{{this.garageName}}</h3>
-                <span style="font-size: 0.75rem; color: var(--color-text-muted); font-family: monospace;">UUID: {{this.id}}</span>
-              </div>
+              {{#if ../isSuperAdmin}}
+                <a href="/garages/{{this.id}}/edit" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; padding: 3px 8px;" title="Edit Garage Details">
+                  {{t 'common.edit'}}
+                </a>
+              {{/if}}
             </div>
 
-            <div style="margin-bottom: 1rem;">
-              <div style="font-size: 0.8rem; text-transform: uppercase; color: var(--color-text-dim); font-weight: 600; margin-bottom: 0.25rem;">Address</div>
+            <div style="margin-bottom: 1.25rem;">
+              <div style="font-size: 0.8rem; text-transform: uppercase; color: var(--color-text-dim); font-weight: 600; margin-bottom: 0.25rem;">{{t 'garages.address'}}</div>
               <div style="font-size: 0.95rem; color: var(--color-text-secondary);">{{this.address}}</div>
             </div>
           </div>
 
-          <div style="border-top: 1px solid var(--color-border); padding-top: 0.75rem; display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; color: var(--color-text-muted);">
-            <span>Operational Facility</span>
-            <span>Registered: {{this.createdAt}}</span>
+          <div>
+            <div style="display: flex; gap: 0.5rem; margin-bottom: 0.75rem;">
+              <a href="/garages/{{this.id}}" class="btn btn-primary" style="flex: 1; text-align: center; justify-content: center; font-size: 0.875rem;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 0.25rem;">
+                  <line x1="18" y1="20" x2="18" y2="10"/>
+                  <line x1="12" y1="20" x2="12" y2="4"/>
+                  <line x1="6" y1="20" x2="6" y2="14"/>
+                </svg>
+                {{t 'garages.viewDashboard'}}
+              </a>
+              <a href="/customers/new?garageId={{this.id}}" class="btn btn-secondary" style="font-size: 0.875rem;" title="Add Customer to this Garage">
+                + {{t 'nav.customers'}}
+              </a>
+            </div>
+
+            <div style="border-top: 1px solid var(--color-border); padding-top: 0.5rem; display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: var(--color-text-muted);">
+              <span>{{t 'garages.facilityActive'}}</span>
+              <span>ID: {{this.id}}</span>
+            </div>
           </div>
         </div>
       {{/each}}
@@ -55,12 +80,12 @@
           <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
         </svg>
       </div>
-      <h2 style="font-size: 1.25rem; font-weight: 700; margin: 0 0 0.5rem 0;">No Garages Registered</h2>
+      <h2 style="font-size: 1.25rem; font-weight: 700; margin: 0 0 0.5rem 0;">{{t 'garages.noGarages'}}</h2>
       <p style="color: var(--color-text-muted); max-width: 400px; margin: 0 auto 1.5rem;">
-        Your company does not currently have any physical garages or service centers registered in the system.
+        {{t 'garages.noGaragesSub'}}
       </p>
       {{#if isSuperAdmin}}
-        <a href="/garages/new" class="btn btn-primary">Register First Garage</a>
+        <a href="/garages/new" class="btn btn-primary">{{t 'garages.registerFirst'}}</a>
       {{/if}}
     </div>
   {{/if}}

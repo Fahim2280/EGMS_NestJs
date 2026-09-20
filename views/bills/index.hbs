@@ -1,0 +1,97 @@
+<div class="page-header">
+  <div class="header-content">
+    <h1 class="page-title">{{t 'bills.title'}}</h1>
+    <p class="page-subtitle">{{t 'bills.subtitle'}}</p>
+  </div>
+  <div class="header-actions" style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+    <form action="/bills/generate-monthly" method="POST" style="display: inline-flex; gap: 0.5rem; align-items: center;" onsubmit="return confirm('Generate monthly bills for all active customers missing a bill this month?');">
+      <input type="date" name="targetDate" class="form-input" style="padding: 0.4rem 0.75rem; font-size: 0.85rem;" required value="{{todayDate}}">
+      <button type="submit" class="btn btn-secondary btn-sm" title="{{t 'bills.batchGenerate'}}">
+        {{t 'bills.batchGenerate'}}
+      </button>
+    </form>
+    <a href="/bills/new" class="btn btn-primary" style="background: #10b981; border-color: #10b981;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <line x1="12" y1="5" x2="12" y2="19"/>
+        <line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+      {{t 'bills.newBill'}}
+    </a>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+    <h2 class="card-title">{{t 'bills.ledgerTitle'}} ({{bnNum totalBillsCount}})</h2>
+  </div>
+
+  {{#if bills.length}}
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>{{t 'common.date'}}</th>
+            <th>{{t 'bills.customer'}}</th>
+            <th>{{t 'bills.prevUnit'}}</th>
+            <th>{{t 'bills.currUnit'}}</th>
+            <th>{{t 'bills.consumed'}}</th>
+            <th>{{t 'bills.electricBill'}} ({{t 'common.currency'}})</th>
+            <th>{{t 'bills.prevDues'}} ({{t 'common.currency'}})</th>
+            <th>{{t 'bills.rent'}} ({{t 'common.currency'}})</th>
+            <th>{{t 'bills.loan'}} ({{t 'common.currency'}})</th>
+            <th>{{t 'bills.totalBill'}} ({{t 'common.currency'}})</th>
+            <th>{{t 'bills.paid'}} ({{t 'common.currency'}})</th>
+            <th>{{t 'bills.presentDues'}} ({{t 'common.currency'}})</th>
+            <th style="text-align: right;">{{t 'common.actions'}}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each bills}}
+            <tr>
+              <td>{{tDate this.date}}</td>
+              <td>
+                <a href="/customers/{{this.customerId}}" style="color: #60a5fa; text-decoration: none; font-weight: 600;">
+                  {{this.customerName}}
+                </a>
+              </td>
+              <td>{{bnNum this.previousUnit}}</td>
+              <td><strong>{{bnNum this.currentUnit}}</strong></td>
+              <td><span class="badge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8;">{{bnNum this.totalUnit}} {{t 'common.unitShort'}}</span></td>
+              <td>{{t 'common.currency'}}{{bnNum this.electricBill}}</td>
+              <td>{{t 'common.currency'}}{{bnNum this.previousDues}}</td>
+              <td>{{t 'common.currency'}}{{bnNum this.rentBill}}</td>
+              <td>{{t 'common.currency'}}{{bnNum this.loan}}</td>
+              <td><strong>{{t 'common.currency'}}{{bnNum this.totalBill}}</strong></td>
+              <td style="color: #10b981; font-weight: 600;">{{t 'common.currency'}}{{bnNum this.clearMoney}}</td>
+              <td>
+                <span style="font-weight: 700; {{#if (ne this.presentDues 0)}}color: #ef4444;{{else}}color: #10b981;{{/if}}">
+                  {{t 'common.currency'}}{{bnNum this.presentDues}}
+                </span>
+              </td>
+              <td style="text-align: right;">
+                <div style="display: inline-flex; gap: 0.25rem; justify-content: flex-end;">
+                  <a href="/bills/{{this.id}}" class="btn btn-secondary btn-sm" title="View Bill Receipt">
+                    {{t 'bills.receipt'}}
+                  </a>
+                  <a href="/bills/{{this.id}}/edit" class="btn btn-secondary btn-sm" title="Edit Bill">
+                    {{t 'common.edit'}}
+                  </a>
+                  <form action="/bills/{{this.id}}/delete" method="POST" style="display: inline;" onsubmit="return confirm('Delete this bill? Subsequent bills will be automatically recalculated.');">
+                    <button type="submit" class="btn btn-danger btn-sm">{{t 'common.delete'}}</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
+  {{else}}
+    <div style="text-align: center; padding: 4rem 1rem;">
+      <div style="font-size: 3rem; margin-bottom: 1rem;">⚡</div>
+      <h3 style="color: var(--color-text-primary); font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">{{t 'bills.noBills'}}</h3>
+      <p style="color: var(--color-text-muted); margin-bottom: 1.5rem;">{{t 'bills.noBillsSub'}}</p>
+      <a href="/bills/new" class="btn btn-primary" style="background: #10b981; border-color: #10b981;">{{t 'bills.newBill'}}</a>
+    </div>
+  {{/if}}
+</div>

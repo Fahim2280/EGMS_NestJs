@@ -1,0 +1,127 @@
+<div class="page-header" style="margin-bottom: 1.5rem;">
+  <div class="header-content">
+    <a href="/bills" style="color: #94a3b8; text-decoration: none; font-size: 0.875rem; display: inline-flex; align-items: center; gap: 0.25rem; margin-bottom: 0.5rem;">
+      &larr; Back to Bills
+    </a>
+    <h1 class="page-title">Electric Bill Invoice Receipt</h1>
+    <p class="page-subtitle">Official billing receipt #{{#if bill.billNumber}}{{bill.billNumber}}{{else}}{{bill.id}}{{/if}}</p>
+  </div>
+  <div class="header-actions">
+    <button onclick="window.print()" class="btn btn-primary" style="background: #3b82f6; border-color: #3b82f6;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="6 9 6 2 18 2 18 9"/>
+        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+        <rect x="6" y="14" width="12" height="8"/>
+      </svg>
+      Print Receipt
+    </button>
+    <a href="/bills/{{bill.id}}/edit" class="btn btn-secondary">Edit Bill</a>
+  </div>
+</div>
+
+<div class="card" id="printableInvoice" style="max-width: 800px; margin: 0 auto; padding: 2.5rem; background: #1e293b; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px;">
+  <!-- Invoice Header -->
+  <div style="display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 2rem; border-bottom: 2px solid rgba(255,255,255,0.1); margin-bottom: 2rem;">
+    <div>
+      <h2 style="font-size: 1.75rem; font-weight: 800; color: #f8fafc; margin-bottom: 0.25rem;">EGMS Electric Garage</h2>
+      <p style="color: #94a3b8; font-size: 0.9rem;">Automated Electric Billing &amp; Garage Services</p>
+    </div>
+    <div style="text-align: right;">
+      <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #10b981; font-size: 0.9rem; padding: 0.4rem 0.8rem;">OFFICIAL RECEIPT</span>
+      <div style="font-size: 0.85rem; color: #94a3b8; margin-top: 0.5rem;">Date: <strong>{{bill.date}}</strong></div>
+    </div>
+  </div>
+
+  <!-- Customer & Account Info -->
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+    <div>
+      <div style="font-size: 0.8rem; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.05em; margin-bottom: 0.25rem;">Billed To</div>
+      <div style="font-size: 1.25rem; font-weight: 700; color: #f8fafc;">{{bill.customerName}}</div>
+      <div style="color: #94a3b8; font-size: 0.9rem; margin-top: 0.25rem;">Customer ID: #{{bill.customerId}}</div>
+    </div>
+    <div style="text-align: right;">
+      <div style="font-size: 0.8rem; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.05em; margin-bottom: 0.25rem;">Tariff &amp; Rate</div>
+      <div style="font-size: 1.1rem; font-weight: 700; color: #38bdf8;">৳15.00 / Unit</div>
+      <div style="color: #94a3b8; font-size: 0.9rem;">Standard Commercial Garage Rate</div>
+    </div>
+  </div>
+
+  <!-- Meter Readings Table -->
+  <div style="margin-bottom: 2rem;">
+    <h3 style="font-size: 1rem; font-weight: 600; color: #f8fafc; margin-bottom: 0.75rem;">Meter Readings &amp; Consumption</h3>
+    <table class="data-table" style="background: rgba(0,0,0,0.2);">
+      <thead>
+        <tr>
+          <th>Previous Reading</th>
+          <th>Current Reading</th>
+          <th>Consumed Units</th>
+          <th>Rate</th>
+          <th style="text-align: right;">Electric Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>{{bill.previousUnit}} Units</td>
+          <td><strong>{{bill.currentUnit}} Units</strong></td>
+          <td><span class="badge" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8;">{{bill.totalUnit}} Units</span></td>
+          <td>৳{{#if bill.unitRate}}{{bill.unitRate}}{{else}}15.00{{/if}}</td>
+          <td style="text-align: right; font-weight: 700; color: #f8fafc;">৳{{bill.electricBill}}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Financial Calculation Ledger Breakdown -->
+  <div style="background: rgba(0,0,0,0.15); border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem;">
+    <div style="display: flex; justify-content: space-between; margin-bottom: 0.75rem;">
+      <span style="color: #94a3b8;">Electric Charge ({{bill.totalUnit}} Units &times; ৳{{#if bill.unitRate}}{{bill.unitRate}}{{else}}15.00{{/if}}):</span>
+      <span style="color: #f8fafc; font-weight: 600;">৳{{bill.electricBill}}</span>
+    </div>
+    <div style="display: flex; justify-content: space-between; margin-bottom: 0.75rem;">
+      <span style="color: #94a3b8;">Previous Dues:</span>
+      <span style="color: #fbbf24; font-weight: 600;">৳{{bill.previousDues}}</span>
+    </div>
+    <div style="display: flex; justify-content: space-between; margin-bottom: 0.75rem;">
+      <span style="color: #94a3b8;">Rent Bill:</span>
+      <span style="color: #f8fafc;">৳{{bill.rentBill}}</span>
+    </div>
+    <div style="display: flex; justify-content: space-between; margin-bottom: 0.75rem;">
+      <span style="color: #94a3b8;">Loan / Adjustment:</span>
+      <span style="color: #f8fafc;">৳{{bill.loan}}</span>
+    </div>
+    <div style="display: flex; justify-content: space-between; padding-top: 0.75rem; border-top: 1px solid rgba(255,255,255,0.1); margin-bottom: 0.75rem;">
+      <span style="font-weight: 700; color: #f8fafc;">Total Bill Amount:</span>
+      <strong style="font-size: 1.2rem; color: #f8fafc;">৳{{bill.totalBill}}</strong>
+    </div>
+    <div style="display: flex; justify-content: space-between; margin-bottom: 0.75rem;">
+      <span style="color: #94a3b8;">Amount Paid (Clear Money):</span>
+      <strong style="color: #10b981; font-weight: 700;">৳{{bill.clearMoney}}</strong>
+    </div>
+    <div style="display: flex; justify-content: space-between; padding-top: 0.75rem; border-top: 2px solid rgba(255,255,255,0.15);">
+      <span style="font-size: 1.1rem; font-weight: 800; color: #f8fafc;">Net Present Dues:</span>
+      <strong style="font-size: 1.35rem; color: {{#if (ne bill.presentDues 0)}}#ef4444{{else}}#10b981{{/if}};">
+        ৳{{bill.presentDues}}
+      </strong>
+    </div>
+  </div>
+
+  <!-- Receipt Footer -->
+  <div style="display: flex; justify-content: space-between; align-items: flex-end; padding-top: 2rem; border-top: 1px dashed rgba(255,255,255,0.1);">
+    <div style="color: #94a3b8; font-size: 0.8rem;">
+      This is a computer-generated billing receipt.<br>Thank you for your business!
+    </div>
+    <div style="text-align: center;">
+      <div style="width: 150px; border-bottom: 1px solid #94a3b8; margin-bottom: 0.25rem;"></div>
+      <span style="font-size: 0.8rem; color: #94a3b8;">Authorized Signature</span>
+    </div>
+  </div>
+</div>
+
+<style>
+  @media print {
+    body { background: #fff !important; color: #000 !important; }
+    .navbar, .page-header, .header-actions, .mobile-toggle, .mobile-drawer { display: none !important; }
+    #printableInvoice { background: #fff !important; color: #000 !important; border: none !important; padding: 0 !important; }
+    #printableInvoice * { color: #000 !important; border-color: #ccc !important; }
+  }
+</style>

@@ -5,6 +5,7 @@ import { PersistenceModule } from '@infrastructure/persistence/persistence.modul
 import { ApplicationModule } from '@application/application.module';
 import { PresentationModule } from '@presentation/presentation.module';
 import { AuthModule } from '@infrastructure/auth/auth.module';
+import { EmailModule } from '@infrastructure/email/email.module';
 import { AllExceptionsFilter } from '@infrastructure/common/filters/all-exceptions.filter';
 import { LoggingInterceptor } from '@infrastructure/common/interceptors/logging.interceptor';
 
@@ -16,6 +17,7 @@ import { LoggingInterceptor } from '@infrastructure/common/interceptors/logging.
     }),
     PersistenceModule,
     AuthModule,
+    EmailModule,
     ApplicationModule,
     PresentationModule,
   ],

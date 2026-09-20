@@ -36,6 +36,7 @@ export class TypeOrmCompanyRepository
       createdBy: orm.createdBy,
       editByName: orm.editByName,
       deletedBy: orm.deletedBy,
+      unitRate: orm.unitRate != null ? Number(orm.unitRate) : 15,
       createdDate: orm.createdDate ? new Date(orm.createdDate) : new Date(),
       modifiedDate: orm.modifiedDate ? new Date(orm.modifiedDate) : undefined,
       deletedDate: orm.deletedDate ? new Date(orm.deletedDate) : undefined,
@@ -52,6 +53,7 @@ export class TypeOrmCompanyRepository
     orm.phoneNumber = domain.phoneNumber;
     orm.role = domain.role;
     orm.address = domain.address;
+    orm.unitRate = domain.unitRate ?? 15;
     orm.isActive = domain.isActive;
     orm.isDeleted = domain.isDeleted;
     orm.createdBy = domain.createdBy;

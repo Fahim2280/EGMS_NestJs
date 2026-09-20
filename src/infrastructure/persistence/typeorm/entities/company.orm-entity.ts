@@ -44,6 +44,10 @@ export class CompanyOrmEntity extends BaseAuditableOrmEntity {
   @Column('text')
   address: string;
 
+  @AutoMap()
+  @Column('decimal', { precision: 10, scale: 2, default: 15 })
+  unitRate: number;
+
   @OneToMany(() => GarageOrmEntity, (garage) => garage.company, {
     cascade: true,
   })
@@ -53,4 +57,9 @@ export class CompanyOrmEntity extends BaseAuditableOrmEntity {
     cascade: true,
   })
   employees: EmployeeOrmEntity[];
+
+  @OneToMany('CustomerOrmEntity', (customer: any) => customer.company, {
+    cascade: true,
+  })
+  customers: any[];
 }

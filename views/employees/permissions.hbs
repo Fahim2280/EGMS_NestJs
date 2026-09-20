@@ -1,0 +1,307 @@
+<div style="padding-top: 1rem; padding-bottom: 2rem;">
+  <!-- Page Header -->
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+    <div>
+      <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+        <span class="badge badge-admin" style="font-size: 0.75rem;">Security &amp; RBAC</span>
+        <span style="color: var(--color-text-muted); font-size: 0.85rem;">/ Management Portal</span>
+      </div>
+      <h1 style="font-size: 1.6rem; font-weight: 800; color: #fff; margin: 0; display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+        <span style="display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 10px; background: rgba(99, 102, 241, 0.15); color: #818cf8; border: 1px solid rgba(99, 102, 241, 0.3);">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+        </span>
+        User Permissions &amp; Access Control
+      </h1>
+      <p style="color: var(--color-text-muted); margin: 0.35rem 0 0 0; font-size: 0.9rem;">
+        Manage employee authorization levels, grant admin roles, and toggle system access for your company personnel.
+      </p>
+    </div>
+    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;" class="header-actions">
+      <a href="/employees" class="btn btn-secondary">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
+          <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+        </svg>
+        Employee Roster
+      </a>
+      <a href="/employees/new" class="btn btn-primary">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="5" x2="12" y2="19"/>
+          <line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        Add Employee
+      </a>
+    </div>
+  </div>
+
+  <!-- Metric Overview Cards -->
+  <div class="kpi-grid-4" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+    <div class="card" style="padding: 1.25rem; display: flex; align-items: center; gap: 1rem;">
+      <div style="width: 44px; height: 44px; border-radius: 10px; background: rgba(99, 102, 241, 0.15); color: #818cf8; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+        👥
+      </div>
+      <div>
+        <div style="color: var(--color-text-muted); font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Total Employees</div>
+        <div style="color: #fff; font-size: 1.5rem; font-weight: 800;" data-counter="{{stats.total}}">{{stats.total}}</div>
+      </div>
+    </div>
+
+    <div class="card" style="padding: 1.25rem; display: flex; align-items: center; gap: 1rem;">
+      <div style="width: 44px; height: 44px; border-radius: 10px; background: rgba(245, 158, 11, 0.15); color: #fbbf24; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+        👑
+      </div>
+      <div>
+        <div style="color: var(--color-text-muted); font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Super Admins</div>
+        <div style="color: #fbbf24; font-size: 1.5rem; font-weight: 800;" data-counter="{{stats.superAdmins}}">{{stats.superAdmins}}</div>
+      </div>
+    </div>
+
+    <div class="card" style="padding: 1.25rem; display: flex; align-items: center; gap: 1rem;">
+      <div style="width: 44px; height: 44px; border-radius: 10px; background: rgba(6, 182, 212, 0.15); color: #22d3ee; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+        🧑‍💼
+      </div>
+      <div>
+        <div style="color: var(--color-text-muted); font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">General Staff</div>
+        <div style="color: #22d3ee; font-size: 1.5rem; font-weight: 800;" data-counter="{{stats.generalStaff}}">{{stats.generalStaff}}</div>
+      </div>
+    </div>
+
+    <div class="card" style="padding: 1.25rem; display: flex; align-items: center; gap: 1rem;">
+      <div style="width: 44px; height: 44px; border-radius: 10px; background: rgba(16, 185, 129, 0.15); color: #34d399; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+        🟢
+      </div>
+      <div>
+        <div style="color: var(--color-text-muted); font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Active Accounts</div>
+        <div style="color: #34d399; font-size: 1.5rem; font-weight: 800;" data-counter="{{stats.active}}">{{stats.active}}</div>
+      </div>
+    </div>
+
+    {{#if stats.suspended}}
+    <div class="card" style="padding: 1.25rem; display: flex; align-items: center; gap: 1rem; border-color: rgba(239, 68, 68, 0.3);">
+      <div style="width: 44px; height: 44px; border-radius: 10px; background: rgba(239, 68, 68, 0.15); color: #f87171; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+        🔴
+      </div>
+      <div>
+        <div style="color: #f87171; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Suspended</div>
+        <div style="color: #f87171; font-size: 1.5rem; font-weight: 800;" data-counter="{{stats.suspended}}">{{stats.suspended}}</div>
+      </div>
+    </div>
+    {{/if}}
+  </div>
+
+  <!-- Employee Permissions Table -->
+  <div class="card" style="padding: 0; overflow: hidden; box-shadow: var(--shadow-md); margin-bottom: 2.5rem;">
+    <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--color-border); background: rgba(15, 23, 42, 0.6); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+      <div>
+        <h2 style="font-size: 1.15rem; font-weight: 700; color: #fff; margin: 0;">Employee Access Management</h2>
+        <p style="color: var(--color-text-muted); font-size: 0.85rem; margin: 0.2rem 0 0 0;">
+          Select a role and account status for each employee, then click "Update" to commit changes.
+        </p>
+      </div>
+      <span style="color: var(--color-text-muted); font-size: 0.85rem; background: rgba(255, 255, 255, 0.05); padding: 0.35rem 0.75rem; border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.1);">
+        🔒 Restricted to Company Super Admin
+      </span>
+    </div>
+
+    {{#if employees.length}}
+      <div class="table-container" style="overflow-x: auto;">
+        <table class="data-table" style="width: 100%; border-collapse: collapse;">
+          <thead>
+            <tr style="background: rgba(15, 23, 42, 0.85); border-bottom: 1px solid var(--color-border); text-align: left;">
+              <th style="padding: 1rem 1.25rem;">Employee</th>
+              <th style="padding: 1rem 1.25rem;">Current Role</th>
+              <th style="padding: 1rem 1.25rem;">Account Access</th>
+              <th style="padding: 1rem 1.25rem;">Assign Role</th>
+              <th style="padding: 1rem 1.25rem;">System Status</th>
+              <th style="padding: 1rem 1.25rem; text-align: right;">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each employees}}
+              <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05); transition: background 0.15s;">
+                <!-- Employee Info -->
+                <td style="padding: 1rem 1.25rem;">
+                  <div style="display: flex; align-items: center; gap: 0.85rem;">
+                    <div class="user-avatar" style="width: 38px; height: 38px; font-size: 0.95rem; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700;">
+                      {{this.name.[0]}}
+                    </div>
+                    <div>
+                      <div style="color: #fff; font-weight: 600; font-size: 0.95rem;">
+                        <a href="/employees/{{this.id}}" style="color: #fff; hover: underline;" title="View Details">{{this.name}}</a>
+                      </div>
+                      <div style="color: var(--color-text-muted); font-size: 0.8rem;">{{this.email}}</div>
+                      <div style="color: #64748b; font-size: 0.75rem; font-family: monospace;">NID: {{this.nidNumber}}</div>
+                    </div>
+                  </div>
+                </td>
+
+                <!-- Current Role -->
+                <td style="padding: 1rem 1.25rem;">
+                  {{{roleBadge this.role}}}
+                </td>
+
+                <!-- Current Status -->
+                <td style="padding: 1rem 1.25rem;">
+                  {{#if this.isActive}}
+                    <span class="badge badge-active">
+                      <span class="badge-dot"></span>Active
+                    </span>
+                  {{else}}
+                    <span class="badge" style="background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.25);">
+                      <span class="badge-dot" style="background: #ef4444;"></span>Suspended
+                    </span>
+                  {{/if}}
+                </td>
+
+                <!-- Edit Form Inputs (Row Level) -->
+                <form method="POST" action="/employees/{{this.id}}/permissions">
+                  <td style="padding: 1rem 1.25rem;">
+                    <select name="role" class="form-control" style="padding: 0.5rem 0.75rem; font-size: 0.85rem; min-width: 170px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(99, 102, 241, 0.3); color: #fff; border-radius: 6px;">
+                      <option value="GENERAL" {{#if (eq this.role 'GENERAL')}}selected{{/if}}>
+                        🧑‍💼 GENERAL (Staff)
+                      </option>
+                      <option value="SUPER_ADMIN" {{#if (eq this.role 'SUPER_ADMIN')}}selected{{/if}}>
+                        👑 SUPER_ADMIN (Admin)
+                      </option>
+                    </select>
+                  </td>
+
+                  <td style="padding: 1rem 1.25rem;">
+                    <select name="isActive" class="form-control" style="padding: 0.5rem 0.75rem; font-size: 0.85rem; min-width: 160px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(99, 102, 241, 0.3); color: #fff; border-radius: 6px;">
+                      <option value="true" {{#if this.isActive}}selected{{/if}}>
+                        🟢 Active (Permitted)
+                      </option>
+                      <option value="false" {{#unless this.isActive}}selected{{/unless}}>
+                        🔴 Suspended (Blocked)
+                      </option>
+                    </select>
+                  </td>
+
+                  <td style="padding: 1rem 1.25rem; text-align: right;">
+                    <button type="submit" class="btn btn-primary btn-sm" style="display: inline-flex; align-items: center; gap: 0.4rem; white-space: nowrap;">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                        <polyline points="17 21 17 13 7 13 7 21"/>
+                        <polyline points="7 3 7 8 15 8"/>
+                      </svg>
+                      Save
+                    </button>
+                  </td>
+                </form>
+              </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      </div>
+    {{else}}
+      <div style="text-align: center; padding: 4rem 2rem;">
+        <div style="width: 56px; height: 56px; background: rgba(99, 102, 241, 0.1); color: #818cf8; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem;">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+          </svg>
+        </div>
+        <h3 style="color: #fff; font-size: 1.15rem; font-weight: 700; margin: 0 0 0.5rem 0;">No Employees Found</h3>
+        <p style="color: var(--color-text-muted); max-width: 420px; margin: 0 auto 1.5rem; font-size: 0.9rem;">
+          Add employees to your company directory first before configuring their roles and system permissions.
+        </p>
+        <a href="/employees/new" class="btn btn-primary">Add First Employee</a>
+      </div>
+    {{/if}}
+  </div>
+
+  <!-- Role Permissions Reference Matrix -->
+  <div class="card" style="padding: 1.5rem; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(99, 102, 241, 0.2);">
+    <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.25rem;">
+      <span style="font-size: 1.25rem;">📋</span>
+      <div>
+        <h3 style="font-size: 1.1rem; font-weight: 700; color: #fff; margin: 0;">Role &amp; Permissions Reference Matrix</h3>
+        <p style="color: var(--color-text-muted); font-size: 0.85rem; margin: 0.15rem 0 0 0;">
+          Detailed breakdown of capabilities assigned to each role level
+        </p>
+      </div>
+    </div>
+
+    <div style="overflow-x: auto;">
+      <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+        <thead>
+          <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); text-align: left;">
+            <th style="padding: 0.75rem 1rem; color: #94a3b8; font-weight: 600;">System Module / Feature</th>
+            <th style="padding: 0.75rem 1rem; color: #fbbf24; font-weight: 700;">👑 SUPER_ADMIN (Admin)</th>
+            <th style="padding: 0.75rem 1rem; color: #22d3ee; font-weight: 700;">🧑‍💼 GENERAL (Staff)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+            <td style="padding: 0.75rem 1rem; color: #e2e8f0; font-weight: 500;">
+              ⚡ <strong>Electric Bills</strong> (Ledger, Invoicing, Due Tracking)
+            </td>
+            <td style="padding: 0.75rem 1rem; color: #34d399;">
+              ✅ Full (Create, Edit, Delete, Bulk Monthly Generate, Export)
+            </td>
+            <td style="padding: 0.75rem 1rem; color: #94a3b8;">
+              🔍 View &amp; Search Ledger (Read-only operational)
+            </td>
+          </tr>
+          <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+            <td style="padding: 0.75rem 1rem; color: #e2e8f0; font-weight: 500;">
+              👥 <strong>Customer Directory</strong> (Profiles, Unit Connections)
+            </td>
+            <td style="padding: 0.75rem 1rem; color: #34d399;">
+              ✅ Full (Register New, Edit Profile, Remove, Assign Garages)
+            </td>
+            <td style="padding: 0.75rem 1rem; color: #94a3b8;">
+              🔍 View Directory &amp; Lookup Customer Info
+            </td>
+          </tr>
+          <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+            <td style="padding: 0.75rem 1rem; color: #e2e8f0; font-weight: 500;">
+              🏠 <strong>Garages &amp; Facilities</strong>
+            </td>
+            <td style="padding: 0.75rem 1rem; color: #34d399;">
+              ✅ Full (Create Garages, View List, Modify)
+            </td>
+            <td style="padding: 0.75rem 1rem; color: #f87171;">
+              ❌ Restricted (Hidden from menu &amp; blocked at API)
+            </td>
+          </tr>
+          <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+            <td style="padding: 0.75rem 1rem; color: #e2e8f0; font-weight: 500;">
+              🧑‍💼 <strong>Staff &amp; Employee Roster</strong>
+            </td>
+            <td style="padding: 0.75rem 1rem; color: #34d399;">
+              ✅ Full (Add Staff, Edit Information, Terminate / Remove)
+            </td>
+            <td style="padding: 0.75rem 1rem; color: #f87171;">
+              ❌ Restricted (Hidden from menu &amp; blocked at API)
+            </td>
+          </tr>
+          <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+            <td style="padding: 0.75rem 1rem; color: #e2e8f0; font-weight: 500;">
+              🛡️ <strong>Permissions &amp; Role Delegation</strong>
+            </td>
+            <td style="padding: 0.75rem 1rem; color: #34d399;">
+              ✅ Full (Promote / Demote Roles, Activate / Suspend Access)
+            </td>
+            <td style="padding: 0.75rem 1rem; color: #f87171;">
+              ❌ Restricted (Strictly Company Super Admin only)
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 0.75rem 1rem; color: #e2e8f0; font-weight: 500;">
+              ⚙️ <strong>Company Profile &amp; Settings</strong>
+            </td>
+            <td style="padding: 0.75rem 1rem; color: #34d399;">
+              ✅ Full (Update Company Name, Email, Phone, Address)
+            </td>
+            <td style="padding: 0.75rem 1rem; color: #f87171;">
+              ❌ Restricted (Company Owner only)
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

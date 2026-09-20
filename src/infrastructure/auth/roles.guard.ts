@@ -1,4 +1,4 @@
-import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { ROLES_KEY, RoleType } from './roles.decorator';
 
@@ -17,17 +17,32 @@ export class RolesGuard implements CanActivate {
     }
 
     const request = context.switchToHttp().getRequest();
+    const response = context.switchToHttp().getResponse();
     const user = request.user;
 
     if (!user || !user.role) {
-      throw new ForbiddenException('User permissions cannot be verified.');
+      const isApi = request.url.startsWith('/api') ||
+        (request.headers.accept && request.headers.accept.includes('application/json'));
+      if (!isApi) {
+        response.redirect('/login');
+        return false;
+      }
+      response.status(401).json({ message: 'Authentication required.' });
+      return false;
     }
 
     const hasRole = requiredRoles.includes(user.role);
     if (!hasRole) {
-      throw new ForbiddenException(
-        `Insufficient privileges. Required role: [${requiredRoles.join(', ')}], Current role: ${user.role}`,
-      );
+      const isApi = request.url.startsWith('/api') ||
+        (request.headers.accept && request.headers.accept.includes('application/json'));
+      if (!isApi) {
+        response.redirect('/403');
+        return false;
+      }
+      response.status(403).json({
+        message: `Insufficient privileges. Required: [${requiredRoles.join(', ')}], Current: ${user.role}`,
+      });
+      return false;
     }
 
     return true;

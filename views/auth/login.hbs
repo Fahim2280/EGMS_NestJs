@@ -1,28 +1,37 @@
-<div style="max-width: 480px; margin: 3rem auto; padding: 0 1rem;">
-  <div class="card" style="box-shadow: var(--shadow-lg); border-color: rgba(79, 70, 229, 0.3);">
-    <div class="card-header" style="text-align: center; flex-direction: column; gap: 0.5rem; padding: 2rem 1.5rem 1rem;">
-      <div class="brand-icon" style="width: 52px; height: 52px; margin: 0 auto; background: linear-gradient(135deg, #3b82f6, #6366f1); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center;">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5">
-          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-        </svg>
-      </div>
-      <h1 style="font-size: 1.5rem; font-weight: 800; color: #ffffff;">Sign in to Garage Portal</h1>
-      <p style="font-size: 0.85rem; color: var(--color-text-muted);">
-        Enterprise Company (Super Admin) &amp; Employee Authentication
-      </p>
-    </div>
+<div class="auth-split">
+  <!-- Left Hero Panel -->
+  <div class="auth-hero">
+    <div class="auth-hero-icon">⚡</div>
+    <h2>Electric Garage<br>Management System</h2>
+    <p>A complete platform to manage customers, generate electric bills, and monitor financials — all in one place.</p>
+    <ul class="auth-hero-features">
+      <li>Real-time electric bill calculation</li>
+      <li>Executive financial dashboard</li>
+      <li>Customer ledger & billing history</li>
+      <li>Role-based access control</li>
+      <li>Automated monthly billing</li>
+    </ul>
+  </div>
 
-    <div class="card-body" style="padding: 1.5rem 2rem 2rem;">
-      {{#if error}}
-        <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: var(--radius-md); padding: 0.75rem 1rem; margin-bottom: 1.25rem; font-size: 0.85rem; color: #f87171;">
-          {{error}}
-        </div>
+  <!-- Right Form Panel -->
+  <div class="auth-card-pane">
+    <div class="auth-card-inner">
+      <div style="margin-bottom: 2rem;">
+        <h1 style="font-size: 1.75rem; font-weight: 800; color: #f1f5f9; margin-bottom: 0.4rem;">Welcome back 👋</h1>
+        <p style="color: #64748b; font-size: 0.9rem;">Sign in to your EGMS account — Company or Employee</p>
+      </div>
+
+      {{#if successMessage}}
+        <div class="alert alert-success" style="margin-bottom: 1.25rem;">✅ {{successMessage}}</div>
       {{/if}}
 
-      <form action="/login" method="POST">
+      {{#if error}}
+        <div class="alert alert-danger" style="margin-bottom: 1.25rem;">⚠️ {{error}}</div>
+      {{/if}}
+
+      <form action="/login" method="POST" id="loginForm">
         <div class="form-group" style="margin-bottom: 1.25rem;">
-          <label class="form-label" for="loginEmail" style="display: block; margin-bottom: 0.4rem; font-size: 0.875rem; font-weight: 600;">Email Address</label>
+          <label class="form-label" for="loginEmail" style="display:block;margin-bottom:0.4rem;font-size:0.875rem;font-weight:600;color:#94a3b8;">Email Address</label>
           <input
             type="email"
             id="loginEmail"
@@ -31,12 +40,15 @@
             required
             placeholder="admin@apexauto.com"
             value="{{email}}"
-            style="width: 100%; padding: 0.75rem; border-radius: var(--radius-md); background: rgba(15, 23, 42, 0.8); border: 1px solid var(--color-border); color: #fff;"
+            style="width:100%;padding:0.75rem 1rem;border-radius:10px;background:rgba(15,23,42,0.8);border:1px solid rgba(99,102,241,0.2);color:#f1f5f9;font-size:0.95rem;"
           />
         </div>
 
-        <div class="form-group" style="margin-bottom: 1.5rem;">
-          <label class="form-label" for="loginPassword" style="display: block; margin-bottom: 0.4rem; font-size: 0.875rem; font-weight: 600;">Password</label>
+        <div class="form-group" style="margin-bottom: 1.75rem;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem;">
+            <label class="form-label" for="loginPassword" style="font-size:0.875rem;font-weight:600;color:#94a3b8;margin:0;">Password</label>
+            <a href="/forgot-password" style="font-size:0.8rem;color:#818cf8;text-decoration:none;font-weight:500;transition:color 0.15s;" onmouseover="this.style.color='#a5b4fc'" onmouseout="this.style.color='#818cf8'">Forgot password?</a>
+          </div>
           <input
             type="password"
             id="loginPassword"
@@ -44,33 +56,51 @@
             class="form-control"
             required
             placeholder="••••••••"
-            style="width: 100%; padding: 0.75rem; border-radius: var(--radius-md); background: rgba(15, 23, 42, 0.8); border: 1px solid var(--color-border); color: #fff;"
+            style="width:100%;padding:0.75rem 1rem;border-radius:10px;background:rgba(15,23,42,0.8);border:1px solid rgba(99,102,241,0.2);color:#f1f5f9;font-size:0.95rem;"
           />
         </div>
 
-        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.75rem; font-weight: 600; font-size: 0.95rem;">
-          Authenticate &amp; Sign In
+        <button type="submit" class="btn btn-primary" style="width:100%;padding:0.875rem;font-weight:700;font-size:0.95rem;border-radius:10px;" id="loginSubmitBtn">
+          Sign In to Portal
         </button>
       </form>
 
       <!-- Demo Quick Fill Buttons -->
-      <div style="margin-top: 1.75rem; padding-top: 1.25rem; border-top: 1px solid var(--color-border);">
-        <span style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-dim); display: block; margin-bottom: 0.75rem; text-align: center;">
-          Demo Accounts (MySQL Pre-seeded)
-        </span>
+      <div style="margin-top: 1.75rem; padding-top: 1.5rem; border-top: 1px solid rgba(99,102,241,0.1);">
+        <p style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#475569;text-align:center;margin-bottom:0.75rem;">
+          Demo Accounts
+        </p>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
-          <button type="button" class="btn btn-secondary btn-sm quick-fill-btn" data-email="admin@apexauto.com" data-pass="Admin@123">
-            🏢 Super Admin (Company)
+          <button type="button" class="btn btn-secondary btn-sm quick-fill-btn" data-email="admin@apexauto.com" data-pass="Admin@123" style="font-size:0.8rem;">
+            🏢 Super Admin
           </button>
-          <button type="button" class="btn btn-secondary btn-sm quick-fill-btn" data-email="john.doe@apexauto.com" data-pass="Employee@123">
-            👤 General Employee
+          <button type="button" class="btn btn-secondary btn-sm quick-fill-btn" data-email="john.doe@apexauto.com" data-pass="Employee@123" style="font-size:0.8rem;">
+            👤 Employee
           </button>
         </div>
       </div>
 
-      <div style="text-align: center; margin-top: 1.5rem; font-size: 0.85rem; color: var(--color-text-muted);">
-        Want to register a new company? <a href="/register" style="color: var(--color-primary); font-weight: 600;">Register here</a>
-      </div>
+      <p style="text-align:center;margin-top:1.5rem;font-size:0.85rem;color:#475569;">
+        New company? <a href="/register" style="color:#818cf8;font-weight:600;text-decoration:none;">Register here →</a>
+      </p>
     </div>
   </div>
 </div>
+
+<script>
+  // Quick-fill demo buttons
+  document.querySelectorAll('.quick-fill-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.getElementById('loginEmail').value = btn.dataset.email;
+      document.getElementById('loginPassword').value = btn.dataset.pass;
+      document.getElementById('loginEmail').dispatchEvent(new Event('input'));
+    });
+  });
+
+  // Submit button loading state
+  document.getElementById('loginForm').addEventListener('submit', () => {
+    const btn = document.getElementById('loginSubmitBtn');
+    btn.textContent = 'Signing in...';
+    btn.disabled = true;
+  });
+</script>

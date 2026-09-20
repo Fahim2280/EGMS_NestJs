@@ -9,6 +9,8 @@ import {
   Garage,
   COMPANY_REPOSITORY_TOKEN,
   ICompanyRepository,
+  CUSTOMER_REPOSITORY_TOKEN,
+  ICustomerRepository,
 } from '@domain/index';
 import { GarageResponseDto } from '../../dtos/garage.dto';
 
@@ -19,6 +21,8 @@ export class GetGaragesByCompanyHandler implements IQueryHandler<GetGaragesByCom
     private readonly garageRepo: IGarageRepository,
     @Inject(COMPANY_REPOSITORY_TOKEN)
     private readonly companyRepo: ICompanyRepository,
+    @Inject(CUSTOMER_REPOSITORY_TOKEN)
+    private readonly customerRepo: ICustomerRepository,
     @InjectMapper()
     private readonly mapper: Mapper,
   ) {}
@@ -27,10 +31,15 @@ export class GetGaragesByCompanyHandler implements IQueryHandler<GetGaragesByCom
     const garages = await this.garageRepo.findByCompanyId(query.companyId);
     const company = await this.companyRepo.findById(query.companyId);
 
-    return garages.map((g) => {
-      const dto = this.mapper.map(g, Garage, GarageResponseDto);
-      dto.companyName = company?.companyName;
-      return dto;
-    });
+    const results = await Promise.all(
+      garages.map(async (g) => {
+        const dto = this.mapper.map(g, Garage, GarageResponseDto);
+        dto.companyName = company?.companyName;
+        dto.customerCount = await this.customerRepo.countByGarageId(query.companyId, g.id);
+        return dto;
+      }),
+    );
+
+    return results;
   }
 }
