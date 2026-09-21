@@ -42,6 +42,14 @@ export class CreateCustomerHandler implements ICommandHandler<CreateCustomerComm
       throw new ConflictException(`A customer with mobile number '${dto.mobileNumber}' already exists.`);
     }
 
+    // Check unique customerCode within company (only among active/non-deleted records)
+    if (dto.customerCode && dto.customerCode.trim()) {
+      const existingCode = await this.customerRepo.findByCustomerCode(companyId, dto.customerCode.trim());
+      if (existingCode) {
+        throw new ConflictException(`Customer ID '${dto.customerCode.trim()}' is already in use. Choose another.`);
+      }
+    }
+
     const customerCount = await this.customerRepo.countByCompanyId(companyId);
     const customerId = uuidv4();
 
@@ -49,6 +57,7 @@ export class CreateCustomerHandler implements ICommandHandler<CreateCustomerComm
       id: customerId,
       cId: customerCount + 1,
       companyId,
+      customerCode: dto.customerCode?.trim() || null,
       name: dto.name,
       fatherName: dto.fatherName || '',
       motherName: dto.motherName || '',

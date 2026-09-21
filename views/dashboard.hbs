@@ -12,6 +12,7 @@
         </p>
       </div>
       <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; width: auto;" class="header-actions">
+        {{#if canCreate}}
         <a href="/bills/new" class="btn btn-primary" style="background: #10b981; border-color: #10b981;">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <line x1="12" y1="5" x2="12" y2="19"/>
@@ -28,14 +29,27 @@
           </svg>
           {{t 'nav.addCustomer'}}
         </a>
+        {{/if}}
       </div>
     </div>
   </div>
 
+  {{#unless hasAssignedGarages}}
+  <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: var(--radius-md); padding: 1.25rem 1.5rem; margin-bottom: 1.5rem; display: flex; align-items: flex-start; gap: 1rem;">
+    <div style="color: #f59e0b; font-size: 1.5rem; line-height: 1;">⚠️</div>
+    <div>
+      <h4 style="color: #fbbf24; font-size: 1rem; font-weight: 600; margin: 0 0 0.25rem 0;">No Garages Assigned</h4>
+      <p style="color: var(--color-text-muted); font-size: 0.875rem; margin: 0;">
+        You do not currently have access permissions to any garage facilities. Statistics and customer rosters are empty. Please contact your company administrator to grant garage permissions to your account.
+      </p>
+    </div>
+  </div>
+  {{/unless}}
+
   <!-- Financial KPI Metrics (Matching ASP.NET Core EGMS) -->
-  <div class="kpi-grid-4" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 1.25rem; margin-bottom: 2rem;">
+  <div class="kpi-grid-4" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.25rem; margin-bottom: 2rem;">
     <!-- Total Advance Money -->
-    <div class="stat-card" style="border-top: 3px solid #10b981;">
+    <div class="stat-card" style="border-top: 3px solid #10b981; background: radial-gradient(circle at top right, rgba(16, 185, 129, 0.1), transparent 60%), rgba(30, 41, 59, 0.75);">
       <div class="stat-card-header">
         <span class="stat-label">{{t 'dashboard.totalAdvance'}}</span>
         <div class="stat-icon" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">
@@ -47,12 +61,12 @@
       </div>
       <div class="stat-value" style="color: #10b981;">৳{{bnNum totalAdvanceMoney}}</div>
       <div class="stat-footer">
-        <span class="stat-trend positive">{{t 'dashboard.totalAdvanceSub'}}</span>
+        <span class="stat-trend positive" style="line-height: 1.4;">{{t 'dashboard.totalAdvanceSub'}}</span>
       </div>
     </div>
 
     <!-- Total Present Dues -->
-    <div class="stat-card" style="border-top: 3px solid #ef4444;">
+    <div class="stat-card" style="border-top: 3px solid #ef4444; background: radial-gradient(circle at top right, rgba(239, 68, 68, 0.1), transparent 60%), rgba(30, 41, 59, 0.75);">
       <div class="stat-card-header">
         <span class="stat-label">{{t 'dashboard.totalDues'}}</span>
         <div class="stat-icon" style="background: rgba(239, 68, 68, 0.15); color: #ef4444;">
@@ -65,12 +79,12 @@
       </div>
       <div class="stat-value" style="color: #ef4444;">৳{{bnNum totalPresentDues}}</div>
       <div class="stat-footer">
-        <span style="color: #ef4444;">{{t 'dashboard.totalDuesSub'}}</span>
+        <span style="color: #ef4444; line-height: 1.4;">{{t 'dashboard.totalDuesSub'}}</span>
       </div>
     </div>
 
     <!-- Net Balance -->
-    <div class="stat-card" style="border-top: 3px solid {{#if (ne balance 0)}}#38bdf8{{else}}#94a3b8{{/if}};">
+    <div class="stat-card" style="border-top: 3px solid {{#if (ne balance 0)}}#38bdf8{{else}}#94a3b8{{/if}}; background: radial-gradient(circle at top right, rgba(56, 189, 248, 0.1), transparent 60%), rgba(30, 41, 59, 0.75);">
       <div class="stat-card-header">
         <span class="stat-label">{{t 'dashboard.netBalance'}}</span>
         <div class="stat-icon" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8;">
@@ -81,12 +95,12 @@
       </div>
       <div class="stat-value" style="color: #38bdf8;">৳{{bnNum balance}}</div>
       <div class="stat-footer">
-        <span>{{t 'dashboard.netBalanceSub'}}</span>
+        <span style="line-height: 1.4;">{{t 'dashboard.netBalanceSub'}}</span>
       </div>
     </div>
 
     <!-- Total Customers Breakdown -->
-    <div class="stat-card" style="border-top: 3px solid #8b5cf6;">
+    <div class="stat-card" style="border-top: 3px solid #8b5cf6; background: radial-gradient(circle at top right, rgba(139, 92, 246, 0.1), transparent 60%), rgba(30, 41, 59, 0.75);">
       <div class="stat-card-header">
         <span class="stat-label">{{t 'dashboard.activeSubscribers'}}</span>
         <div class="stat-icon" style="background: rgba(139, 92, 246, 0.15); color: #8b5cf6;">
@@ -96,9 +110,9 @@
           </svg>
         </div>
       </div>
-      <div class="stat-value">{{bnNum customerCount}}</div>
+      <div class="stat-value" style="color: #f8fafc;">{{bnNum customerCount}}</div>
       <div class="stat-footer">
-        <span style="color: #10b981;">{{bnNum customersWithBills}} {{t 'dashboard.billedSubscribers'}}</span> &bull; 
+        <span style="color: #10b981; font-weight: 600;">{{bnNum customersWithBills}} {{t 'dashboard.billedSubscribers'}}</span> &bull; 
         <span style="color: #94a3b8;">{{bnNum customersWithoutBills}} {{t 'dashboard.unbilledSubscribers'}}</span>
       </div>
     </div>
@@ -155,12 +169,14 @@
                   {{/if}}
                 </td>
                 <td style="text-align: right;">
-                  <div style="display: inline-flex; gap: 0.5rem;">
-                    <a href="/bills/new?customerId={{this.id}}" class="btn btn-primary btn-sm" style="background: #10b981; border-color: #10b981;">
-                      + Bill
+                  <div class="table-actions-group">
+                    {{#if ../canCreate}}
+                    <a href="/bills/new?customerId={{this.id}}" class="btn btn-primary btn-icon-action" style="background: #10b981; border-color: #10b981;" title="{{t 'bills.newBill'}}" aria-label="{{t 'bills.newBill'}}">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
                     </a>
-                    <a href="/customers/{{this.id}}" class="btn btn-secondary btn-sm">
-                      {{t 'common.view'}}
+                    {{/if}}
+                    <a href="/customers/{{this.id}}" class="btn btn-secondary btn-icon-action" title="{{t 'common.view'}}" aria-label="{{t 'common.view'}}">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                     </a>
                   </div>
                 </td>
@@ -174,7 +190,9 @@
         <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🚗⚡</div>
         <h3 style="font-size: 1.15rem; font-weight: 600; margin-bottom: 0.5rem;">{{t 'customers.noCustomers'}}</h3>
         <p style="color: #94a3b8; margin-bottom: 1.5rem;">Add your first customer to begin managing electricity meters, bills, and payments.</p>
+        {{#if canCreate}}
         <a href="/customers/new" class="btn btn-primary">{{t 'customers.addCustomer'}}</a>
+        {{/if}}
       </div>
     {{/if}}
   </div>
@@ -185,7 +203,9 @@
     <div class="card" style="padding: 1.5rem;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
         <h3 style="font-size: 1.1rem; font-weight: 600; color: #f8fafc; margin: 0;">Garages ({{garages.length}})</h3>
-        <a href="/garages" class="btn btn-secondary btn-sm">Manage</a>
+        {{#if (or isSuperAdmin hasAssignedGarages)}}
+        <a href="/garages" class="btn btn-secondary btn-sm">{{#if isSuperAdmin}}Manage{{else}}View{{/if}}</a>
+        {{/if}}
       </div>
       {{#if garages.length}}
         <div style="display: flex; flex-direction: column; gap: 0.75rem;">
@@ -205,7 +225,9 @@
     <div class="card" style="padding: 1.5rem;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
         <h3 style="font-size: 1.1rem; font-weight: 600; color: #f8fafc; margin: 0;">Staff &amp; Technicians ({{employees.length}})</h3>
+        {{#if isSuperAdmin}}
         <a href="/employees" class="btn btn-secondary btn-sm">Manage</a>
+        {{/if}}
       </div>
       {{#if employees.length}}
         <div style="display: flex; flex-direction: column; gap: 0.75rem;">

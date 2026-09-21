@@ -4,6 +4,7 @@ export interface CreateCustomerProps extends AuditableProps {
   id: string;
   cId?: number;
   companyId: string;
+  customerCode?: string | null;
   name: string;
   fatherName: string;
   motherName: string;
@@ -21,6 +22,7 @@ export class Customer extends AuditableEntity {
   public readonly id: string;
   public cId?: number;
   public companyId: string;
+  public customerCode?: string | null;
   public name: string;
   public fatherName: string;
   public motherName: string;
@@ -38,6 +40,7 @@ export class Customer extends AuditableEntity {
     this.id = props.id;
     this.cId = props.cId;
     this.companyId = props.companyId;
+    this.customerCode = props.customerCode?.trim() || null;
     this.name = props.name.trim();
     this.fatherName = props.fatherName.trim();
     this.motherName = props.motherName.trim();
@@ -69,6 +72,7 @@ export class Customer extends AuditableEntity {
     previousUnit: number,
     advanceMoney: number,
     garageId?: string,
+    customerCode?: string | null,
     updatedByStamp?: string,
   ): void {
     if (!name || name.trim().length < 2) throw new Error('Name must be at least 2 characters.');
@@ -85,6 +89,9 @@ export class Customer extends AuditableEntity {
     this.advanceMoney = Number(advanceMoney) || 0;
     if (garageId !== undefined) {
       this.garageId = garageId;
+    }
+    if (customerCode !== undefined) {
+      this.customerCode = customerCode?.trim() || null;
     }
 
     if (updatedByStamp) {

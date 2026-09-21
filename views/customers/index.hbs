@@ -3,6 +3,7 @@
     <h1 class="page-title">{{t 'customers.title'}}</h1>
     <p class="page-subtitle">{{t 'customers.subtitle'}}</p>
   </div>
+  {{#if (or isSuperAdmin currentUser.canCreate)}}
   <div class="header-actions">
     <a href="/customers/new" class="btn btn-primary">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -12,13 +13,14 @@
       {{t 'customers.addCustomer'}}
     </a>
   </div>
+  {{/if}}
 </div>
 
 <div class="card">
   <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
     <h2 class="card-title" style="margin: 0;">{{t 'customers.registeredCount'}} ({{bnNum customerCount}})</h2>
-    <form method="GET" action="/customers" style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
-      <select name="garageId" class="form-input" style="width: auto; padding: 0.4rem 0.75rem; font-size: 0.85rem;" onchange="this.form.submit()">
+    <form method="GET" action="/customers" class="table-filter-form">
+      <select name="garageId" class="form-input filter-select" onchange="this.form.submit()">
         <option value="">{{t 'common.allGarages'}}</option>
         {{#each garages}}
           <option value="{{this.id}}" {{#if (eq this.id ../selectedGarageId)}}selected{{/if}}>
@@ -26,20 +28,27 @@
           </option>
         {{/each}}
       </select>
-      <input type="text" name="search" class="form-input" placeholder="{{t 'customers.searchPlaceholder'}}" value="{{search}}" style="width: 200px; padding: 0.4rem 0.75rem; font-size: 0.85rem;">
-      <button type="submit" class="btn btn-secondary btn-sm">{{t 'common.search'}}</button>
-      {{#if (or selectedGarageId search)}}
-        <a href="/customers" class="btn btn-secondary btn-sm" style="color: #ef4444;">{{t 'common.reset'}}</a>
-      {{/if}}
+      <div class="search-input-group">
+        <input type="text" name="search" class="form-input" placeholder="{{t 'customers.searchPlaceholder'}}" value="{{search}}">
+        <button type="submit" class="btn btn-secondary btn-sm">{{t 'common.search'}}</button>
+        {{#if (or selectedGarageId search)}}
+          <a href="/customers" class="btn btn-secondary btn-sm" style="color: #ef4444;">{{t 'common.reset'}}</a>
+        {{/if}}
+      </div>
     </form>
   </div>
 
   {{#if customers.length}}
+    <div class="table-scroll-hint">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="8 18 2 12 8 6"/><polyline points="16 6 22 12 16 18"/></svg>
+      <span>{{#if isBn}}সম্পূর্ণ বিবরণ দেখতে ডানে স্ক্রোল করুন{{else}}Scroll horizontally to view all{{/if}}</span>
+    </div>
     <div class="table-responsive">
       <table class="data-table">
         <thead>
           <tr>
             <th>{{t 'customers.id'}}</th>
+            <th>{{t 'customers.code'}}</th>
             <th>{{t 'customers.name'}}</th>
             <th>{{t 'customers.garage'}}</th>
             <th>{{t 'customers.mobile'}}</th>
@@ -55,39 +64,54 @@
             <tr>
               <td><span class="badge" style="background: rgba(99, 102, 241, 0.15); color: #818cf8;">#{{#if this.cId}}{{bnNum this.cId}}{{else}}{{this.id}}{{/if}}</span></td>
               <td>
+                {{#if this.customerCode}}
+                  <span class="badge" style="background: rgba(20, 184, 166, 0.15); color: #2dd4bf; border: 1px solid rgba(20,184,166,0.3); font-weight: 600; letter-spacing: 0.03em;">{{this.customerCode}}</span>
+                {{else}}
+                  <span style="color: var(--color-text-muted); font-size: 0.8rem;">—</span>
+                {{/if}}
+              </td>
+              <td>
                 <div style="font-weight: 600;">{{this.name}}</div>
-                {{#if this.fatherName}}<div style="font-size: 0.8rem; color: var(--color-text-muted);">{{../t 'customers.fatherName'}}: {{this.fatherName}}</div>{{/if}}
+                {{#if this.fatherName}}<div style="font-size: 0.8rem; color: var(--color-text-muted);">{{t 'customers.fatherName'}}: {{this.fatherName}}</div>{{/if}}
               </td>
               <td>
                 {{#if this.garageId}}
                   <a href="/garages/{{this.garageId}}" style="text-decoration: none;">
                     <span class="badge" style="background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); font-weight: 500;">
-                      🏢 {{#if this.garageName}}{{this.garageName}}{{else}}{{../t 'garages.viewDashboard'}}{{/if}}
+                      🏢 {{#if this.garageName}}{{this.garageName}}{{else}}{{t 'garages.viewDashboard'}}{{/if}}
                     </span>
                   </a>
                 {{else}}
-                  <span class="badge" style="background: rgba(148, 163, 184, 0.1); color: #94a3b8;">{{../t 'common.na'}}</span>
+                  <span class="badge" style="background: rgba(148, 163, 184, 0.1); color: #94a3b8;">{{t 'common.na'}}</span>
                 {{/if}}
               </td>
               <td>{{this.mobileNumber}}</td>
               <td><code>{{this.nidNumber}}</code></td>
-              <td><strong>{{bnNum this.previousUnit}}</strong> {{../t 'common.units'}}</td>
+              <td><strong>{{bnNum this.previousUnit}}</strong> {{t 'common.units'}}</td>
               <td><span style="color: #10b981; font-weight: 600;">৳{{bnNum this.advanceMoney}}</span></td>
               <td style="color: var(--color-text-muted); font-size: 0.85rem;">{{tDate this.createdDate}}</td>
               <td style="text-align: right;">
-                <div style="display: inline-flex; gap: 0.5rem; justify-content: flex-end;">
-                  <a href="/customers/{{this.id}}" class="btn btn-secondary btn-sm" title="View Customer Details &amp; Ledger">
-                    {{../t 'common.view'}}
+                <div class="table-actions-group">
+                  <a href="/customers/{{this.id}}" class="btn btn-secondary btn-icon-action" title="{{t 'common.view'}}" aria-label="{{t 'common.view'}}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                   </a>
-                  <a href="/bills/new?customerId={{this.id}}" class="btn btn-primary btn-sm" style="background: #10b981; border-color: #10b981;" title="Create Bill for Customer">
-                    + Bill
+                  {{#if (or ../isSuperAdmin ../currentUser.canCreate)}}
+                  <a href="/bills/new?customerId={{this.id}}" class="btn btn-primary btn-icon-action" style="background: #10b981; border-color: #10b981;" title="{{t 'bills.newBill'}}" aria-label="{{t 'bills.newBill'}}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
                   </a>
-                  <a href="/customers/{{this.id}}/edit" class="btn btn-secondary btn-sm" title="Edit Customer Profile">
-                    {{../t 'common.edit'}}
+                  {{/if}}
+                  {{#if (or ../isSuperAdmin ../currentUser.canEdit)}}
+                  <a href="/customers/{{this.id}}/edit" class="btn btn-secondary btn-icon-action" title="{{t 'common.edit'}}" aria-label="{{t 'common.edit'}}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                   </a>
+                  {{/if}}
+                  {{#if (or ../isSuperAdmin ../currentUser.canDelete)}}
                   <form action="/customers/{{this.id}}/delete" method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this customer?');">
-                    <button type="submit" class="btn btn-danger btn-sm">{{../t 'common.delete'}}</button>
+                    <button type="submit" class="btn btn-danger btn-icon-action" title="{{t 'common.delete'}}" aria-label="{{t 'common.delete'}}">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                    </button>
                   </form>
+                  {{/if}}
                 </div>
               </td>
             </tr>
@@ -100,7 +124,9 @@
       <div style="font-size: 3rem; margin-bottom: 1rem;">👥</div>
       <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">{{t 'customers.noCustomers'}}</h3>
       <p style="color: var(--color-text-muted); margin-bottom: 1.5rem;">You have not registered any customers in this garage system yet.</p>
+      {{#if (or isSuperAdmin currentUser.canCreate)}}
       <a href="/customers/new" class="btn btn-primary">{{t 'customers.addCustomer'}}</a>
+      {{/if}}
     </div>
   {{/if}}
 </div>

@@ -17,11 +17,17 @@ export class GetCustomersByCompanyHandler
   ) {}
 
   async execute(query: GetCustomersByCompanyQuery): Promise<CustomerResponseDto[]> {
-    const customers = await this.customerRepo.findByCompanyId(query.companyId);
+    let customers = await this.customerRepo.findByCompanyId(query.companyId);
+
+    if (query.allowedGarageIds !== undefined && query.allowedGarageIds !== null) {
+      const allowedSet = new Set(query.allowedGarageIds);
+      customers = customers.filter((c) => c.garageId && allowedSet.has(c.garageId));
+    }
 
     return customers.map((c) => ({
       id: c.id,
       cId: c.cId,
+      customerCode: c.customerCode,
       companyId: c.companyId,
       name: c.name,
       fatherName: c.fatherName,
@@ -31,6 +37,8 @@ export class GetCustomersByCompanyHandler
       nidNumber: c.nidNumber,
       previousUnit: c.previousUnit,
       advanceMoney: c.advanceMoney,
+      garageId: c.garageId,
+      garageName: c.garageName,
       createdDate: c.createdDate,
     }));
   }

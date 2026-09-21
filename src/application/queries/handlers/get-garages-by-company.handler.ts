@@ -28,7 +28,13 @@ export class GetGaragesByCompanyHandler implements IQueryHandler<GetGaragesByCom
   ) {}
 
   async execute(query: GetGaragesByCompanyQuery): Promise<GarageResponseDto[]> {
-    const garages = await this.garageRepo.findByCompanyId(query.companyId);
+    let garages = await this.garageRepo.findByCompanyId(query.companyId);
+
+    if (query.allowedGarageIds !== undefined && query.allowedGarageIds !== null) {
+      const allowedSet = new Set(query.allowedGarageIds);
+      garages = garages.filter((g) => allowedSet.has(g.id));
+    }
+
     const company = await this.companyRepo.findById(query.companyId);
 
     const results = await Promise.all(

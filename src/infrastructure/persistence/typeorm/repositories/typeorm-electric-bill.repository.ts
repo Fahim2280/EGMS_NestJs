@@ -95,6 +95,7 @@ export class TypeOrmElectricBillRepository
       customerId: orm.customerId,
       companyId: orm.companyId,
       date: orm.date ? new Date(orm.date) : new Date(),
+      fromDate: orm.fromDate ? new Date(orm.fromDate) : undefined,
       previousUnit: Number(orm.previousUnit),
       currentUnit: Number(orm.currentUnit),
       totalUnit: Number(orm.totalUnit),
@@ -124,6 +125,7 @@ export class TypeOrmElectricBillRepository
     orm.customerId = domain.customerId;
     orm.companyId = domain.companyId;
     orm.date = domain.date;
+    orm.fromDate = domain.fromDate;
     orm.previousUnit = domain.previousUnit;
     orm.currentUnit = domain.currentUnit;
     orm.totalUnit = domain.totalUnit;

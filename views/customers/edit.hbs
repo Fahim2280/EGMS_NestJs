@@ -1,79 +1,173 @@
-<div class="page-header">
+<div class="page-header" style="margin-bottom: 1.5rem;">
   <div class="header-content">
-    <a href="/customers/{{customer.id}}" style="color: var(--color-text-muted); text-decoration: none; font-size: 0.875rem; display: inline-flex; align-items: center; gap: 0.25rem; margin-bottom: 0.5rem;">
-      &larr; {{t 'common.back'}}
+    <a href="/customers/{{customer.id}}" style="color: var(--color-text-muted); text-decoration: none; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 0.35rem; margin-bottom: 0.5rem; transition: color 0.15s ease;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+      {{t 'common.back'}}
     </a>
-    <h1 class="page-title">{{t 'customers.editTitle'}}</h1>
+    <h1 class="page-title" style="display: flex; align-items: center; gap: 0.65rem;">
+      <span style="display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 10px; background: rgba(99, 102, 241, 0.15); color: #818cf8;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      </span>
+      {{t 'customers.editTitle'}}
+    </h1>
     <p class="page-subtitle">{{t 'customers.createSubtitle'}}</p>
   </div>
 </div>
 
-<div class="card" style="max-width: 800px; margin: 0 auto;">
+<div class="card" style="max-width: 860px; margin: 0 auto; padding: 2rem; border-top: 3px solid #6366f1;">
   {{#if error}}
-    <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem; color: #ef4444; font-size: 0.9rem;">
-      {{error}}
+    <div style="background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 10px; padding: 1rem 1.25rem; margin-bottom: 1.5rem; color: #f87171; font-size: 0.9rem; display: flex; align-items: center; gap: 0.75rem;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span>{{error}}</span>
     </div>
   {{/if}}
 
   <form action="/customers/{{customer.id}}/edit" method="POST">
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
-      <div class="form-group" style="grid-column: 1 / -1;">
-        <label class="form-label" for="garageId">{{t 'customers.garage'}} *</label>
+    <!-- Section 1: Facility & Identification -->
+    <div style="margin-bottom: 1.75rem;">
+      <div class="form-section-title" style="margin-bottom: 1.25rem;">
+        <span class="section-icon-badge">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </span>
+        Facility &amp; Identity Profile
+      </div>
+
+      <div class="form-group" style="margin-bottom: 1.25rem;">
+        <label class="form-label" for="garageId">
+          <span>{{t 'customers.garage'}} <span style="color: #f43f5e;">*</span></span>
+        </label>
         <select id="garageId" name="garageId" class="form-input" required>
           <option value="" disabled>{{t 'common.selectGarage'}}</option>
           {{#each garages}}
-            <option value="{{this.id}}" {{#if (eq this.id ../selectedGarageId)}}selected{{/if}}>
-              {{this.garageName}} ({{this.address}})
+            <option value="{{this.id}}" data-subtext="{{this.address}}" {{#if (eq this.id ../selectedGarageId)}}selected{{/if}}>
+              🏢 {{this.garageName}}
             </option>
           {{/each}}
         </select>
-        <span style="font-size: 0.75rem; color: var(--color-text-muted);">Required: Each customer must be associated with exactly one garage facility.</span>
+        <span class="form-hint">Physical garage branch managing this customer.</span>
       </div>
 
-      <div class="form-group">
-        <label class="form-label" for="name">{{t 'customers.name'}} *</label>
-        <input type="text" id="name" name="name" class="form-input" required value="{{customer.name}}">
+      <div class="form-grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
+        <div class="form-group" style="margin-bottom: 0;">
+          <label class="form-label" for="name">
+            <span>{{t 'customers.name'}} <span style="color: #f43f5e;">*</span></span>
+          </label>
+          <input type="text" id="name" name="name" class="form-input" required value="{{customer.name}}">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0;">
+          <label class="form-label" for="mobileNumber">
+            <span>{{t 'customers.mobile'}} <span style="color: #f43f5e;">*</span></span>
+          </label>
+          <input type="tel" id="mobileNumber" name="mobileNumber" class="form-input" required value="{{customer.mobileNumber}}">
+        </div>
       </div>
 
-      <div class="form-group">
-        <label class="form-label" for="mobileNumber">{{t 'customers.mobile'}} *</label>
-        <input type="tel" id="mobileNumber" name="mobileNumber" class="form-input" required value="{{customer.mobileNumber}}">
+      <div class="form-grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
+        <div class="form-group" style="margin-bottom: 0;">
+          <label class="form-label" for="fatherName">{{t 'customers.fatherName'}}</label>
+          <input type="text" id="fatherName" name="fatherName" class="form-input" value="{{customer.fatherName}}">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0;">
+          <label class="form-label" for="motherName">{{t 'customers.motherName'}}</label>
+          <input type="text" id="motherName" name="motherName" class="form-input" value="{{customer.motherName}}">
+        </div>
       </div>
 
-      <div class="form-group">
-        <label class="form-label" for="fatherName">{{t 'customers.fatherName'}}</label>
-        <input type="text" id="fatherName" name="fatherName" class="form-input" value="{{customer.fatherName}}">
-      </div>
-
-      <div class="form-group">
-        <label class="form-label" for="motherName">{{t 'customers.motherName'}}</label>
-        <input type="text" id="motherName" name="motherName" class="form-input" value="{{customer.motherName}}">
-      </div>
-
-      <div class="form-group" style="grid-column: 1 / -1;">
-        <label class="form-label" for="nidNumber">{{t 'customers.nid'}} *</label>
+      <div class="form-group" style="margin-bottom: 0;">
+        <label class="form-label" for="nidNumber">
+          <span>{{t 'customers.nid'}} <span style="color: #f43f5e;">*</span></span>
+        </label>
         <input type="text" id="nidNumber" name="nidNumber" class="form-input" required value="{{customer.nidNumber}}">
       </div>
 
-      <div class="form-group" style="grid-column: 1 / -1;">
-        <label class="form-label" for="address">{{t 'customers.address'}} *</label>
+      <div class="form-group" style="margin-bottom: 0; margin-top: 1.25rem;">
+        <label class="form-label" for="customerCode">
+          <span>Customer ID <span style="color: var(--color-text-muted); font-size: 0.8rem; font-weight: 400;">(optional)</span></span>
+        </label>
+        <div style="display: flex; gap: 0.5rem; align-items: center;">
+          <input type="text" id="customerCode" name="customerCode" class="form-input" placeholder="e.g. CUST-001" value="{{customer.customerCode}}" maxlength="50" autocomplete="off" data-exclude="{{customer.id}}">
+          <span id="codeStatus" style="font-size: 0.8rem; white-space: nowrap;"></span>
+        </div>
+        <span class="form-hint">Unique ID you assign. Leave blank to skip. Changing it is allowed as long as the new code is not taken.</span>
+      </div>
+    </div>
+
+    <!-- Section 2: Address & Metering -->
+    <div style="margin-bottom: 1.5rem;">
+      <div class="form-section-title" style="margin-bottom: 1.25rem;">
+        <span class="section-icon-badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        </span>
+        Premises &amp; Electricity Metering
+      </div>
+
+      <div class="form-group" style="margin-bottom: 1.25rem;">
+        <label class="form-label" for="address">
+          <span>{{t 'customers.address'}} <span style="color: #f43f5e;">*</span></span>
+        </label>
         <textarea id="address" name="address" class="form-input" rows="2" required>{{customer.address}}</textarea>
       </div>
 
-      <div class="form-group">
-        <label class="form-label" for="previousUnit">{{t 'customers.baselineMeter'}} *</label>
-        <input type="number" step="0.01" min="0" id="previousUnit" name="previousUnit" class="form-input" required value="{{customer.previousUnit}}">
-      </div>
+      <div class="form-grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <div class="form-group" style="margin-bottom: 0;">
+          <label class="form-label" for="previousUnit">
+            <span>{{t 'customers.baselineMeter'}} <span style="color: #f43f5e;">*</span></span>
+          </label>
+          <input type="number" step="0.01" min="0" id="previousUnit" name="previousUnit" class="form-input" required value="{{customer.previousUnit}}">
+        </div>
 
-      <div class="form-group">
-        <label class="form-label" for="advanceMoney">{{t 'customers.advanceMoney'}} (৳) *</label>
-        <input type="number" step="0.01" id="advanceMoney" name="advanceMoney" class="form-input" required value="{{customer.advanceMoney}}">
+        <div class="form-group" style="margin-bottom: 0;">
+          <label class="form-label" for="advanceMoney">
+            <span>{{t 'customers.advanceMoney'}} (৳) <span style="color: #f43f5e;">*</span></span>
+          </label>
+          <input type="number" step="0.01" id="advanceMoney" name="advanceMoney" class="form-input" required value="{{customer.advanceMoney}}">
+        </div>
       </div>
     </div>
 
-    <div class="form-actions" style="margin-top: 2rem; display: flex; gap: 0.75rem; justify-content: flex-end; flex-wrap: wrap;">
-      <a href="/customers/{{customer.id}}" class="btn btn-secondary">{{t 'common.cancel'}}</a>
-      <button type="submit" class="btn btn-primary">{{t 'customers.updateProfile'}}</button>
+    <div class="form-actions" style="margin-top: 2rem; display: flex; gap: 0.75rem; justify-content: flex-end; align-items: center;">
+      <a href="/customers/{{customer.id}}" class="btn btn-secondary" style="padding: 0.65rem 1.25rem;">{{t 'common.cancel'}}</a>
+      <button type="submit" class="btn btn-primary" style="padding: 0.65rem 1.5rem; display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 700; box-shadow: 0 4px 16px rgba(99, 102, 241, 0.35);">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        {{t 'customers.updateProfile'}}
+      </button>
     </div>
   </form>
 </div>
+
+<script>
+  (function() {
+    const input = document.getElementById('customerCode');
+    const status = document.getElementById('codeStatus');
+    if (!input || !status) return;
+
+    let timer;
+    const exclude = input.dataset.exclude || '';
+
+    input.addEventListener('input', function() {
+      clearTimeout(timer);
+      const val = this.value.trim();
+      if (!val) {
+        status.innerHTML = '';
+        return;
+      }
+      status.innerHTML = '<span style="color: var(--color-text-muted); font-size: 0.75rem;">checking...</span>';
+      timer = setTimeout(async () => {
+        try {
+          const url = `/customers/check-code?code=${encodeURIComponent(val)}${exclude ? '&exclude=' + encodeURIComponent(exclude) : ''}`;
+          const res = await fetch(url);
+          const data = await res.json();
+          if (data.available) {
+            status.innerHTML = '<span style="color: #10b981; font-weight: 600; font-size: 0.8rem;">✓ Available</span>';
+          } else {
+            status.innerHTML = '<span style="color: #f43f5e; font-weight: 600; font-size: 0.8rem;">✕ In use</span>';
+          }
+        } catch (e) {
+          status.innerHTML = '';
+        }
+      }, 350);
+    });
+  })();
+</script>

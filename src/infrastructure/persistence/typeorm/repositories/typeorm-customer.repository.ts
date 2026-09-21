@@ -89,6 +89,26 @@ export class TypeOrmCustomerRepository
     return orm ? this.toDomain(orm) : null;
   }
 
+  async findByCustomerCode(
+    companyId: string,
+    code: string,
+    excludeId?: string,
+  ): Promise<Customer | null> {
+    const qb = this.customerRepo
+      .createQueryBuilder('c')
+      .leftJoinAndSelect('c.garage', 'g')
+      .where('c.companyId = :companyId', { companyId })
+      .andWhere('c.customerCode = :code', { code: code.trim() })
+      .andWhere('c.isDeleted = :isDeleted', { isDeleted: false });
+
+    if (excludeId) {
+      qb.andWhere('c.id != :excludeId', { excludeId });
+    }
+
+    const orm = await qb.getOne();
+    return orm ? this.toDomain(orm) : null;
+  }
+
   async countByCompanyId(companyId: string): Promise<number> {
     return this.customerRepo.count({
       where: { companyId, isDeleted: false },
@@ -100,6 +120,7 @@ export class TypeOrmCustomerRepository
       id: orm.id,
       cId: orm.cId,
       companyId: orm.companyId,
+      customerCode: orm.customerCode || null,
       name: orm.name,
       fatherName: orm.fatherName,
       motherName: orm.motherName,
@@ -126,6 +147,7 @@ export class TypeOrmCustomerRepository
     orm.id = domain.id;
     orm.cId = domain.cId ?? 0;
     orm.companyId = domain.companyId;
+    orm.customerCode = domain.customerCode || null;
     orm.name = domain.name;
     orm.fatherName = domain.fatherName;
     orm.motherName = domain.motherName;

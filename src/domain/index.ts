@@ -7,6 +7,7 @@ export * from './entities/garage.entity';
 export * from './entities/employee.entity';
 export * from './entities/customer.entity';
 export * from './entities/electric-bill.entity';
+export * from './entities/guarantor.entity';
 export * from './entities/password-reset-token.entity';
 
 // Repository Ports & Tokens
@@ -16,4 +17,5 @@ export * from './repositories/garage.repository.interface';
 export * from './repositories/employee.repository.interface';
 export * from './repositories/customer.repository.interface';
 export * from './repositories/electric-bill.repository.interface';
+export * from './repositories/guarantor.repository.interface';
 export * from './repositories/password-reset-token.repository.interface';

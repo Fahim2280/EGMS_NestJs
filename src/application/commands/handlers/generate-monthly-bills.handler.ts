@@ -30,7 +30,7 @@ export class GenerateMonthlyBillsHandler
   async execute(
     command: GenerateMonthlyBillsCommand,
   ): Promise<{ successCount: number; failCount: number; totalCustomers: number }> {
-    const { companyId, targetDate, actorStamp } = command;
+    const { companyId, targetDate, actorStamp, fromDate } = command;
     const [customers, company] = await Promise.all([
       this.customerRepo.findByCompanyId(companyId),
       this.companyRepo.getByIdAsync(companyId),
@@ -40,6 +40,7 @@ export class GenerateMonthlyBillsHandler
 
     const year = targetDate.getFullYear();
     const month = targetDate.getMonth();
+    const billingFromDate = fromDate || new Date(year, month, 1);
 
     let successCount = 0;
     let failCount = 0;
@@ -75,6 +76,7 @@ export class GenerateMonthlyBillsHandler
             customerId: customer.id,
             companyId,
             date: targetDate,
+            fromDate: billingFromDate,
             previousUnit: calc.previousUnit,
             currentUnit: summary.lastMeterReading,
             totalUnit: calc.totalUnit,

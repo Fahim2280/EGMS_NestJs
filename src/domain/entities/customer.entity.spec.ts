@@ -67,6 +67,7 @@ describe('Customer Entity', () => {
       120,
       2500,
       'gar-001',
+      'CUST-002',
       'comp-001|SUPER_ADMIN',
     );
 
@@ -75,7 +76,26 @@ describe('Customer Entity', () => {
     expect(customer.advanceMoney).toBe(2500);
     expect(customer.previousUnit).toBe(120);
     expect(customer.garageId).toBe('gar-001');
+    expect(customer.customerCode).toBe('CUST-002');
     expect(customer.editByName).toBe('comp-001|SUPER_ADMIN');
+  });
+
+  it('should create customer with customerCode and trim whitespace', () => {
+    const customer = Customer.create({
+      id: 'cust-code-01',
+      companyId: 'comp-001',
+      customerCode: '  CUST-999  ',
+      name: 'Test Customer',
+      fatherName: '',
+      motherName: '',
+      address: 'Dhaka',
+      mobileNumber: '01711223344',
+      nidNumber: '123456789',
+      previousUnit: 10,
+      advanceMoney: 1000,
+    });
+
+    expect(customer.customerCode).toBe('CUST-999');
   });
 
   it('should create customer with assigned garageId', () => {

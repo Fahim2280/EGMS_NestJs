@@ -36,6 +36,10 @@ export class ElectricBillOrmEntity extends BaseAuditableOrmEntity {
   date: Date;
 
   @AutoMap()
+  @Column({ type: 'datetime', nullable: true })
+  fromDate?: Date;
+
+  @AutoMap()
   @Column('decimal', { precision: 18, scale: 2, default: 0 })
   previousUnit: number;
 

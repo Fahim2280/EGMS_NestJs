@@ -33,16 +33,22 @@ export class GarageController {
   @Get()
   async listGarages(@Req() req: Request, @Res() res: Response) {
     const user = (req as any).user;
+    const isSuperAdmin = user.role === 'SUPER_ADMIN' || user.isSuperAdmin;
+    const allowedGarageIds = isSuperAdmin ? null : (user.garageIds || []);
 
     const garages = await this.queryBus.execute(
-      new GetGaragesByCompanyQuery(user.companyId),
+      new GetGaragesByCompanyQuery(user.companyId, allowedGarageIds),
     );
 
     return res.render('garages/index', {
       title: 'Company Garages - EGMS Portal',
       activeNav: 'garages',
       user,
-      isSuperAdmin: user.role === 'SUPER_ADMIN',
+      isSuperAdmin,
+      canCreate: isSuperAdmin || Boolean(user.canCreate),
+      canEdit: isSuperAdmin || Boolean(user.canEdit),
+      canDelete: isSuperAdmin || Boolean(user.canDelete),
+      canView: isSuperAdmin || Boolean(user.canView),
       garages,
     });
   }
@@ -95,6 +101,16 @@ export class GarageController {
     @Query('success') success?: string,
   ) {
     const user = (req as any).user;
+    const isSuperAdmin = user.role === 'SUPER_ADMIN' || user.isSuperAdmin;
+
+    // Check garage permission for non-super admins
+    if (!isSuperAdmin) {
+      const allowed = user.garageIds && Array.isArray(user.garageIds) && user.garageIds.includes(id);
+      if (!allowed) {
+        return res.redirect('/garages?error=You+do+not+have+permission+to+view+this+garage');
+      }
+    }
+
     try {
       const data = await this.queryBus.execute(
         new GetGarageDashboardQuery(id, user.companyId),
@@ -104,7 +120,10 @@ export class GarageController {
         title: `${data.garage.garageName} - Garage Dashboard`,
         activeNav: 'garages',
         user,
-        isSuperAdmin: user.role === 'SUPER_ADMIN',
+        isSuperAdmin,
+        canCreate: isSuperAdmin || Boolean(user.canCreate),
+        canEdit: isSuperAdmin || Boolean(user.canEdit),
+        canDelete: isSuperAdmin || Boolean(user.canDelete),
         garage: data.garage,
         metrics: data.metrics,
         customers: data.customers,
@@ -135,7 +154,7 @@ export class GarageController {
         title: `Edit Garage: ${garage.garageName} - EGMS Portal`,
         activeNav: 'garages',
         user,
-        isSuperAdmin: user.role === 'SUPER_ADMIN',
+        isSuperAdmin: user.role === 'SUPER_ADMIN' || user.isSuperAdmin,
         garage,
       });
     } catch {

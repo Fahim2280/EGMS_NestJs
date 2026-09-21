@@ -1,57 +1,109 @@
-<div class="page-header">
+<div class="page-header" style="margin-bottom: 1.5rem;">
   <div class="header-content">
     <div style="display: inline-flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
-      <span class="badge" style="background: rgba(99, 102, 241, 0.15); color: #818cf8; border: 1px solid rgba(99, 102, 241, 0.3);">Super Admin Only</span>
+      <span class="badge" style="background: rgba(99, 102, 241, 0.15); color: #818cf8; border: 1px solid rgba(99, 102, 241, 0.3); font-size: 0.72rem; font-weight: 700;">
+        SUPER ADMIN ONLY
+      </span>
     </div>
-    <h1 class="page-title">Manage Company Profile &amp; Billing Settings</h1>
-    <p class="page-subtitle">Configure company details and baseline electricity billing rate</p>
+    <h1 class="page-title" style="display: flex; align-items: center; gap: 0.65rem;">
+      <span style="display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 10px; background: rgba(99, 102, 241, 0.15); color: #818cf8;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </span>
+      Manage Company Profile &amp; Billing Settings
+    </h1>
+    <p class="page-subtitle">Configure enterprise company identity and default electricity tariff rates</p>
   </div>
 </div>
 
-<div class="card" style="max-width: 650px; margin: 0 auto;">
+<div class="card" style="max-width: 860px; margin: 0 auto; padding: 2rem; border-top: 3px solid #6366f1;">
   <form action="/profile/edit" method="POST">
-    <div style="display: flex; flex-direction: column; gap: 1.25rem;">
-      <div class="form-group">
-        <label class="form-label" for="companyName">Business / Company Name</label>
-        <input type="text" id="companyName" name="companyName" class="form-input" required value="{{company.companyName}}">
-      </div>
-
-      <div class="form-group">
-        <label class="form-label" for="name">Owner / Primary Contact Name</label>
-        <input type="text" id="name" name="name" class="form-input" required value="{{company.name}}">
-      </div>
-
-      <div class="form-group">
-        <label class="form-label" for="email">Email Address</label>
-        <input type="email" id="email" class="form-input" readonly value="{{company.email}}" style="background: rgba(255,255,255,0.03); color: #94a3b8;">
-        <span style="font-size: 0.75rem; color: #94a3b8;">Primary account email cannot be altered directly.</span>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label" for="phoneNumber">Contact Phone Number</label>
-        <input type="tel" id="phoneNumber" name="phoneNumber" class="form-input" required value="{{company.phoneNumber}}">
-      </div>
-
-      <div class="form-group">
-        <label class="form-label" for="address">Commercial Address</label>
-        <textarea id="address" name="address" class="form-input" rows="2" required>{{company.address}}</textarea>
-      </div>
-
-      <div class="form-group" style="background: rgba(99, 102, 241, 0.05); border: 1px solid rgba(99, 102, 241, 0.2); border-radius: 8px; padding: 1rem;">
-        <label class="form-label" for="unitRate" style="display: flex; align-items: center; justify-content: space-between;">
-          <span>Default Electricity Rate (৳ / Unit) *</span>
-          <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">Admin Only</span>
-        </label>
-        <input type="number" step="0.01" min="0.01" id="unitRate" name="unitRate" class="form-input" required value="{{#if company.unitRate}}{{company.unitRate}}{{else}}15.00{{/if}}">
-        <span style="font-size: 0.75rem; color: #94a3b8; display: block; margin-top: 0.35rem;">
-          Only Super Admins can set this number. This rate applies as default when generating new electric bills.
+    <!-- Section 1: Company Profile -->
+    <div style="margin-bottom: 2rem;">
+      <div class="form-section-title">
+        <span class="section-icon-badge">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M3 7v14M21 7v14M6 11h4M6 15h4M14 11h4M14 15h4M9 21v-4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v4M3 7l9-4 9 4"/></svg>
         </span>
+        Company Identification &amp; Contact
+      </div>
+
+      <div class="form-grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
+        <div class="form-group" style="margin-bottom: 0;">
+          <label class="form-label" for="companyName">
+            <span>Business / Company Name <span style="color: #f43f5e;">*</span></span>
+          </label>
+          <input type="text" id="companyName" name="companyName" class="form-input" required value="{{company.companyName}}">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0;">
+          <label class="form-label" for="name">
+            <span>Owner / Primary Contact Name <span style="color: #f43f5e;">*</span></span>
+          </label>
+          <input type="text" id="name" name="name" class="form-input" required value="{{company.name}}">
+        </div>
+      </div>
+
+      <div class="form-grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
+        <div class="form-group" style="margin-bottom: 0;">
+          <label class="form-label" for="email">
+            <span>Email Address</span>
+            <span style="font-size: 0.7rem; color: var(--color-text-dim);">System ID</span>
+          </label>
+          <input type="email" id="email" class="form-input" readonly value="{{company.email}}">
+          <span class="form-hint">Primary login email cannot be altered directly.</span>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0;">
+          <label class="form-label" for="phoneNumber">
+            <span>Contact Phone Number <span style="color: #f43f5e;">*</span></span>
+          </label>
+          <input type="tel" id="phoneNumber" name="phoneNumber" class="form-input" required value="{{company.phoneNumber}}">
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 0;">
+        <label class="form-label" for="address">
+          <span>Commercial / Headquarters Address <span style="color: #f43f5e;">*</span></span>
+        </label>
+        <textarea id="address" name="address" class="form-input" rows="2" required>{{company.address}}</textarea>
       </div>
     </div>
 
-    <div style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: flex-end;">
-      <a href="/" class="btn btn-secondary">Cancel</a>
-      <button type="submit" class="btn btn-primary">Save Changes</button>
+    <!-- Section 2: Electricity Tariff -->
+    <div style="margin-bottom: 2rem;">
+      <div class="form-section-title">
+        <span class="section-icon-badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        </span>
+        Electricity Tariff Configuration
+      </div>
+
+      <div style="background: radial-gradient(circle at top right, rgba(16, 185, 129, 0.08), transparent 70%), rgba(15, 23, 42, 0.6); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 12px; padding: 1.5rem;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.85rem;">
+          <div>
+            <label class="form-label" for="unitRate" style="font-size: 0.95rem; font-weight: 700; color: #ffffff; margin-bottom: 0.2rem;">
+              Default Electricity Rate (৳ / Unit) <span style="color: #f43f5e;">*</span>
+            </label>
+            <span style="font-size: 0.78rem; color: #94a3b8;">
+              System-wide base tariff rate applied automatically when staff generate new monthly electric bills.
+            </span>
+          </div>
+          <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); font-size: 0.75rem; font-weight: 700;">
+            ACTIVE TARIFF
+          </span>
+        </div>
+
+        <div style="max-width: 280px;">
+          <input type="number" step="0.01" min="0.01" id="unitRate" name="unitRate" class="form-input" required value="{{#if company.unitRate}}{{company.unitRate}}{{else}}15.00{{/if}}" style="font-size: 1.25rem; font-weight: 800; color: #34d399;">
+        </div>
+      </div>
+    </div>
+
+    <div class="form-actions" style="display: flex; gap: 0.75rem; justify-content: flex-end; align-items: center;">
+      <a href="/" class="btn btn-secondary" style="padding: 0.65rem 1.25rem;">Cancel</a>
+      <button type="submit" class="btn btn-primary" style="padding: 0.65rem 1.5rem; display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 700; box-shadow: 0 4px 16px rgba(99, 102, 241, 0.35);">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        Save Settings
+      </button>
     </div>
   </form>
 </div>

@@ -17,6 +17,7 @@ import { DeleteEmployeeCommand } from '@application/commands/impl/delete-employe
 import { UpdateEmployeePermissionCommand } from '@application/commands/impl/update-employee-permission.command';
 import { GetEmployeesByCompanyQuery } from '@application/queries/impl/get-employees-by-company.query';
 import { GetEmployeeByIdQuery } from '@application/queries/impl/get-employee-by-id.query';
+import { GetGaragesByCompanyQuery } from '@application/queries/impl/get-garages-by-company.query';
 import { JwtAuthGuard } from '@infrastructure/auth/jwt-auth.guard';
 import { RolesGuard } from '@infrastructure/auth/roles.guard';
 import { Roles } from '@infrastructure/auth/roles.decorator';
@@ -82,9 +83,10 @@ export class EmployeeController {
   @Get('permissions')
   async listPermissions(@Req() req: Request, @Res() res: Response) {
     const user = (req as any).user;
-    const employees = await this.queryBus.execute(
-      new GetEmployeesByCompanyQuery(user.companyId),
-    );
+    const [employees, garages] = await Promise.all([
+      this.queryBus.execute(new GetEmployeesByCompanyQuery(user.companyId)),
+      this.queryBus.execute(new GetGaragesByCompanyQuery(user.companyId)),
+    ]);
 
     const stats = {
       total: employees.length,
@@ -100,6 +102,7 @@ export class EmployeeController {
       user,
       isSuperAdmin: true,
       employees,
+      garages,
       stats,
     });
   }
@@ -120,12 +123,52 @@ export class EmployeeController {
         body.isActive === '1' ||
         body.isActive === 'on';
 
+      const canCreate =
+        body.canCreate === true ||
+        body.canCreate === 'true' ||
+        body.canCreate === '1' ||
+        body.canCreate === 'on';
+
+      const canEdit =
+        body.canEdit === true ||
+        body.canEdit === 'true' ||
+        body.canEdit === '1' ||
+        body.canEdit === 'on';
+
+      const canDelete =
+        body.canDelete === true ||
+        body.canDelete === 'true' ||
+        body.canDelete === '1' ||
+        body.canDelete === 'on';
+
+      const canView =
+        body.canView === undefined
+          ? true
+          : body.canView === true ||
+            body.canView === 'true' ||
+            body.canView === '1' ||
+            body.canView === 'on';
+
+      let garageIds: string[] = [];
+      if (body.garageIds) {
+        if (Array.isArray(body.garageIds)) {
+          garageIds = body.garageIds.filter(Boolean);
+        } else if (typeof body.garageIds === 'string' && body.garageIds.trim()) {
+          garageIds = [body.garageIds.trim()];
+        }
+      }
+
       await this.commandBus.execute(
         new UpdateEmployeePermissionCommand(
           id,
           user.companyId,
-          body.role,
+          body.role || 'GENERAL',
           isActive,
+          canCreate,
+          canEdit,
+          canDelete,
+          canView,
+          garageIds,
           `${user.companyId}|SUPER_ADMIN`,
         ),
       );

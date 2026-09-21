@@ -15,7 +15,9 @@
       </svg>
       Print Receipt
     </button>
+    {{#if (or isSuperAdmin currentUser.canEdit)}}
     <a href="/bills/{{bill.id}}/edit" class="btn btn-secondary">Edit Bill</a>
+    {{/if}}
   </div>
 </div>
 
@@ -33,11 +35,11 @@
   </div>
 
   <!-- Customer & Account Info -->
-  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+  <div class="bill-receipt-info-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
     <div>
       <div style="font-size: 0.8rem; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.05em; margin-bottom: 0.25rem;">Billed To</div>
       <div style="font-size: 1.25rem; font-weight: 700; color: #f8fafc;">{{bill.customerName}}</div>
-      <div style="color: #94a3b8; font-size: 0.9rem; margin-top: 0.25rem;">Customer ID: #{{bill.customerId}}</div>
+      <div style="color: #94a3b8; font-size: 0.9rem; margin-top: 0.25rem;">Customer ID: {{#if bill.customerCode}}<strong style="color: #2dd4bf;">{{bill.customerCode}}</strong>{{else if bill.customerCId}}#{{bill.customerCId}}{{else}}#{{bill.customerId}}{{/if}}</div>
     </div>
     <div style="text-align: right;">
       <div style="font-size: 0.8rem; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.05em; margin-bottom: 0.25rem;">Tariff &amp; Rate</div>
@@ -119,9 +121,99 @@
 
 <style>
   @media print {
-    body { background: #fff !important; color: #000 !important; }
-    .navbar, .page-header, .header-actions, .mobile-toggle, .mobile-drawer { display: none !important; }
-    #printableInvoice { background: #fff !important; color: #000 !important; border: none !important; padding: 0 !important; }
-    #printableInvoice * { color: #000 !important; border-color: #ccc !important; }
+    /* ── Force white page ── */
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    html, body {
+      background: #fff !important;
+      color: #000 !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+
+    /* ── Hide ALL UI chrome (exact class names from partials) ── */
+    .sidebar,          /* aside.sidebar in sidebar.hbs */
+    .app-topbar,       /* header.app-topbar in topbar.hbs */
+    .bottom-nav-dock,  /* nav.bottom-nav-dock in bottom_nav.hbs */
+    .footer,           /* footer.footer in footer.hbs */
+    .page-header,
+    .header-actions,
+    .toast-container,
+    .btn { display: none !important; }
+
+    /* ── Collapse app-layout grid so sidebar doesn't shift content ── */
+    .app-layout {
+      display: block !important;
+    }
+    .app-main {
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+    .main-content {
+      padding: 0 !important;
+    }
+    .container-fluid,
+    .app-container {
+      padding: 0 !important;
+      max-width: 100% !important;
+    }
+
+    /* ── Invoice card: clean white box ── */
+    #printableInvoice {
+      background: #fff !important;
+      color: #000 !important;
+      border: none !important;
+      box-shadow: none !important;
+      border-radius: 0 !important;
+      padding: 1cm 1.5cm !important;
+      max-width: 100% !important;
+      margin: 0 !important;
+    }
+
+    /* ── All text → black ── */
+    #printableInvoice h2,
+    #printableInvoice h3,
+    #printableInvoice strong,
+    #printableInvoice span,
+    #printableInvoice p,
+    #printableInvoice div,
+    #printableInvoice td,
+    #printableInvoice th { color: #000 !important; }
+
+    /* ── Borders → light grey ── */
+    #printableInvoice * { border-color: #ccc !important; }
+
+    /* ── Table header: light grey bg ── */
+    #printableInvoice .data-table thead th {
+      background: #f3f4f6 !important;
+      color: #000 !important;
+      border: 1px solid #ccc !important;
+    }
+    #printableInvoice .data-table tbody td {
+      background: #fff !important;
+      border: 1px solid #ccc !important;
+    }
+
+    /* ── Badge/chip: plain ── */
+    #printableInvoice .badge {
+      background: #f3f4f6 !important;
+      color: #000 !important;
+      border: 1px solid #ccc !important;
+    }
+
+    /* ── Ledger box: light grey bg ── */
+    #printableInvoice div[style*="rgba(0,0,0,0.15)"] {
+      background: #f9fafb !important;
+      border: 1px solid #e5e7eb !important;
+    }
+
+    /* ── Signature line ── */
+    #printableInvoice div[style*="border-bottom: 1px solid #94a3b8"] {
+      border-bottom: 1px solid #000 !important;
+    }
+
+    /* ── One page, A4 ── */
+    #printableInvoice { page-break-inside: avoid; }
+    @page { margin: 0.5cm; size: A4 portrait; }
   }
 </style>
+

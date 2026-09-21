@@ -3,10 +3,21 @@
     <a href="/customers" style="color: var(--color-text-muted); text-decoration: none; font-size: 0.875rem; display: inline-flex; align-items: center; gap: 0.25rem; margin-bottom: 0.5rem;">
       &larr; {{t 'customers.subtitle'}}
     </a>
-    <h1 class="page-title">{{customer.name}}</h1>
-    <p class="page-subtitle">{{t 'customers.id'}} #{{#if customer.cId}}{{bnNum customer.cId}}{{else}}{{bnNum customer.id}}{{/if}} &bull; {{t 'common.registered'}}: {{tDate customer.createdDate}}</p>
+    <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+      <h1 class="page-title" style="margin-bottom: 0;">{{customer.name}}</h1>
+      {{#if customer.customerCode}}
+      <span class="badge" style="background: rgba(20, 184, 166, 0.15); color: #2dd4bf; border: 1px solid rgba(20,184,166,0.3); font-size: 0.9rem; font-weight: 700; padding: 0.25rem 0.65rem; border-radius: 6px; letter-spacing: 0.04em;">{{customer.customerCode}}</span>
+      {{/if}}
+    </div>
+    <p class="page-subtitle" style="margin-top: 0.35rem;">
+      {{#if customer.customerCode}}
+        Customer ID: <strong style="color: #2dd4bf;">{{customer.customerCode}}</strong> &bull;
+      {{/if}}
+      System #{{#if customer.cId}}{{bnNum customer.cId}}{{else}}{{bnNum customer.id}}{{/if}} &bull; {{t 'common.registered'}}: {{tDate customer.createdDate}}
+    </p>
   </div>
   <div class="header-actions">
+    {{#if (or isSuperAdmin currentUser.canCreate)}}
     <a href="/bills/new?customerId={{customer.id}}" class="btn btn-primary" style="background: #10b981; border-color: #10b981;">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
         <line x1="12" y1="5" x2="12" y2="19"/>
@@ -14,17 +25,25 @@
       </svg>
       {{t 'bills.newBill'}}
     </a>
+    {{/if}}
+    {{#if (or isSuperAdmin currentUser.canEdit)}}
     <a href="/customers/{{customer.id}}/edit" class="btn btn-secondary">
       {{t 'customers.updateProfile'}}
     </a>
+    {{/if}}
   </div>
 </div>
 
 <!-- Profile Info Grid -->
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
   <div class="card" style="padding: 1.25rem;">
-    <div style="font-size: 0.8rem; text-transform: uppercase; color: var(--color-text-muted); letter-spacing: 0.05em; margin-bottom: 0.5rem;">{{t 'customers.mobile'}} &amp; {{t 'customers.nid'}}</div>
-    <div style="font-size: 1.1rem; font-weight: 700; color: var(--color-text-primary); margin-bottom: 0.25rem;">{{customer.mobileNumber}}</div>
+    <div style="font-size: 0.8rem; text-transform: uppercase; color: var(--color-text-muted); letter-spacing: 0.05em; margin-bottom: 0.5rem;">Customer ID &amp; {{t 'customers.mobile'}}</div>
+    <div style="font-size: 1.1rem; font-weight: 700; color: var(--color-text-primary); margin-bottom: 0.25rem;">
+      {{#if customer.customerCode}}
+        <span style="color: #2dd4bf; margin-right: 0.35rem;">{{customer.customerCode}}</span> &bull; 
+      {{/if}}
+      {{customer.mobileNumber}}
+    </div>
     <div style="color: var(--color-text-muted); font-size: 0.85rem;">NID: <code style="color: var(--color-text-secondary);">{{customer.nidNumber}}</code></div>
   </div>
 
@@ -68,6 +87,97 @@
   <div style="font-size: 1rem; color: var(--color-text-primary);">{{customer.address}}</div>
 </div>
 
+<!-- Guarantors / জামিনদারবৃন্দ Section -->
+<div class="card" style="margin-bottom: 2rem;">
+  <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+    <div>
+      <h2 class="card-title" style="margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+        <span>🛡️</span> {{t 'guarantors.title'}} ({{bnNum customer.guarantors.length}})
+      </h2>
+      <p style="color: var(--color-text-muted); font-size: 0.85rem; margin: 0.25rem 0 0 0;">{{t 'guarantors.subtitle'}}</p>
+    </div>
+    {{#if (or isSuperAdmin currentUser.canCreate)}}
+    <button type="button" class="btn btn-primary btn-sm" onclick="document.getElementById('addGuarantorModal').style.display='flex'">
+      + {{t 'guarantors.add'}}
+    </button>
+    {{/if}}
+  </div>
+
+  {{#if customer.guarantors.length}}
+    <div style="padding: 1.25rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.25rem;">
+      {{#each customer.guarantors}}
+        <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 1.25rem; display: flex; flex-direction: column; justify-content: space-between;">
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
+              <div>
+                <div style="font-size: 1.1rem; font-weight: 700; color: var(--color-text-primary);">{{this.name}}</div>
+                {{#if this.relationship}}
+                  <span class="badge" style="background: rgba(99, 102, 241, 0.15); color: #818cf8; font-size: 0.75rem; margin-top: 0.25rem;">
+                    {{this.relationship}}
+                  </span>
+                {{/if}}
+              </div>
+              <div class="table-actions-group">
+                {{#if (or ../isSuperAdmin ../currentUser.canEdit)}}
+                <a href="/customers/{{../customer.id}}/guarantors/{{this.id}}/edit" class="btn btn-secondary btn-icon-action" title="{{t 'common.edit'}}" aria-label="{{t 'common.edit'}}">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                </a>
+                {{/if}}
+                {{#if (or ../isSuperAdmin ../currentUser.canDelete)}}
+                <form action="/customers/{{../customer.id}}/guarantors/{{this.id}}/delete" method="POST" style="display: inline;" onsubmit="return confirm('Remove this guarantor?');">
+                  <button type="submit" class="btn btn-danger btn-icon-action" title="{{t 'common.delete'}}" aria-label="{{t 'common.delete'}}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                  </button>
+                </form>
+                {{/if}}
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem; font-size: 0.85rem;">
+              <div>
+                <div style="color: var(--color-text-muted); font-size: 0.75rem; text-transform: uppercase;">{{t 'guarantors.mobile'}}</div>
+                <div style="color: var(--color-text-secondary); font-weight: 600;">{{this.mobileNumber}}</div>
+              </div>
+              <div>
+                <div style="color: var(--color-text-muted); font-size: 0.75rem; text-transform: uppercase;">{{t 'guarantors.nid'}}</div>
+                <code style="color: #93c5fd; font-size: 0.8rem;">{{this.nidNumber}}</code>
+              </div>
+              {{#if this.fatherName}}
+              <div>
+                <div style="color: var(--color-text-muted); font-size: 0.75rem; text-transform: uppercase;">{{t 'guarantors.fatherName'}}</div>
+                <div style="color: var(--color-text-secondary);">{{this.fatherName}}</div>
+              </div>
+              {{/if}}
+              {{#if this.motherName}}
+              <div>
+                <div style="color: var(--color-text-muted); font-size: 0.75rem; text-transform: uppercase;">{{t 'guarantors.motherName'}}</div>
+                <div style="color: var(--color-text-secondary);">{{this.motherName}}</div>
+              </div>
+              {{/if}}
+            </div>
+
+            <div style="font-size: 0.85rem; border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 0.5rem;">
+              <span style="color: var(--color-text-muted); font-size: 0.75rem; text-transform: uppercase;">{{t 'guarantors.address'}}:</span>
+              <span style="color: var(--color-text-secondary);"> {{this.address}}</span>
+            </div>
+          </div>
+        </div>
+      {{/each}}
+    </div>
+  {{else}}
+    <div style="text-align: center; padding: 2.5rem 1rem;">
+      <div style="font-size: 2rem; margin-bottom: 0.5rem;">🛡️</div>
+      <h3 style="color: var(--color-text-primary); font-size: 1rem; font-weight: 600; margin-bottom: 0.25rem;">{{t 'guarantors.noGuarantors'}}</h3>
+      <p style="color: var(--color-text-muted); font-size: 0.85rem; margin-bottom: 1rem;">{{t 'guarantors.noGuarantorsSub'}}</p>
+      {{#if (or isSuperAdmin currentUser.canCreate)}}
+      <button type="button" class="btn btn-primary btn-sm" onclick="document.getElementById('addGuarantorModal').style.display='flex'">
+        + {{t 'guarantors.add'}}
+      </button>
+      {{/if}}
+    </div>
+  {{/if}}
+</div>
+
 <!-- Bills Ledger Table -->
 <div class="card">
   <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
@@ -75,6 +185,10 @@
   </div>
 
   {{#if bills.length}}
+    <div class="table-scroll-hint">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="8 18 2 12 8 6"/><polyline points="16 6 22 12 16 18"/></svg>
+      <span>{{#if isBn}}সম্পূর্ণ বিবরণ দেখতে ডানে স্ক্রোল করুন{{else}}Scroll horizontally to view all{{/if}}</span>
+    </div>
     <div class="table-responsive">
       <table class="data-table">
         <thead>
@@ -112,9 +226,15 @@
                 </span>
               </td>
               <td style="text-align: right;">
-                <div style="display: inline-flex; gap: 0.25rem;">
-                  <a href="/bills/{{this.id}}" class="btn btn-secondary btn-sm" title="View Receipt">{{t 'bills.receipt'}}</a>
-                  <a href="/bills/{{this.id}}/edit" class="btn btn-secondary btn-sm" title="Edit Bill">{{t 'common.edit'}}</a>
+                <div class="table-actions-group">
+                  <a href="/bills/{{this.id}}" class="btn btn-secondary btn-icon-action" title="{{t 'bills.receipt'}}" aria-label="{{t 'bills.receipt'}}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                  </a>
+                  {{#if (or ../isSuperAdmin ../currentUser.canEdit)}}
+                  <a href="/bills/{{this.id}}/edit" class="btn btn-secondary btn-icon-action" title="{{t 'common.edit'}}" aria-label="{{t 'common.edit'}}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                  </a>
+                  {{/if}}
                 </div>
               </td>
             </tr>
@@ -127,7 +247,55 @@
       <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">⚡</div>
       <h3 style="color: var(--color-text-primary); font-size: 1.15rem; font-weight: 600; margin-bottom: 0.5rem;">{{t 'bills.noBills'}}</h3>
       <p style="color: var(--color-text-muted); margin-bottom: 1.5rem;">{{t 'bills.noBillsSub'}}</p>
+      {{#if (or isSuperAdmin currentUser.canCreate)}}
       <a href="/bills/new?customerId={{customer.id}}" class="btn btn-primary" style="background: #10b981; border-color: #10b981;">{{t 'bills.newBill'}}</a>
+      {{/if}}
     </div>
   {{/if}}
+</div>
+
+<!-- Add Guarantor Modal -->
+<div id="addGuarantorModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center; padding: 1rem;">
+  <div class="card" style="max-width: 650px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 1.75rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; border-bottom: 1px solid var(--color-border); padding-bottom: 0.75rem;">
+      <h3 style="margin: 0; font-size: 1.25rem; font-weight: 700; color: #fff;">+ {{t 'guarantors.add'}}</h3>
+      <button type="button" onclick="document.getElementById('addGuarantorModal').style.display='none'" style="background: transparent; border: none; color: var(--color-text-muted); font-size: 1.5rem; cursor: pointer; line-height: 1;">&times;</button>
+    </div>
+    <form action="/customers/{{customer.id}}/guarantors" method="POST">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+        <div class="form-group">
+          <label class="form-label" for="gName">{{t 'guarantors.name'}} *</label>
+          <input type="text" id="gName" name="name" class="form-input" required placeholder="Full Name">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="gRelationship">{{t 'guarantors.relationship'}}</label>
+          <input type="text" id="gRelationship" name="relationship" class="form-input" placeholder="e.g. Father, Brother, Relative, Friend">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="gMobile">{{t 'guarantors.mobile'}} *</label>
+          <input type="tel" id="gMobile" name="mobileNumber" class="form-input" required placeholder="017XXXXXXXX">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="gNid">{{t 'guarantors.nid'}} *</label>
+          <input type="text" id="gNid" name="nidNumber" class="form-input" required placeholder="National ID Number">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="gFather">{{t 'guarantors.fatherName'}}</label>
+          <input type="text" id="gFather" name="fatherName" class="form-input" placeholder="Father's Name">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="gMother">{{t 'guarantors.motherName'}}</label>
+          <input type="text" id="gMother" name="motherName" class="form-input" placeholder="Mother's Name">
+        </div>
+        <div class="form-group" style="grid-column: 1 / -1;">
+          <label class="form-label" for="gAddress">{{t 'guarantors.address'}} *</label>
+          <textarea id="gAddress" name="address" class="form-input" rows="2" required placeholder="Guarantor residential or business address..."></textarea>
+        </div>
+      </div>
+      <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem;">
+        <button type="button" class="btn btn-secondary" onclick="document.getElementById('addGuarantorModal').style.display='none'">{{t 'common.cancel'}}</button>
+        <button type="submit" class="btn btn-primary">{{t 'guarantors.save'}}</button>
+      </div>
+    </form>
+  </div>
 </div>

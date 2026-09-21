@@ -6,6 +6,8 @@ import {
   ICustomerRepository,
   ELECTRIC_BILL_REPOSITORY_TOKEN,
   IElectricBillRepository,
+  GUARANTOR_REPOSITORY_TOKEN,
+  IGuarantorRepository,
 } from '@domain/index';
 import { CustomerResponseDto } from '../../dtos/customer.dto';
 
@@ -18,6 +20,8 @@ export class GetCustomerByIdHandler
     private readonly customerRepo: ICustomerRepository,
     @Inject(ELECTRIC_BILL_REPOSITORY_TOKEN)
     private readonly billRepo: IElectricBillRepository,
+    @Inject(GUARANTOR_REPOSITORY_TOKEN)
+    private readonly guarantorRepo: IGuarantorRepository,
   ) {}
 
   async execute(query: GetCustomerByIdQuery): Promise<CustomerResponseDto> {
@@ -26,11 +30,15 @@ export class GetCustomerByIdHandler
       throw new NotFoundException('Customer not found.');
     }
 
-    const bills = await this.billRepo.findByCustomerId(customer.id);
+    const [bills, guarantors] = await Promise.all([
+      this.billRepo.findByCustomerId(customer.id),
+      this.guarantorRepo.findByCustomerId(customer.id),
+    ]);
 
     return {
       id: customer.id,
       cId: customer.cId,
+      customerCode: customer.customerCode,
       companyId: customer.companyId,
       name: customer.name,
       fatherName: customer.fatherName,
@@ -40,6 +48,8 @@ export class GetCustomerByIdHandler
       nidNumber: customer.nidNumber,
       previousUnit: customer.previousUnit,
       advanceMoney: customer.advanceMoney,
+      garageId: customer.garageId,
+      garageName: customer.garageName,
       createdDate: customer.createdDate,
       bills: bills.map((b) => ({
         id: b.id,
@@ -57,6 +67,19 @@ export class GetCustomerByIdHandler
         totalBill: b.totalBill,
         clearMoney: b.clearMoney,
         presentDues: b.presentDues,
+      })),
+      guarantors: guarantors.map((g) => ({
+        id: g.id,
+        customerId: g.customerId,
+        companyId: g.companyId,
+        name: g.name,
+        fatherName: g.fatherName,
+        motherName: g.motherName,
+        address: g.address,
+        mobileNumber: g.mobileNumber,
+        nidNumber: g.nidNumber,
+        relationship: g.relationship,
+        createdDate: g.createdDate,
       })),
     };
   }

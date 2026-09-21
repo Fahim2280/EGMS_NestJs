@@ -12,10 +12,10 @@
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
           </svg>
         </span>
-        User Permissions &amp; Access Control
+        User Permissions &amp; Garage Access Control
       </h1>
       <p style="color: var(--color-text-muted); margin: 0.35rem 0 0 0; font-size: 0.9rem;">
-        Manage employee authorization levels, grant admin roles, and toggle system access for your company personnel.
+        Configure fine-grained action permissions (Create, Edit, Delete, View) and assign authorized garage facilities for each employee.
       </p>
     </div>
     <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;" class="header-actions">
@@ -77,27 +77,15 @@
         <div style="color: #34d399; font-size: 1.5rem; font-weight: 800;" data-counter="{{stats.active}}">{{stats.active}}</div>
       </div>
     </div>
-
-    {{#if stats.suspended}}
-    <div class="card" style="padding: 1.25rem; display: flex; align-items: center; gap: 1rem; border-color: rgba(239, 68, 68, 0.3);">
-      <div style="width: 44px; height: 44px; border-radius: 10px; background: rgba(239, 68, 68, 0.15); color: #f87171; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
-        🔴
-      </div>
-      <div>
-        <div style="color: #f87171; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Suspended</div>
-        <div style="color: #f87171; font-size: 1.5rem; font-weight: 800;" data-counter="{{stats.suspended}}">{{stats.suspended}}</div>
-      </div>
-    </div>
-    {{/if}}
   </div>
 
-  <!-- Employee Permissions Table -->
+  <!-- Employee Permissions List with Expandable Panels -->
   <div class="card" style="padding: 0; overflow: hidden; box-shadow: var(--shadow-md); margin-bottom: 2.5rem;">
     <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--color-border); background: rgba(15, 23, 42, 0.6); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
       <div>
-        <h2 style="font-size: 1.15rem; font-weight: 700; color: #fff; margin: 0;">Employee Access Management</h2>
+        <h2 style="font-size: 1.15rem; font-weight: 700; color: #fff; margin: 0;">Employee Access &amp; Garage Permissions</h2>
         <p style="color: var(--color-text-muted); font-size: 0.85rem; margin: 0.2rem 0 0 0;">
-          Select a role and account status for each employee, then click "Update" to commit changes.
+          Select action capabilities and assign authorized garages. Click "Configure" to modify and commit changes.
         </p>
       </div>
       <span style="color: var(--color-text-muted); font-size: 0.85rem; background: rgba(255, 255, 255, 0.05); padding: 0.35rem 0.75rem; border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.1);">
@@ -106,94 +94,180 @@
     </div>
 
     {{#if employees.length}}
-      <div class="table-container" style="overflow-x: auto;">
-        <table class="data-table" style="width: 100%; border-collapse: collapse;">
-          <thead>
-            <tr style="background: rgba(15, 23, 42, 0.85); border-bottom: 1px solid var(--color-border); text-align: left;">
-              <th style="padding: 1rem 1.25rem;">Employee</th>
-              <th style="padding: 1rem 1.25rem;">Current Role</th>
-              <th style="padding: 1rem 1.25rem;">Account Access</th>
-              <th style="padding: 1rem 1.25rem;">Assign Role</th>
-              <th style="padding: 1rem 1.25rem;">System Status</th>
-              <th style="padding: 1rem 1.25rem; text-align: right;">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {{#each employees}}
-              <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05); transition: background 0.15s;">
-                <!-- Employee Info -->
-                <td style="padding: 1rem 1.25rem;">
-                  <div style="display: flex; align-items: center; gap: 0.85rem;">
-                    <div class="user-avatar" style="width: 38px; height: 38px; font-size: 0.95rem; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700;">
-                      {{this.name.[0]}}
-                    </div>
-                    <div>
-                      <div style="color: #fff; font-weight: 600; font-size: 0.95rem;">
-                        <a href="/employees/{{this.id}}" style="color: #fff; hover: underline;" title="View Details">{{this.name}}</a>
-                      </div>
-                      <div style="color: var(--color-text-muted); font-size: 0.8rem;">{{this.email}}</div>
-                      <div style="color: #64748b; font-size: 0.75rem; font-family: monospace;">NID: {{this.nidNumber}}</div>
-                    </div>
+      <div style="display: flex; flex-direction: column;">
+        {{#each employees}}
+          <div style="border-bottom: 1px solid rgba(255, 255, 255, 0.07); padding: 1.25rem 1.5rem; background: rgba(15, 23, 42, 0.4); transition: background 0.2s;" id="emp-card-{{this.id}}">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+              <!-- Employee Info -->
+              <div style="display: flex; align-items: center; gap: 1rem; min-width: 260px;">
+                <div class="user-avatar" style="width: 44px; height: 44px; font-size: 1.1rem; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700;">
+                  {{this.name.[0]}}
+                </div>
+                <div>
+                  <div style="color: #fff; font-weight: 700; font-size: 1rem;">
+                    <a href="/employees/{{this.id}}" style="color: #fff; text-decoration: none;" title="View Profile">{{this.name}}</a>
+                    {{#if (eq this.role 'SUPER_ADMIN')}}
+                      <span class="badge badge-admin" style="margin-left: 0.5rem; font-size: 0.7rem;">Super Admin</span>
+                    {{else}}
+                      <span class="badge badge-officer" style="margin-left: 0.5rem; font-size: 0.7rem;">General Staff</span>
+                    {{/if}}
+                    {{#if this.isActive}}
+                      <span class="badge badge-active" style="margin-left: 0.25rem; font-size: 0.7rem;"><span class="badge-dot"></span>Active</span>
+                    {{else}}
+                      <span class="badge" style="margin-left: 0.25rem; font-size: 0.7rem; background: rgba(239, 68, 68, 0.15); color: #ef4444;"><span class="badge-dot" style="background:#ef4444;"></span>Suspended</span>
+                    {{/if}}
                   </div>
-                </td>
+                  <div style="color: var(--color-text-muted); font-size: 0.85rem; margin-top: 0.15rem;">{{this.email}} &bull; NID: <span style="font-family: monospace;">{{this.nidNumber}}</span></div>
+                </div>
+              </div>
 
-                <!-- Current Role -->
-                <td style="padding: 1rem 1.25rem;">
-                  {{{roleBadge this.role}}}
-                </td>
+              <!-- Permission Badges Overview -->
+              <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+                <!-- Action Badges -->
+                <div style="display: flex; gap: 0.35rem; align-items: center;">
+                  <span style="font-size: 0.75rem; color: var(--color-text-muted); margin-right: 0.25rem;">Actions:</span>
+                  <span class="badge" style="font-size: 0.75rem; {{#if (or (eq this.role 'SUPER_ADMIN') this.canCreate)}}background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3);{{else}}background: rgba(255, 255, 255, 0.05); color: #64748b; border: 1px solid rgba(255, 255, 255, 0.1);{{/if}}">
+                    Create
+                  </span>
+                  <span class="badge" style="font-size: 0.75rem; {{#if (or (eq this.role 'SUPER_ADMIN') this.canEdit)}}background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3);{{else}}background: rgba(255, 255, 255, 0.05); color: #64748b; border: 1px solid rgba(255, 255, 255, 0.1);{{/if}}">
+                    Edit
+                  </span>
+                  <span class="badge" style="font-size: 0.75rem; {{#if (or (eq this.role 'SUPER_ADMIN') this.canDelete)}}background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3);{{else}}background: rgba(255, 255, 255, 0.05); color: #64748b; border: 1px solid rgba(255, 255, 255, 0.1);{{/if}}">
+                    Delete
+                  </span>
+                  <span class="badge" style="font-size: 0.75rem; {{#if (or (eq this.role 'SUPER_ADMIN') this.canView)}}background: rgba(139, 92, 246, 0.15); color: #c084fc; border: 1px solid rgba(139, 92, 246, 0.3);{{else}}background: rgba(255, 255, 255, 0.05); color: #64748b; border: 1px solid rgba(255, 255, 255, 0.1);{{/if}}">
+                    View
+                  </span>
+                </div>
 
-                <!-- Current Status -->
-                <td style="padding: 1rem 1.25rem;">
-                  {{#if this.isActive}}
-                    <span class="badge badge-active">
-                      <span class="badge-dot"></span>Active
+                <!-- Garage Permission Badges -->
+                <div style="display: flex; gap: 0.35rem; align-items: center; margin-left: 0.5rem;">
+                  <span style="font-size: 0.75rem; color: var(--color-text-muted); margin-right: 0.25rem;">Garages:</span>
+                  {{#if (eq this.role 'SUPER_ADMIN')}}
+                    <span class="badge" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); font-size: 0.75rem;">
+                      👑 All Company Garages
                     </span>
                   {{else}}
-                    <span class="badge" style="background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.25);">
-                      <span class="badge-dot" style="background: #ef4444;"></span>Suspended
-                    </span>
+                    {{#if this.permittedGarageIds.length}}
+                      <span class="badge" style="background: rgba(6, 182, 212, 0.15); color: #22d3ee; border: 1px solid rgba(6, 182, 212, 0.3); font-size: 0.75rem;">
+                        🏢 {{this.permittedGarageIds.length}} Assigned
+                      </span>
+                    {{else}}
+                      <span class="badge" style="background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); font-size: 0.75rem;">
+                        ⚠️ None (No Access)
+                      </span>
+                    {{/if}}
                   {{/if}}
-                </td>
+                </div>
 
-                <!-- Edit Form Inputs (Row Level) -->
-                <form method="POST" action="/employees/{{this.id}}/permissions">
-                  <td style="padding: 1rem 1.25rem;">
-                    <select name="role" class="form-control" style="padding: 0.5rem 0.75rem; font-size: 0.85rem; min-width: 170px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(99, 102, 241, 0.3); color: #fff; border-radius: 6px;">
-                      <option value="GENERAL" {{#if (eq this.role 'GENERAL')}}selected{{/if}}>
-                        🧑‍💼 GENERAL (Staff)
-                      </option>
-                      <option value="SUPER_ADMIN" {{#if (eq this.role 'SUPER_ADMIN')}}selected{{/if}}>
-                        👑 SUPER_ADMIN (Admin)
-                      </option>
-                    </select>
-                  </td>
+                <!-- Toggle Edit Button -->
+                <button type="button" class="btn btn-secondary btn-sm" onclick="togglePermForm('{{this.id}}')" style="display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.8rem; padding: 0.4rem 0.85rem;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                  </svg>
+                  Configure
+                </button>
+              </div>
+            </div>
 
-                  <td style="padding: 1rem 1.25rem;">
-                    <select name="isActive" class="form-control" style="padding: 0.5rem 0.75rem; font-size: 0.85rem; min-width: 160px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(99, 102, 241, 0.3); color: #fff; border-radius: 6px;">
-                      <option value="true" {{#if this.isActive}}selected{{/if}}>
-                        🟢 Active (Permitted)
-                      </option>
-                      <option value="false" {{#unless this.isActive}}selected{{/unless}}>
-                        🔴 Suspended (Blocked)
-                      </option>
-                    </select>
-                  </td>
+            <!-- Expandable Permission Editor Form -->
+            <div id="perm-editor-{{this.id}}" style="display: none; margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px dashed rgba(255, 255, 255, 0.15); background: rgba(15, 23, 42, 0.7); border-radius: 8px; padding: 1.25rem;">
+              <form method="POST" action="/employees/{{this.id}}/permissions">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 1.25rem;">
+                  
+                  <!-- Column 1: Role & Account Status -->
+                  <div>
+                    <h4 style="font-size: 0.9rem; color: #fff; margin: 0 0 0.75rem 0; display: flex; align-items: center; gap: 0.4rem;">
+                      <span>🛡️</span> Role &amp; Account Status
+                    </h4>
+                    <div style="margin-bottom: 0.75rem;">
+                      <label style="display: block; font-size: 0.8rem; color: var(--color-text-muted); margin-bottom: 0.25rem;">System Role</label>
+                      <select name="role" class="form-control" style="width: 100%; padding: 0.5rem 0.75rem; font-size: 0.85rem; background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(99, 102, 241, 0.3); color: #fff; border-radius: 6px;" onchange="handleRoleChange('{{this.id}}', this.value)">
+                        <option value="GENERAL" {{#if (eq this.role 'GENERAL')}}selected{{/if}}>🧑‍💼 GENERAL (Staff Member)</option>
+                        <option value="SUPER_ADMIN" {{#if (eq this.role 'SUPER_ADMIN')}}selected{{/if}}>👑 SUPER_ADMIN (Full Company Access)</option>
+                      </select>
+                    </div>
 
-                  <td style="padding: 1rem 1.25rem; text-align: right;">
-                    <button type="submit" class="btn btn-primary btn-sm" style="display: inline-flex; align-items: center; gap: 0.4rem; white-space: nowrap;">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
-                        <polyline points="17 21 17 13 7 13 7 21"/>
-                        <polyline points="7 3 7 8 15 8"/>
-                      </svg>
-                      Save
-                    </button>
-                  </td>
-                </form>
-              </tr>
-            {{/each}}
-          </tbody>
-        </table>
+                    <div>
+                      <label style="display: block; font-size: 0.8rem; color: var(--color-text-muted); margin-bottom: 0.25rem;">Account Access State</label>
+                      <select name="isActive" class="form-control" style="width: 100%; padding: 0.5rem 0.75rem; font-size: 0.85rem; background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(99, 102, 241, 0.3); color: #fff; border-radius: 6px;">
+                        <option value="true" {{#if this.isActive}}selected{{/if}}>🟢 Active (Permitted to Log In)</option>
+                        <option value="false" {{#unless this.isActive}}selected{{/unless}}>🔴 Suspended (Blocked Immediately)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <!-- Column 2: Action Permissions -->
+                  <div>
+                    <h4 style="font-size: 0.9rem; color: #fff; margin: 0 0 0.75rem 0; display: flex; align-items: center; gap: 0.4rem;">
+                      <span>⚡</span> Action Permissions
+                    </h4>
+                    <div style="display: flex; flex-direction: column; gap: 0.6rem;">
+                      <label style="display: flex; align-items: center; gap: 0.6rem; cursor: pointer; color: #e2e8f0; font-size: 0.85rem;">
+                        <input type="checkbox" name="canCreate" value="true" {{#if (or (eq this.role 'SUPER_ADMIN') this.canCreate)}}checked{{/if}} style="width: 17px; height: 17px; accent-color: #10b981;">
+                        <span><strong>Create</strong> &bull; Add new customers and electric bills</span>
+                      </label>
+                      <label style="display: flex; align-items: center; gap: 0.6rem; cursor: pointer; color: #e2e8f0; font-size: 0.85rem;">
+                        <input type="checkbox" name="canEdit" value="true" {{#if (or (eq this.role 'SUPER_ADMIN') this.canEdit)}}checked{{/if}} style="width: 17px; height: 17px; accent-color: #3b82f6;">
+                        <span><strong>Edit</strong> &bull; Update existing customer and bill records</span>
+                      </label>
+                      <label style="display: flex; align-items: center; gap: 0.6rem; cursor: pointer; color: #e2e8f0; font-size: 0.85rem;">
+                        <input type="checkbox" name="canDelete" value="true" {{#if (or (eq this.role 'SUPER_ADMIN') this.canDelete)}}checked{{/if}} style="width: 17px; height: 17px; accent-color: #ef4444;">
+                        <span><strong>Delete</strong> &bull; Remove customer records and bills</span>
+                      </label>
+                      <label style="display: flex; align-items: center; gap: 0.6rem; cursor: pointer; color: #e2e8f0; font-size: 0.85rem;">
+                        <input type="checkbox" name="canView" value="true" {{#if (or (eq this.role 'SUPER_ADMIN') this.canView)}}checked{{/if}} style="width: 17px; height: 17px; accent-color: #8b5cf6;">
+                        <span><strong>View</strong> &bull; Read-only viewing of assigned ledger &amp; customers</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  <!-- Column 3: Authorized Garages -->
+                  <div style="grid-column: 1 / -1;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
+                      <h4 style="font-size: 0.9rem; color: #fff; margin: 0; display: flex; align-items: center; gap: 0.4rem;">
+                        <span>🏢</span> Authorized Garages (Resource Access)
+                      </h4>
+                      <div style="display: flex; gap: 0.4rem;">
+                        <button type="button" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; padding: 0.2rem 0.6rem;" onclick="selectAllGarages('{{this.id}}', true)">Select All</button>
+                        <button type="button" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; padding: 0.2rem 0.6rem;" onclick="selectAllGarages('{{this.id}}', false)">Clear All</button>
+                      </div>
+                    </div>
+
+                    <p style="color: var(--color-text-muted); font-size: 0.8rem; margin: 0 0 0.75rem 0;">
+                      The employee will <strong>only</strong> see information, dashboard stats, customers, and bills belonging to the selected garages. Unselected garages are strictly hidden.
+                    </p>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 0.75rem;" id="garage-list-{{this.id}}">
+                      {{#each ../garages}}
+                        <label style="display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.75rem; border-radius: 6px; background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255, 255, 255, 0.1); cursor: pointer; transition: border-color 0.2s;">
+                          <input type="checkbox" name="garageIds" value="{{this.id}}" {{#if (includes ../permittedGarageIds this.id)}}checked{{/if}} style="margin-top: 3px; width: 18px; height: 18px; accent-color: #6366f1;">
+                          <div>
+                            <strong style="color: #f8fafc; font-size: 0.85rem; display: block;">{{this.garageName}}</strong>
+                            <span style="color: var(--color-text-muted); font-size: 0.75rem;">{{this.address}}</span>
+                          </div>
+                        </label>
+                      {{/each}}
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Form Action Buttons -->
+                <div style="display: flex; justify-content: flex-end; gap: 0.75rem; border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 1rem;">
+                  <button type="button" class="btn btn-secondary btn-sm" onclick="togglePermForm('{{this.id}}')">Cancel</button>
+                  <button type="submit" class="btn btn-primary btn-sm" style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.4rem 1.25rem;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                      <polyline points="17 21 17 13 7 13 7 21"/>
+                      <polyline points="7 3 7 8 15 8"/>
+                    </svg>
+                    Save Permissions
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        {{/each}}
       </div>
     {{else}}
       <div style="text-align: center; padding: 4rem 2rem;">
@@ -212,14 +286,14 @@
     {{/if}}
   </div>
 
-  <!-- Role Permissions Reference Matrix -->
+  <!-- Role & Permissions Reference Matrix -->
   <div class="card" style="padding: 1.5rem; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(99, 102, 241, 0.2);">
     <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.25rem;">
       <span style="font-size: 1.25rem;">📋</span>
       <div>
-        <h3 style="font-size: 1.1rem; font-weight: 700; color: #fff; margin: 0;">Role &amp; Permissions Reference Matrix</h3>
+        <h3 style="font-size: 1.1rem; font-weight: 700; color: #fff; margin: 0;">Access Control &amp; Permissions Matrix</h3>
         <p style="color: var(--color-text-muted); font-size: 0.85rem; margin: 0.15rem 0 0 0;">
-          Detailed breakdown of capabilities assigned to each role level
+          Detailed breakdown of action and garage permissions
         </p>
       </div>
     </div>
@@ -228,76 +302,65 @@
       <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
         <thead>
           <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); text-align: left;">
-            <th style="padding: 0.75rem 1rem; color: #94a3b8; font-weight: 600;">System Module / Feature</th>
-            <th style="padding: 0.75rem 1rem; color: #fbbf24; font-weight: 700;">👑 SUPER_ADMIN (Admin)</th>
-            <th style="padding: 0.75rem 1rem; color: #22d3ee; font-weight: 700;">🧑‍💼 GENERAL (Staff)</th>
+            <th style="padding: 0.75rem 1rem; color: #94a3b8; font-weight: 600;">System Module</th>
+            <th style="padding: 0.75rem 1rem; color: #fbbf24; font-weight: 700;">👑 SUPER_ADMIN</th>
+            <th style="padding: 0.75rem 1rem; color: #22d3ee; font-weight: 700;">🧑‍💼 GENERAL (Employee)</th>
           </tr>
         </thead>
         <tbody>
           <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
             <td style="padding: 0.75rem 1rem; color: #e2e8f0; font-weight: 500;">
-              ⚡ <strong>Electric Bills</strong> (Ledger, Invoicing, Due Tracking)
+              🏠 <strong>Garage Scope</strong>
             </td>
             <td style="padding: 0.75rem 1rem; color: #34d399;">
-              ✅ Full (Create, Edit, Delete, Bulk Monthly Generate, Export)
+              ✅ All Company Garages (Full visibility)
+            </td>
+            <td style="padding: 0.75rem 1rem; color: #38bdf8;">
+              🔍 <strong>Only Assigned Garages</strong> (Unassigned garages like Garage - 1 are completely hidden)
+            </td>
+          </tr>
+          <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+            <td style="padding: 0.75rem 1rem; color: #e2e8f0; font-weight: 500;">
+              📊 <strong>Dashboard &amp; KPI Metrics</strong>
+            </td>
+            <td style="padding: 0.75rem 1rem; color: #34d399;">
+              ✅ Company-wide aggregates
+            </td>
+            <td style="padding: 0.75rem 1rem; color: #38bdf8;">
+              🔍 Aggregates scoped strictly to authorized garages
+            </td>
+          </tr>
+          <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+            <td style="padding: 0.75rem 1rem; color: #e2e8f0; font-weight: 500;">
+              ➕ <strong>Create (Customers &amp; Bills)</strong>
+            </td>
+            <td style="padding: 0.75rem 1rem; color: #34d399;">
+              ✅ Allowed
             </td>
             <td style="padding: 0.75rem 1rem; color: #94a3b8;">
-              🔍 View &amp; Search Ledger (Read-only operational)
+              Controlled by <code>canCreate</code> permission (within authorized garages)
             </td>
           </tr>
           <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
             <td style="padding: 0.75rem 1rem; color: #e2e8f0; font-weight: 500;">
-              👥 <strong>Customer Directory</strong> (Profiles, Unit Connections)
+              ✏️ <strong>Edit (Customers &amp; Bills)</strong>
             </td>
             <td style="padding: 0.75rem 1rem; color: #34d399;">
-              ✅ Full (Register New, Edit Profile, Remove, Assign Garages)
+              ✅ Allowed
             </td>
             <td style="padding: 0.75rem 1rem; color: #94a3b8;">
-              🔍 View Directory &amp; Lookup Customer Info
+              Controlled by <code>canEdit</code> permission (within authorized garages)
             </td>
           </tr>
           <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
             <td style="padding: 0.75rem 1rem; color: #e2e8f0; font-weight: 500;">
-              🏠 <strong>Garages &amp; Facilities</strong>
+              🗑️ <strong>Delete (Customers &amp; Bills)</strong>
             </td>
             <td style="padding: 0.75rem 1rem; color: #34d399;">
-              ✅ Full (Create Garages, View List, Modify)
+              ✅ Allowed
             </td>
-            <td style="padding: 0.75rem 1rem; color: #f87171;">
-              ❌ Restricted (Hidden from menu &amp; blocked at API)
-            </td>
-          </tr>
-          <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
-            <td style="padding: 0.75rem 1rem; color: #e2e8f0; font-weight: 500;">
-              🧑‍💼 <strong>Staff &amp; Employee Roster</strong>
-            </td>
-            <td style="padding: 0.75rem 1rem; color: #34d399;">
-              ✅ Full (Add Staff, Edit Information, Terminate / Remove)
-            </td>
-            <td style="padding: 0.75rem 1rem; color: #f87171;">
-              ❌ Restricted (Hidden from menu &amp; blocked at API)
-            </td>
-          </tr>
-          <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
-            <td style="padding: 0.75rem 1rem; color: #e2e8f0; font-weight: 500;">
-              🛡️ <strong>Permissions &amp; Role Delegation</strong>
-            </td>
-            <td style="padding: 0.75rem 1rem; color: #34d399;">
-              ✅ Full (Promote / Demote Roles, Activate / Suspend Access)
-            </td>
-            <td style="padding: 0.75rem 1rem; color: #f87171;">
-              ❌ Restricted (Strictly Company Super Admin only)
-            </td>
-          </tr>
-          <tr>
-            <td style="padding: 0.75rem 1rem; color: #e2e8f0; font-weight: 500;">
-              ⚙️ <strong>Company Profile &amp; Settings</strong>
-            </td>
-            <td style="padding: 0.75rem 1rem; color: #34d399;">
-              ✅ Full (Update Company Name, Email, Phone, Address)
-            </td>
-            <td style="padding: 0.75rem 1rem; color: #f87171;">
-              ❌ Restricted (Company Owner only)
+            <td style="padding: 0.75rem 1rem; color: #94a3b8;">
+              Controlled by <code>canDelete</code> permission (within authorized garages)
             </td>
           </tr>
         </tbody>
@@ -305,3 +368,35 @@
     </div>
   </div>
 </div>
+
+<script>
+  function togglePermForm(employeeId) {
+    const editor = document.getElementById('perm-editor-' + employeeId);
+    if (editor) {
+      if (editor.style.display === 'none' || editor.style.display === '') {
+        editor.style.display = 'block';
+      } else {
+        editor.style.display = 'none';
+      }
+    }
+  }
+
+  function selectAllGarages(employeeId, select) {
+    const container = document.getElementById('garage-list-' + employeeId);
+    if (container) {
+      const checkboxes = container.querySelectorAll('input[type="checkbox"][name="garageIds"]');
+      checkboxes.forEach(cb => cb.checked = select);
+    }
+  }
+
+  function handleRoleChange(employeeId, role) {
+    // If role changed to SUPER_ADMIN, automatically check all action permissions
+    if (role === 'SUPER_ADMIN') {
+      const editor = document.getElementById('perm-editor-' + employeeId);
+      if (editor) {
+        const actionBoxes = editor.querySelectorAll('input[type="checkbox"]');
+        actionBoxes.forEach(cb => cb.checked = true);
+      }
+    }
+  }
+</script>

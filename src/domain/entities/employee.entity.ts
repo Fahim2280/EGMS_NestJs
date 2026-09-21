@@ -10,6 +10,11 @@ export interface CreateEmployeeProps extends AuditableProps {
   phoneNumber: string;
   role?: string;
   nidNumber: string;
+  canCreate?: boolean;
+  canEdit?: boolean;
+  canDelete?: boolean;
+  canView?: boolean;
+  permittedGarageIds?: string[];
 }
 
 export class Employee extends AuditableEntity {
@@ -22,6 +27,11 @@ export class Employee extends AuditableEntity {
   public phoneNumber: string;
   public role: string;
   public nidNumber: string;
+  public canCreate: boolean;
+  public canEdit: boolean;
+  public canDelete: boolean;
+  public canView: boolean;
+  public permittedGarageIds: string[];
 
   constructor(props: CreateEmployeeProps) {
     super(props);
@@ -35,12 +45,22 @@ export class Employee extends AuditableEntity {
     this.phoneNumber = props.phoneNumber.trim();
     this.role = props.role || 'GENERAL';
     this.nidNumber = props.nidNumber.trim();
+    this.canCreate = props.canCreate ?? (props.role === 'SUPER_ADMIN');
+    this.canEdit = props.canEdit ?? (props.role === 'SUPER_ADMIN');
+    this.canDelete = props.canDelete ?? (props.role === 'SUPER_ADMIN');
+    this.canView = props.canView ?? true;
+    this.permittedGarageIds = props.permittedGarageIds ? [...props.permittedGarageIds] : [];
   }
 
   public static create(props: CreateEmployeeProps): Employee {
     return new Employee({
       ...props,
-      role: 'GENERAL',
+      role: props.role || 'GENERAL',
+      canCreate: props.canCreate ?? (props.role === 'SUPER_ADMIN'),
+      canEdit: props.canEdit ?? (props.role === 'SUPER_ADMIN'),
+      canDelete: props.canDelete ?? (props.role === 'SUPER_ADMIN'),
+      canView: props.canView ?? true,
+      permittedGarageIds: props.permittedGarageIds ? [...props.permittedGarageIds] : [],
       isActive: true,
       isDeleted: false,
       createdDate: new Date(),
@@ -89,6 +109,48 @@ export class Employee extends AuditableEntity {
       this.markModified(updatedByStamp);
     } else {
       this.modifiedDate = new Date();
+    }
+  }
+
+  public updatePermissions(
+    canCreate: boolean,
+    canEdit: boolean,
+    canDelete: boolean,
+    canView: boolean,
+    garageIds: string[],
+    updatedByStamp?: string,
+  ): void {
+    this.canCreate = Boolean(canCreate);
+    this.canEdit = Boolean(canEdit);
+    this.canDelete = Boolean(canDelete);
+    this.canView = Boolean(canView);
+    this.permittedGarageIds = Array.isArray(garageIds) ? [...garageIds] : [];
+    if (updatedByStamp) {
+      this.markModified(updatedByStamp);
+    } else {
+      this.modifiedDate = new Date();
+    }
+  }
+
+  public hasGarageAccess(garageId?: string | null): boolean {
+    if (this.role === 'SUPER_ADMIN') return true;
+    if (!garageId) return false;
+    return this.permittedGarageIds.includes(garageId);
+  }
+
+  public canPerform(action: 'create' | 'edit' | 'delete' | 'view'): boolean {
+    if (this.role === 'SUPER_ADMIN') return true;
+    switch (action) {
+      case 'create':
+        return this.canCreate;
+      case 'edit':
+        return this.canEdit;
+      case 'delete':
+        return this.canDelete;
+      case 'view':
+        return this.canView;
+      default:
+        return false;
     }
   }
 

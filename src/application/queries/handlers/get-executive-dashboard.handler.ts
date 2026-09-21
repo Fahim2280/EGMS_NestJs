@@ -33,7 +33,12 @@ export class GetExecutiveDashboardHandler
   async execute(
     query: GetExecutiveDashboardQuery,
   ): Promise<ExecutiveDashboardResult> {
-    const customers = await this.customerRepo.findByCompanyId(query.companyId);
+    let customers = await this.customerRepo.findByCompanyId(query.companyId);
+
+    if (query.allowedGarageIds !== undefined && query.allowedGarageIds !== null) {
+      const allowedSet = new Set(query.allowedGarageIds);
+      customers = customers.filter((c) => c.garageId && allowedSet.has(c.garageId));
+    }
 
     let totalAdvanceMoney = 0;
     let totalPresentDues = 0;
@@ -58,6 +63,7 @@ export class GetExecutiveDashboardHandler
       dashboardList.push({
         id: customer.id,
         cId: customer.cId,
+        customerCode: customer.customerCode,
         name: customer.name,
         mobileNumber: customer.mobileNumber,
         advanceMoney: customerAdvanceMoney,

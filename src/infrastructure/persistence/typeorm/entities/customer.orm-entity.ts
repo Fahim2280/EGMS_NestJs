@@ -12,10 +12,12 @@ import { BaseAuditableOrmEntity } from './base-auditable.orm-entity';
 import { CompanyOrmEntity } from './company.orm-entity';
 import { ElectricBillOrmEntity } from './electric-bill.orm-entity';
 import { GarageOrmEntity } from './garage.orm-entity';
+import { GuarantorOrmEntity } from './guarantor.orm-entity';
 
 @Entity('customers')
 @Index(['companyId', 'nidNumber'])
 @Index(['companyId', 'mobileNumber'])
+@Index(['companyId', 'customerCode'])
 export class CustomerOrmEntity extends BaseAuditableOrmEntity {
   @AutoMap()
   @PrimaryColumn('varchar', { length: 100 })
@@ -24,6 +26,10 @@ export class CustomerOrmEntity extends BaseAuditableOrmEntity {
   @AutoMap()
   @Column({ type: 'int', nullable: true })
   cId: number;
+
+  @AutoMap(() => String)
+  @Column('varchar', { length: 50, nullable: true, default: null })
+  customerCode?: string | null;
 
   @AutoMap()
   @Column('varchar', { length: 100 })
@@ -80,4 +86,9 @@ export class CustomerOrmEntity extends BaseAuditableOrmEntity {
     cascade: true,
   })
   bills: ElectricBillOrmEntity[];
+
+  @OneToMany(() => GuarantorOrmEntity, (guarantor) => guarantor.customer, {
+    cascade: true,
+  })
+  guarantors: GuarantorOrmEntity[];
 }

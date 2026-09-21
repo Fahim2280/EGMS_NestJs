@@ -23,12 +23,13 @@ import { GenerateMonthlyBillsCommand } from '@application/commands/impl/generate
 import { GetElectricBillsByCompanyQuery } from '@application/queries/impl/get-electric-bills-by-company.query';
 import { GetElectricBillByIdQuery } from '@application/queries/impl/get-electric-bill-by-id.query';
 import { GetCustomersByCompanyQuery } from '@application/queries/impl/get-customers-by-company.query';
+import { GetCustomerByIdQuery } from '@application/queries/impl/get-customer-by-id.query';
 import { GetCustomerBillSummaryQuery } from '@application/queries/impl/get-customer-bill-summary.query';
 import { PreviewElectricBillQuery } from '@application/queries/impl/preview-electric-bill.query';
 import { GetCompanyByIdQuery } from '@application/queries/impl/get-company-by-id.query';
 import { JwtAuthGuard } from '@infrastructure/auth/jwt-auth.guard';
-import { RolesGuard } from '@infrastructure/auth/roles.guard';
-import { Roles } from '@infrastructure/auth/roles.decorator';
+import { PermissionsGuard } from '@infrastructure/auth/permissions.guard';
+import { RequirePermissions } from '@infrastructure/auth/permissions.decorator';
 
 @Controller('bills')
 @UseGuards(JwtAuthGuard)
@@ -45,11 +46,14 @@ export class ElectricBillController {
     @Query('page') page?: string,
   ) {
     const user = (req as any).user;
+    const isSuperAdmin = user.role === 'SUPER_ADMIN' || user.isSuperAdmin;
+    const allowedGarageIds = isSuperAdmin ? null : (user.garageIds || []);
+
     const currentPage = Math.max(1, parseInt(page || '1', 10));
     const pageSize = 15;
 
     const bills = await this.queryBus.execute(
-      new GetElectricBillsByCompanyQuery(user.companyId),
+      new GetElectricBillsByCompanyQuery(user.companyId, allowedGarageIds),
     );
 
     const totalCount = bills.length;
@@ -57,13 +61,24 @@ export class ElectricBillController {
     const safePage = Math.min(currentPage, totalPages);
     const paginated = bills.slice((safePage - 1) * pageSize, safePage * pageSize);
 
+    const now = new Date();
+    const defaultFromDate = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+    const defaultToDate = now.toISOString().split('T')[0];
+
     return res.render('bills/index', {
       title: 'Electric Bills Ledger - EGMS Portal',
       activeNav: 'bills',
       user,
-      isSuperAdmin: user.role === 'SUPER_ADMIN',
+      isSuperAdmin,
+      canCreate: isSuperAdmin || Boolean(user.canCreate),
+      canEdit: isSuperAdmin || Boolean(user.canEdit),
+      canDelete: isSuperAdmin || Boolean(user.canDelete),
+      canView: isSuperAdmin || Boolean(user.canView),
       bills: paginated,
       totalBillsCount: totalCount,
+      defaultFromDate,
+      defaultToDate,
+      todayDate: defaultToDate,
       pagination: {
         page: safePage,
         totalPages,
@@ -75,17 +90,19 @@ export class ElectricBillController {
   }
 
   @Get('new')
-  @UseGuards(RolesGuard)
-  @Roles('SUPER_ADMIN')
+  @UseGuards(PermissionsGuard)
+  @RequirePermissions('canCreate')
   async renderCreateForm(
     @Query('customerId') customerId: string,
     @Req() req: Request,
     @Res() res: Response,
   ) {
     const user = (req as any).user;
+    const isSuperAdmin = user.role === 'SUPER_ADMIN' || user.isSuperAdmin;
+    const allowedGarageIds = isSuperAdmin ? null : (user.garageIds || []);
 
     const [customers, company] = await Promise.all([
-      this.queryBus.execute(new GetCustomersByCompanyQuery(user.companyId)),
+      this.queryBus.execute(new GetCustomersByCompanyQuery(user.companyId, allowedGarageIds)),
       this.queryBus.execute(new GetCompanyByIdQuery(user.companyId)).catch(() => null),
     ]);
 
@@ -118,8 +135,8 @@ export class ElectricBillController {
   }
 
   @Post()
-  @UseGuards(RolesGuard)
-  @Roles('SUPER_ADMIN')
+  @UseGuards(PermissionsGuard)
+  @RequirePermissions('canCreate')
   async handleCreate(
     @Body() dto: CreateElectricBillDto,
     @Req() req: Request,
@@ -127,6 +144,35 @@ export class ElectricBillController {
   ) {
     const user = (req as any).user;
     if (!user) return res.redirect('/login');
+    const isSuperAdmin = user.role === 'SUPER_ADMIN' || user.isSuperAdmin;
+    const allowedGarageIds = isSuperAdmin ? null : (user.garageIds || []);
+
+    // Verify that the customer belongs to an allowed garage
+    if (!isSuperAdmin) {
+      try {
+        const targetCustomer = await this.queryBus.execute(
+          new GetCustomerByIdQuery(dto.customerId, user.companyId),
+        );
+        if (targetCustomer?.garageId && !user.garageIds?.includes(targetCustomer.garageId)) {
+          const [customers, company] = await Promise.all([
+            this.queryBus.execute(new GetCustomersByCompanyQuery(user.companyId, allowedGarageIds)),
+            this.queryBus.execute(new GetCompanyByIdQuery(user.companyId)).catch(() => null),
+          ]);
+          return res.render('bills/create', {
+            title: 'Generate Electric Bill - Garage Portal',
+            activeNav: 'bills',
+            user,
+            customers,
+            error: 'You do not have permission to generate bills for customers in this garage.',
+            formData: dto,
+            defaultUnitRate: company?.unitRate || 15,
+            todayDate: dto.date || new Date().toISOString().split('T')[0],
+          });
+        }
+      } catch {
+        // continue to command execution
+      }
+    }
 
     try {
       await this.commandBus.execute(
@@ -140,7 +186,7 @@ export class ElectricBillController {
       return res.redirect('/bills');
     } catch (err: any) {
       const [customers, company] = await Promise.all([
-        this.queryBus.execute(new GetCustomersByCompanyQuery(user.companyId)),
+        this.queryBus.execute(new GetCustomersByCompanyQuery(user.companyId, allowedGarageIds)),
         this.queryBus.execute(new GetCompanyByIdQuery(user.companyId)).catch(() => null),
       ]);
 
@@ -165,16 +211,31 @@ export class ElectricBillController {
   ) {
     const user = (req as any).user;
     if (!user) return res.redirect('/login');
+    const isSuperAdmin = user.role === 'SUPER_ADMIN' || user.isSuperAdmin;
 
     try {
       const bill = await this.queryBus.execute(
         new GetElectricBillByIdQuery(id, user.companyId),
       );
 
+      // Verify garage permission via customer
+      if (!isSuperAdmin) {
+        const customer = await this.queryBus.execute(
+          new GetCustomerByIdQuery(bill.customerId, user.companyId),
+        );
+        if (customer?.garageId && !user.garageIds?.includes(customer.garageId)) {
+          return res.redirect('/bills?error=You+do+not+have+permission+to+view+this+bill');
+        }
+      }
+
       return res.render('bills/details', {
         title: `Bill Receipt #${bill.billNumber || bill.id.substring(0, 8)} - Garage Portal`,
         activeNav: 'bills',
         user,
+        isSuperAdmin,
+        canCreate: isSuperAdmin || Boolean(user.canCreate),
+        canEdit: isSuperAdmin || Boolean(user.canEdit),
+        canDelete: isSuperAdmin || Boolean(user.canDelete),
         bill,
       });
     } catch {
@@ -183,8 +244,8 @@ export class ElectricBillController {
   }
 
   @Get(':id/edit')
-  @UseGuards(RolesGuard)
-  @Roles('SUPER_ADMIN')
+  @UseGuards(PermissionsGuard)
+  @RequirePermissions('canEdit')
   async renderEditForm(
     @Param('id') id: string,
     @Req() req: Request,
@@ -192,14 +253,26 @@ export class ElectricBillController {
   ) {
     const user = (req as any).user;
     if (!user) return res.redirect('/login');
+    const isSuperAdmin = user.role === 'SUPER_ADMIN' || user.isSuperAdmin;
+    const allowedGarageIds = isSuperAdmin ? null : (user.garageIds || []);
 
     try {
       const bill = await this.queryBus.execute(
         new GetElectricBillByIdQuery(id, user.companyId),
       );
 
+      // Verify customer garage access
+      if (!isSuperAdmin) {
+        const customer = await this.queryBus.execute(
+          new GetCustomerByIdQuery(bill.customerId, user.companyId),
+        );
+        if (customer?.garageId && !user.garageIds?.includes(customer.garageId)) {
+          return res.redirect('/bills?error=You+do+not+have+permission+to+edit+this+bill');
+        }
+      }
+
       const customers = await this.queryBus.execute(
-        new GetCustomersByCompanyQuery(user.companyId),
+        new GetCustomersByCompanyQuery(user.companyId, allowedGarageIds),
       );
 
       return res.render('bills/edit', {
@@ -216,8 +289,8 @@ export class ElectricBillController {
   }
 
   @Post(':id/edit')
-  @UseGuards(RolesGuard)
-  @Roles('SUPER_ADMIN')
+  @UseGuards(PermissionsGuard)
+  @RequirePermissions('canEdit')
   async handleUpdate(
     @Param('id') id: string,
     @Body() dto: UpdateElectricBillDto,
@@ -226,8 +299,23 @@ export class ElectricBillController {
   ) {
     const user = (req as any).user;
     if (!user) return res.redirect('/login');
+    const isSuperAdmin = user.role === 'SUPER_ADMIN' || user.isSuperAdmin;
+    const allowedGarageIds = isSuperAdmin ? null : (user.garageIds || []);
 
     try {
+      const existing = await this.queryBus.execute(
+        new GetElectricBillByIdQuery(id, user.companyId),
+      );
+
+      if (!isSuperAdmin) {
+        const customer = await this.queryBus.execute(
+          new GetCustomerByIdQuery(existing.customerId, user.companyId),
+        );
+        if (customer?.garageId && !user.garageIds?.includes(customer.garageId)) {
+          return res.redirect('/bills?error=You+do+not+have+permission+to+edit+this+bill');
+        }
+      }
+
       dto.id = id;
       await this.commandBus.execute(
         new UpdateElectricBillCommand(
@@ -244,7 +332,7 @@ export class ElectricBillController {
         new GetElectricBillByIdQuery(id, user.companyId),
       );
       const customers = await this.queryBus.execute(
-        new GetCustomersByCompanyQuery(user.companyId),
+        new GetCustomersByCompanyQuery(user.companyId, allowedGarageIds),
       );
 
       return res.render('bills/edit', {
@@ -259,8 +347,8 @@ export class ElectricBillController {
   }
 
   @Post(':id/delete')
-  @UseGuards(RolesGuard)
-  @Roles('SUPER_ADMIN')
+  @UseGuards(PermissionsGuard)
+  @RequirePermissions('canDelete')
   async handleDelete(
     @Param('id') id: string,
     @Req() req: Request,
@@ -268,8 +356,22 @@ export class ElectricBillController {
   ) {
     const user = (req as any).user;
     if (!user) return res.redirect('/login');
+    const isSuperAdmin = user.role === 'SUPER_ADMIN' || user.isSuperAdmin;
 
     try {
+      const existing = await this.queryBus.execute(
+        new GetElectricBillByIdQuery(id, user.companyId),
+      );
+
+      if (!isSuperAdmin) {
+        const customer = await this.queryBus.execute(
+          new GetCustomerByIdQuery(existing.customerId, user.companyId),
+        );
+        if (customer?.garageId && !user.garageIds?.includes(customer.garageId)) {
+          return res.redirect('/bills?error=You+do+not+have+permission+to+delete+this+bill');
+        }
+      }
+
       await this.commandBus.execute(
         new DeleteElectricBillCommand(
           id,
@@ -285,9 +387,11 @@ export class ElectricBillController {
   }
 
   @Post('generate-monthly')
-  @UseGuards(RolesGuard)
-  @Roles('SUPER_ADMIN')
+  @UseGuards(PermissionsGuard)
+  @RequirePermissions('canCreate')
   async handleGenerateMonthly(
+    @Body('fromDate') fromDateStr: string,
+    @Body('toDate') toDateStr: string,
     @Body('targetDate') targetDateStr: string,
     @Req() req: Request,
     @Res() res: Response,
@@ -295,13 +399,21 @@ export class ElectricBillController {
     const user = (req as any).user;
     if (!user) return res.redirect('/login');
 
-    const targetDate = targetDateStr ? new Date(targetDateStr) : new Date();
+    const toDate = toDateStr
+      ? new Date(toDateStr)
+      : targetDateStr
+        ? new Date(targetDateStr)
+        : new Date();
+    const fromDate = fromDateStr
+      ? new Date(fromDateStr)
+      : new Date(toDate.getFullYear(), toDate.getMonth(), 1);
 
     await this.commandBus.execute(
       new GenerateMonthlyBillsCommand(
         user.companyId,
-        targetDate,
+        toDate,
         `${user.sub || user.companyId}|${user.role || 'SUPER_ADMIN'}`,
+        fromDate,
       ),
     );
 

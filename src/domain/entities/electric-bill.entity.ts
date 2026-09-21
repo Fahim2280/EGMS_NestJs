@@ -6,6 +6,7 @@ export interface CreateElectricBillProps extends AuditableProps {
   customerId: string;
   companyId: string;
   date: Date;
+  fromDate?: Date;
   previousUnit: number;
   currentUnit: number;
   totalUnit: number;
@@ -25,6 +26,7 @@ export class ElectricBill extends AuditableEntity {
   public customerId: string;
   public companyId: string;
   public date: Date;
+  public fromDate?: Date;
   public previousUnit: number;
   public currentUnit: number;
   public totalUnit: number;
@@ -45,6 +47,7 @@ export class ElectricBill extends AuditableEntity {
     this.customerId = props.customerId;
     this.companyId = props.companyId;
     this.date = props.date ? new Date(props.date) : new Date();
+    this.fromDate = props.fromDate ? new Date(props.fromDate) : undefined;
     this.previousUnit = Number(props.previousUnit) || 0;
     this.currentUnit = Number(props.currentUnit) || 0;
     this.totalUnit = Number(props.totalUnit) || 0;

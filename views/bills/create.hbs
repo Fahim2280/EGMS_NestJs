@@ -1,90 +1,140 @@
-<div class="page-header">
+<div class="page-header" style="margin-bottom: 1.5rem;">
   <div class="header-content">
-    <a href="/bills" style="color: var(--color-text-muted); text-decoration: none; font-size: 0.875rem; display: inline-flex; align-items: center; gap: 0.25rem; margin-bottom: 0.5rem;">
-      &larr; {{t 'bills.backToBills'}}
+    <a href="/bills" style="color: var(--color-text-muted); text-decoration: none; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 0.35rem; margin-bottom: 0.5rem; transition: color 0.15s ease;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+      {{t 'bills.backToBills'}}
     </a>
-    <h1 class="page-title">{{t 'bills.createTitle'}}</h1>
+    <h1 class="page-title" style="display: flex; align-items: center; gap: 0.65rem;">
+      <span style="display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 10px; background: rgba(16, 185, 129, 0.15); color: #10b981;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      </span>
+      {{t 'bills.createTitle'}}
+    </h1>
     <p class="page-subtitle">{{t 'bills.createSubtitle'}}</p>
   </div>
 </div>
 
 {{#if error}}
-  <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem; color: #ef4444; font-size: 0.9rem;">
-    {{error}}
+  <div style="background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 10px; padding: 1rem 1.25rem; margin-bottom: 1.5rem; color: #f87171; font-size: 0.9rem; display: flex; align-items: center; gap: 0.75rem;">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <span>{{error}}</span>
   </div>
 {{/if}}
 
-<div class="bill-create-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem;">
+<div class="bill-create-grid" style="display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 1.75rem; align-items: start;">
   <!-- Bill Creation Form -->
-  <div class="card">
-    <h2 class="card-title" style="margin-bottom: 1.5rem;">{{t 'bills.billDetails'}}</h2>
+  <div class="card" style="padding: 1.75rem; border-top: 3px solid #10b981; margin-bottom: 0;">
+    <div style="display: flex; align-items: center; justify-content: space-between; padding-bottom: 1rem; margin-bottom: 1.5rem; border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
+      <h2 style="font-size: 1.15rem; font-weight: 700; color: #ffffff; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        {{t 'bills.billDetails'}}
+      </h2>
+      <span class="badge" style="background: rgba(16, 185, 129, 0.12); color: #34d399; font-size: 0.72rem;">STEP 1 OF 1</span>
+    </div>
 
     <form action="/bills" method="POST" id="billForm">
-      <div class="form-group" style="margin-bottom: 1.25rem;">
-        <label class="form-label" for="customerId">{{t 'bills.selectCustomer'}} *</label>
-        <select id="customerId" name="customerId" class="form-input" required>
-          <option value="">{{t 'bills.chooseCustomer'}}</option>
-          {{#each customers}}
-            <option value="{{this.id}}" {{#if (eq ../preselectedCustomerId this.id)}}selected{{/if}}>
-              {{this.name}} ({{this.mobileNumber}})
-            </option>
-          {{/each}}
-        </select>
-      </div>
-
-      <div class="form-grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
-        <div class="form-group">
-          <label class="form-label" for="date">{{t 'bills.billingDate'}} *</label>
-          <input type="date" id="date" name="date" class="form-input" required value="{{todayDate}}">
+      <!-- Section 1: Customer & Date -->
+      <div style="background: rgba(15, 23, 42, 0.4); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 1.25rem;">
+        <div style="font-size: 0.76rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #94a3b8; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.4rem;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          Customer &amp; Date
         </div>
 
-        <div class="form-group">
-          <label class="form-label" for="unitRate">
-            {{t 'bills.ratePerUnit'}} ({{t 'common.currency'}}) *
-            {{#if (eq user.role 'SUPER_ADMIN')}}
-            <span style="font-size: 0.75rem; color: #10b981; font-weight: normal; margin-left: 0.25rem;">Super Admin Configurable</span>
-            {{else}}
-            <span style="font-size: 0.75rem; color: var(--color-text-muted); font-weight: normal; margin-left: 0.25rem;">Locked to Default</span>
-            {{/if}}
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label class="form-label" for="customerId">
+            <span>{{t 'bills.selectCustomer'}} <span style="color: #f43f5e;">*</span></span>
           </label>
-          <input type="number" step="0.01" min="0.01" id="unitRate" name="unitRate" class="form-input" required 
-            value="{{#if formData.unitRate}}{{formData.unitRate}}{{else}}{{defaultUnitRate}}{{/if}}"
-            {{#unless (eq user.role 'SUPER_ADMIN')}}readonly style="background: rgba(255,255,255,0.03); color: var(--color-text-muted); cursor: not-allowed;" title="Only Super Admin can change the electricity unit rate"{{/unless}}>
+          <select id="customerId" name="customerId" class="form-input" required>
+            <option value="">{{t 'bills.chooseCustomer'}}</option>
+            {{#each customers}}
+              <option value="{{this.id}}" data-subtext="📱 {{this.mobileNumber}}" {{#if (eq ../preselectedCustomerId this.id)}}selected{{/if}}>
+                {{this.name}}
+              </option>
+            {{/each}}
+          </select>
+        </div>
+
+        <div class="form-grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label" for="date">
+              <span>{{t 'bills.billingDate'}} <span style="color: #f43f5e;">*</span></span>
+            </label>
+            <input type="date" id="date" name="date" class="form-input" required value="{{todayDate}}">
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label" for="unitRate">
+              <span>{{t 'bills.ratePerUnit'}} ({{t 'common.currency'}}) <span style="color: #f43f5e;">*</span></span>
+              {{#if (eq user.role 'SUPER_ADMIN')}}
+              <span style="font-size: 0.7rem; color: #10b981; font-weight: 600;">Editable</span>
+              {{else}}
+              <span style="font-size: 0.7rem; color: var(--color-text-dim);">Locked</span>
+              {{/if}}
+            </label>
+            <input type="number" step="0.01" min="0.01" id="unitRate" name="unitRate" class="form-input" required 
+              value="{{#if formData.unitRate}}{{formData.unitRate}}{{else}}{{defaultUnitRate}}{{/if}}"
+              {{#unless (eq user.role 'SUPER_ADMIN')}}readonly title="Only Super Admin can change the electricity unit rate"{{/unless}}>
+          </div>
         </div>
       </div>
 
-      <div class="form-grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
-        <div class="form-group">
-          <label class="form-label">{{t 'bills.prevUnit'}}</label>
-          <input type="text" id="displayPreviousUnit" class="form-input" readonly style="background: rgba(255,255,255,0.03); color: var(--color-text-muted);" value="0.00">
+      <!-- Section 2: Meter Readings -->
+      <div style="background: rgba(15, 23, 42, 0.4); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 1.25rem;">
+        <div style="font-size: 0.76rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #94a3b8; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.4rem;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          Electricity Meter Readings
         </div>
 
-        <div class="form-group">
-          <label class="form-label" for="currentUnit">{{t 'bills.currUnit'}} *</label>
-          <input type="number" step="0.01" min="0" id="currentUnit" name="currentUnit" class="form-input" required placeholder="0.00" value="{{formData.currentUnit}}">
+        <div class="form-grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label">
+              <span>{{t 'bills.prevUnit'}}</span>
+              <span style="font-size: 0.7rem; color: var(--color-text-dim);">Auto-Loaded</span>
+            </label>
+            <input type="text" id="displayPreviousUnit" class="form-input" readonly value="0.00">
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label" for="currentUnit">
+              <span>{{t 'bills.currUnit'}} <span style="color: #f43f5e;">*</span></span>
+            </label>
+            <input type="number" step="0.01" min="0" id="currentUnit" name="currentUnit" class="form-input" required placeholder="0.00" value="{{formData.currentUnit}}">
+          </div>
         </div>
       </div>
 
-      <div class="form-grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
-        <div class="form-group">
-          <label class="form-label" for="rentBill">{{t 'bills.rent'}} ({{t 'common.currency'}})</label>
-          <input type="number" step="0.01" min="0" id="rentBill" name="rentBill" class="form-input" required value="{{#if formData.rentBill}}{{formData.rentBill}}{{else}}0.00{{/if}}">
+      <!-- Section 3: Rent, Loan & Payment Settlement -->
+      <div style="background: rgba(15, 23, 42, 0.4); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 1.5rem;">
+        <div style="font-size: 0.76rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #94a3b8; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.4rem;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+          Charges &amp; Payment Settlement
         </div>
 
-        <div class="form-group">
-          <label class="form-label" for="loan">{{t 'bills.loan'}} ({{t 'common.currency'}})</label>
-          <input type="number" step="0.01" min="0" id="loan" name="loan" class="form-input" required value="{{#if formData.loan}}{{formData.loan}}{{else}}0.00{{/if}}">
+        <div class="form-grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label" for="rentBill">{{t 'bills.rent'}} ({{t 'common.currency'}})</label>
+            <input type="number" step="0.01" min="0" id="rentBill" name="rentBill" class="form-input" required value="{{#if formData.rentBill}}{{formData.rentBill}}{{else}}0.00{{/if}}">
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label" for="loan">{{t 'bills.loan'}} ({{t 'common.currency'}})</label>
+            <input type="number" step="0.01" min="0" id="loan" name="loan" class="form-input" required value="{{#if formData.loan}}{{formData.loan}}{{else}}0.00{{/if}}">
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0;">
+          <label class="form-label" for="clearMoney">
+            <span>{{t 'bills.paid'}} ({{t 'common.currency'}}) <span style="color: #f43f5e;">*</span></span>
+            <span style="font-size: 0.7rem; color: #10b981;">Customer Handover</span>
+          </label>
+          <input type="number" step="0.01" min="0" id="clearMoney" name="clearMoney" class="form-input" required placeholder="0.00" value="{{#if formData.clearMoney}}{{formData.clearMoney}}{{else}}0.00{{/if}}" style="font-size: 1.05rem; font-weight: 700; color: #34d399;">
         </div>
       </div>
 
-      <div class="form-group" style="margin-bottom: 1.5rem;">
-        <label class="form-label" for="clearMoney">{{t 'bills.paid'}} ({{t 'common.currency'}}) *</label>
-        <input type="number" step="0.01" min="0" id="clearMoney" name="clearMoney" class="form-input" required placeholder="0.00" value="{{#if formData.clearMoney}}{{formData.clearMoney}}{{else}}0.00{{/if}}">
-      </div>
-
-      <div class="form-actions" style="display: flex; gap: 0.75rem; justify-content: flex-end; flex-wrap: wrap;">
-        <a href="/bills" class="btn btn-secondary">{{t 'common.cancel'}}</a>
-        <button type="submit" class="btn btn-primary" style="background: #10b981; border-color: #10b981;">
+      <div class="form-actions" style="display: flex; gap: 0.75rem; justify-content: flex-end; align-items: center;">
+        <a href="/bills" class="btn btn-secondary" style="padding: 0.65rem 1.25rem;">{{t 'common.cancel'}}</a>
+        <button type="submit" class="btn btn-primary" style="background: #10b981; border-color: #10b981; padding: 0.65rem 1.5rem; display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 700; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
           {{t 'bills.saveBill'}}
         </button>
       </div>
@@ -92,58 +142,81 @@
   </div>
 
   <!-- Live Automatic Calculation Preview Card -->
-  <div>
-    <div class="card" style="border-left: 4px solid #10b981;">
-      <h2 class="card-title" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
-        <span>{{t 'bills.livePreview'}}</span>
-        <span class="badge" id="previewRateBadge" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">{{t 'bills.ratePerUnit'}}: ৳{{defaultUnitRate}}/{{t 'common.units'}}</span>
-      </h2>
-
-      <div style="display: flex; flex-direction: column; gap: 0.85rem; font-size: 0.95rem;">
-        <div style="display: flex; justify-content: space-between; padding-bottom: 0.5rem; border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
-          <span style="color: var(--color-text-muted);">{{t 'bills.customer'}}:</span>
-          <strong id="previewCustomerName" style="color: var(--color-text-primary);">{{t 'bills.chooseCustomer'}}</strong>
+  <div class="bill-create-preview" style="position: sticky; top: 84px;">
+    <div class="card" style="padding: 1.75rem; border-top: 3px solid #38bdf8; background: radial-gradient(circle at top right, rgba(56, 189, 248, 0.08), transparent 60%), rgba(30, 41, 59, 0.85); box-shadow: 0 12px 36px rgba(0, 0, 0, 0.35);">
+      <!-- Header -->
+      <div style="display: flex; align-items: center; justify-content: space-between; padding-bottom: 1rem; margin-bottom: 1.25rem; border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
+        <div>
+          <h3 style="font-size: 1.1rem; font-weight: 700; color: #ffffff; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+            <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #10b981; box-shadow: 0 0 10px #10b981;"></span>
+            {{t 'bills.livePreview'}}
+          </h3>
+          <span style="font-size: 0.72rem; color: var(--color-text-dim);">Real-time calculation breakdown</span>
         </div>
+        <span class="badge" id="previewRateBadge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); font-size: 0.75rem; font-weight: 700;">
+          {{t 'bills.ratePerUnit'}}: ৳{{defaultUnitRate}}/{{t 'common.units'}}
+        </span>
+      </div>
 
-        <div style="display: flex; justify-content: space-between; padding-bottom: 0.5rem; border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
-          <span style="color: var(--color-text-muted);">{{t 'bills.meterReadings'}}:</span>
-          <span style="color: var(--color-text-primary);"><span id="previewPrevUnit">0.00</span> &rarr; <span id="previewCurrUnit">0.00</span></span>
+      <!-- Customer Name Pill -->
+      <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: space-between;">
+        <span style="font-size: 0.8rem; color: var(--color-text-muted);">{{t 'bills.customer'}}</span>
+        <strong id="previewCustomerName" style="color: #f8fafc; font-size: 0.92rem;">{{t 'bills.chooseCustomer'}}</strong>
+      </div>
+
+      <!-- Meter Reading Bar -->
+      <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(56, 189, 248, 0.2); border-radius: 8px; padding: 0.85rem 1rem; margin-bottom: 1.25rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+          <span style="font-size: 0.76rem; font-weight: 600; text-transform: uppercase; color: #94a3b8;">{{t 'bills.meterReadings'}}</span>
+          <span style="font-size: 0.76rem; color: #38bdf8; font-weight: 700;" id="previewConsumedUnits">0.00 Units</span>
         </div>
-
-        <div style="display: flex; justify-content: space-between; padding-bottom: 0.5rem; border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
-          <span style="color: var(--color-text-muted);">{{t 'bills.consumedUnits'}}:</span>
-          <strong id="previewConsumedUnits" style="color: #38bdf8;">0.00 {{t 'common.units'}}</strong>
+        <div style="display: flex; align-items: center; justify-content: space-between; font-family: monospace; font-size: 1rem; font-weight: 700; color: #ffffff;">
+          <span id="previewPrevUnit" style="color: #94a3b8;">0.00</span>
+          <span style="color: #38bdf8; font-size: 1.15rem;">&rarr;</span>
+          <span id="previewCurrUnit" style="color: #38bdf8;">0.00</span>
         </div>
+      </div>
 
-        <div style="display: flex; justify-content: space-between; padding-bottom: 0.5rem; border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
+      <!-- Breakdown Table Rows -->
+      <div style="display: flex; flex-direction: column; gap: 0.65rem; font-size: 0.88rem; margin-bottom: 1.25rem;">
+        <div style="display: flex; justify-content: space-between; padding-bottom: 0.45rem; border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
           <span style="color: var(--color-text-muted);" id="previewElectricLabel">{{t 'bills.electricBill'}}:</span>
-          <strong id="previewElectricBill" style="color: var(--color-text-primary);">৳0.00</strong>
+          <strong id="previewElectricBill" style="color: #ffffff; font-family: monospace;">৳0.00</strong>
         </div>
 
-        <div style="display: flex; justify-content: space-between; padding-bottom: 0.5rem; border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
+        <div style="display: flex; justify-content: space-between; padding-bottom: 0.45rem; border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
           <span style="color: var(--color-text-muted);">{{t 'bills.prevDues'}}:</span>
-          <strong id="previewPrevDues" style="color: #fbbf24;">৳0.00</strong>
+          <strong id="previewPrevDues" style="color: #fbbf24; font-family: monospace;">৳0.00</strong>
         </div>
 
-        <div style="display: flex; justify-content: space-between; padding-bottom: 0.5rem; border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
+        <div style="display: flex; justify-content: space-between; padding-bottom: 0.45rem; border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
           <span style="color: var(--color-text-muted);">{{t 'bills.rentLoan'}}:</span>
-          <span id="previewRentLoan" style="color: var(--color-text-primary);">৳0.00</span>
+          <strong id="previewRentLoan" style="color: #ffffff; font-family: monospace;">৳0.00</strong>
         </div>
+      </div>
 
-        <div style="display: flex; justify-content: space-between; padding: 0.75rem; background: rgba(255, 255, 255, 0.03); border-radius: 6px; margin-top: 0.5rem;">
-          <span style="font-weight: 700; color: var(--color-text-primary);">{{t 'bills.totalBill'}}:</span>
-          <strong id="previewTotalBill" style="font-size: 1.25rem; color: var(--color-text-primary);">৳0.00</strong>
+      <!-- Total Bill Card -->
+      <div style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(56, 189, 248, 0.1)); border: 1px solid rgba(99, 102, 241, 0.3); border-radius: 10px; padding: 1rem 1.15rem; margin-bottom: 0.85rem; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <div style="font-size: 0.76rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #a5b4fc;">{{t 'bills.totalBill'}}</div>
+          <div style="font-size: 0.72rem; color: var(--color-text-dim);">Combined billing obligation</div>
         </div>
+        <strong id="previewTotalBill" style="font-size: 1.5rem; font-weight: 800; color: #ffffff; letter-spacing: -0.02em;">৳0.00</strong>
+      </div>
 
-        <div style="display: flex; justify-content: space-between; padding: 0.5rem 0.75rem;">
-          <span style="color: var(--color-text-muted);">{{t 'bills.paid'}}:</span>
-          <strong id="previewPaidAmount" style="color: #10b981;">৳0.00</strong>
-        </div>
+      <!-- Paid Amount Row -->
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.65rem 0.85rem; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 8px; margin-bottom: 0.85rem;">
+        <span style="font-size: 0.82rem; font-weight: 600; color: #34d399;">{{t 'bills.paid'}}</span>
+        <strong id="previewPaidAmount" style="font-size: 1.1rem; color: #34d399; font-weight: 800;">৳0.00</strong>
+      </div>
 
-        <div style="display: flex; justify-content: space-between; padding: 0.75rem; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 6px;">
-          <span style="font-weight: 700; color: var(--color-text-primary);">{{t 'bills.presentDues'}}:</span>
-          <strong id="previewPresentDues" style="font-size: 1.35rem; color: #ef4444;">৳0.00</strong>
+      <!-- Present Net Dues Alert -->
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.85rem 1rem; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 10px;">
+        <div>
+          <div style="font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #f87171;">{{t 'bills.presentDues'}}</div>
+          <div style="font-size: 0.7rem; color: #fca5a5;">Outstanding balance carryover</div>
         </div>
+        <strong id="previewPresentDues" style="font-size: 1.5rem; font-weight: 800; color: #ef4444; letter-spacing: -0.02em;">৳0.00</strong>
       </div>
     </div>
   </div>
@@ -205,7 +278,7 @@
         previewRateBadge.textContent = 'Rate: ৳' + rate.toFixed(2) + '/Unit';
       }
       if (previewElectricLabel) {
-        previewElectricLabel.innerHTML = 'Electric Charge (Units &times; ৳' + rate.toFixed(2) + '):';
+        previewElectricLabel.innerHTML = 'Electricity (' + consumed.toFixed(1) + 'u &times; ৳' + rate.toFixed(2) + '):';
       }
 
       document.getElementById('previewPrevUnit').textContent = previousUnit.toFixed(2);
@@ -216,8 +289,18 @@
       document.getElementById('previewRentLoan').textContent = '৳' + (rent + loan).toFixed(2);
       document.getElementById('previewTotalBill').textContent = '৳' + total.toFixed(2);
       document.getElementById('previewPaidAmount').textContent = '৳' + clearMoney.toFixed(2);
-      document.getElementById('previewPresentDues').textContent = '৳' + presentDues.toFixed(2);
-      document.getElementById('previewPresentDues').style.color = presentDues > 0 ? '#ef4444' : '#10b981';
+      
+      const duesEl = document.getElementById('previewPresentDues');
+      duesEl.textContent = '৳' + presentDues.toFixed(2);
+      if (presentDues <= 0) {
+        duesEl.style.color = '#34d399';
+        duesEl.parentElement.style.background = 'rgba(16, 185, 129, 0.1)';
+        duesEl.parentElement.style.borderColor = 'rgba(16, 185, 129, 0.25)';
+      } else {
+        duesEl.style.color = '#ef4444';
+        duesEl.parentElement.style.background = 'rgba(239, 68, 68, 0.1)';
+        duesEl.parentElement.style.borderColor = 'rgba(239, 68, 68, 0.25)';
+      }
     }
 
     customerSelect.addEventListener('change', () => fetchCustomerSummary(customerSelect.value));

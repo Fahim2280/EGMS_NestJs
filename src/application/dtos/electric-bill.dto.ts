@@ -80,6 +80,8 @@ export class ElectricBillResponseDto {
   billNumber?: number;
   customerId: string;
   customerName?: string;
+  customerCode?: string | null;
+  customerCId?: number;
   companyId: string;
   date: Date;
   previousUnit: number;

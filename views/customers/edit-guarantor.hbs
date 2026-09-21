@@ -1,0 +1,61 @@
+<div class="page-header">
+  <div class="header-content">
+    <a href="/customers/{{customer.id}}" style="color: var(--color-text-muted); text-decoration: none; font-size: 0.875rem; display: inline-flex; align-items: center; gap: 0.25rem; margin-bottom: 0.5rem;">
+      &larr; {{t 'common.back'}}
+    </a>
+    <h1 class="page-title">{{t 'guarantors.edit'}}</h1>
+    <p class="page-subtitle">{{t 'guarantors.subtitle'}}</p>
+  </div>
+</div>
+
+<div class="card" style="max-width: 800px; margin: 0 auto;">
+  {{#if error}}
+    <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem; color: #ef4444; font-size: 0.9rem;">
+      {{error}}
+    </div>
+  {{/if}}
+
+  <form action="/customers/{{customer.id}}/guarantors/{{guarantor.id}}" method="POST">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
+      <div class="form-group">
+        <label class="form-label" for="name">{{t 'guarantors.name'}} *</label>
+        <input type="text" id="name" name="name" class="form-input" required value="{{guarantor.name}}" placeholder="Guarantor full name">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="relationship">{{t 'guarantors.relationship'}}</label>
+        <input type="text" id="relationship" name="relationship" class="form-input" value="{{guarantor.relationship}}" placeholder="e.g. Father, Brother, Relative, Friend">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="mobileNumber">{{t 'guarantors.mobile'}} *</label>
+        <input type="tel" id="mobileNumber" name="mobileNumber" class="form-input" required value="{{guarantor.mobileNumber}}" placeholder="e.g. 01712345678">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="nidNumber">{{t 'guarantors.nid'}} *</label>
+        <input type="text" id="nidNumber" name="nidNumber" class="form-input" required value="{{guarantor.nidNumber}}" placeholder="National ID number">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="fatherName">{{t 'guarantors.fatherName'}}</label>
+        <input type="text" id="fatherName" name="fatherName" class="form-input" value="{{guarantor.fatherName}}" placeholder="Father's full name">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="motherName">{{t 'guarantors.motherName'}}</label>
+        <input type="text" id="motherName" name="motherName" class="form-input" value="{{guarantor.motherName}}" placeholder="Mother's full name">
+      </div>
+
+      <div class="form-group" style="grid-column: 1 / -1;">
+        <label class="form-label" for="address">{{t 'guarantors.address'}} *</label>
+        <textarea id="address" name="address" class="form-input" rows="2" required placeholder="Guarantor residential or business address...">{{guarantor.address}}</textarea>
+      </div>
+    </div>
+
+    <div class="form-actions" style="margin-top: 2rem; display: flex; gap: 0.75rem; justify-content: flex-end; flex-wrap: wrap;">
+      <a href="/customers/{{customer.id}}" class="btn btn-secondary">{{t 'common.cancel'}}</a>
+      <button type="submit" class="btn btn-primary">{{t 'guarantors.update'}}</button>
+    </div>
+  </form>
+</div>

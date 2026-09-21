@@ -23,19 +23,31 @@ export class GetElectricBillsByCompanyHandler
   async execute(
     query: GetElectricBillsByCompanyQuery,
   ): Promise<ElectricBillResponseDto[]> {
-    const [bills, customers] = await Promise.all([
+    let [bills, customers] = await Promise.all([
       this.billRepo.findByCompanyId(query.companyId),
       this.customerRepo.findByCompanyId(query.companyId),
     ]);
 
-    const customerMap = new Map(customers.map((c) => [c.id, c.name]));
+    if (query.allowedGarageIds !== undefined && query.allowedGarageIds !== null) {
+      const allowedSet = new Set(query.allowedGarageIds);
+      const allowedCustomerIds = new Set(
+        customers.filter((c) => c.garageId && allowedSet.has(c.garageId)).map((c) => c.id),
+      );
+      bills = bills.filter((b) => allowedCustomerIds.has(b.customerId));
+    }
 
-    return bills.map((b) => ({
-      id: b.id,
-      billNumber: b.billNumber,
-      customerId: b.customerId,
-      customerName: customerMap.get(b.customerId) || 'Unknown Customer',
-      companyId: b.companyId,
+    const customerMap = new Map(customers.map((c) => [c.id, c]));
+
+    return bills.map((b) => {
+      const cust = customerMap.get(b.customerId);
+      return {
+        id: b.id,
+        billNumber: b.billNumber,
+        customerId: b.customerId,
+        customerName: cust?.name || 'Unknown Customer',
+        customerCode: cust?.customerCode || null,
+        customerCId: cust?.cId,
+        companyId: b.companyId,
       date: b.date,
       previousUnit: b.previousUnit,
       currentUnit: b.currentUnit,
@@ -47,6 +59,7 @@ export class GetElectricBillsByCompanyHandler
       totalBill: b.totalBill,
       clearMoney: b.clearMoney,
       presentDues: b.presentDues,
-    }));
+      };
+    });
   }
 }

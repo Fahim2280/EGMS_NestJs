@@ -8,4 +8,5 @@ export interface IEmployeeRepository extends IGenericRepository<Employee> {
   findByNid(nidNumber: string): Promise<Employee | null>;
   findByCompanyId(companyId: string): Promise<Employee[]>;
   countByCompanyId(companyId: string): Promise<number>;
+  saveWithGarages(employee: Employee, garageIds: string[]): Promise<Employee>;
 }

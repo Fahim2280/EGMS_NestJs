@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { Employee, IEmployeeRepository } from '@domain/index';
 import { EmployeeOrmEntity } from '../entities/employee.orm-entity';
+import { GarageOrmEntity } from '../entities/garage.orm-entity';
 import { GenericTypeOrmRepository } from './generic-typeorm.repository';
 
 @Injectable()
@@ -13,24 +14,64 @@ export class TypeOrmEmployeeRepository
   constructor(
     @InjectRepository(EmployeeOrmEntity)
     private readonly employeeRepo: Repository<EmployeeOrmEntity>,
+    @InjectRepository(GarageOrmEntity)
+    private readonly garageRepo: Repository<GarageOrmEntity>,
   ) {
     super(employeeRepo);
   }
 
   async findByEmail(email: string): Promise<Employee | null> {
-    return this.getFirstOrDefaultAsync({ email: email.trim().toLowerCase() });
+    const orm = await this.employeeRepo.findOne({
+      where: { email: email.trim().toLowerCase(), isDeleted: false },
+      relations: { permittedGarages: true },
+    });
+    return orm ? this.toDomain(orm) : null;
   }
 
   async findByNid(nidNumber: string): Promise<Employee | null> {
-    return this.getFirstOrDefaultAsync({ nidNumber: nidNumber.trim() });
+    const orm = await this.employeeRepo.findOne({
+      where: { nidNumber: nidNumber.trim(), isDeleted: false },
+      relations: { permittedGarages: true },
+    });
+    return orm ? this.toDomain(orm) : null;
   }
 
   async findByCompanyId(companyId: string): Promise<Employee[]> {
-    return this.getAllAsync({ filter: { companyId } });
+    const orms = await this.employeeRepo.find({
+      where: { companyId, isDeleted: false },
+      relations: { permittedGarages: true },
+      order: { createdDate: 'DESC' },
+    });
+    return orms.map((orm) => this.toDomain(orm));
+  }
+
+  override async findById(id: string): Promise<Employee | null> {
+    const orm = await this.employeeRepo.findOne({
+      where: { id, isDeleted: false },
+      relations: { permittedGarages: true },
+    });
+    return orm ? this.toDomain(orm) : null;
   }
 
   async countByCompanyId(companyId: string): Promise<number> {
     return this.countAsync({ companyId });
+  }
+
+  async saveWithGarages(employee: Employee, garageIds: string[]): Promise<Employee> {
+    const orm = this.toOrm(employee);
+    if (garageIds && Array.isArray(garageIds)) {
+      if (garageIds.length > 0) {
+        orm.permittedGarages = await this.garageRepo.findBy({
+          id: In(garageIds),
+          companyId: employee.companyId,
+          isDeleted: false,
+        });
+      } else {
+        orm.permittedGarages = [];
+      }
+    }
+    const saved = await this.employeeRepo.save(orm);
+    return this.toDomain(saved);
   }
 
   protected toDomain(orm: EmployeeOrmEntity): Employee {
@@ -44,6 +85,11 @@ export class TypeOrmEmployeeRepository
       phoneNumber: orm.phoneNumber,
       role: orm.role,
       nidNumber: orm.nidNumber,
+      canCreate: orm.canCreate,
+      canEdit: orm.canEdit,
+      canDelete: orm.canDelete,
+      canView: orm.canView,
+      permittedGarageIds: orm.permittedGarages ? orm.permittedGarages.map((g) => g.id) : [],
       isActive: orm.isActive,
       isDeleted: orm.isDeleted,
       createdBy: orm.createdBy,
@@ -66,6 +112,10 @@ export class TypeOrmEmployeeRepository
     orm.phoneNumber = domain.phoneNumber;
     orm.role = domain.role;
     orm.nidNumber = domain.nidNumber;
+    orm.canCreate = domain.canCreate;
+    orm.canEdit = domain.canEdit;
+    orm.canDelete = domain.canDelete;
+    orm.canView = domain.canView;
     orm.isActive = domain.isActive;
     orm.isDeleted = domain.isDeleted;
     orm.createdBy = domain.createdBy;

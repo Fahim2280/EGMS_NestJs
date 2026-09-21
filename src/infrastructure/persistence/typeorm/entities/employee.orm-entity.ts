@@ -3,12 +3,15 @@ import {
   Entity,
   Index,
   JoinColumn,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
   PrimaryColumn,
 } from 'typeorm';
 import { AutoMap } from '@automapper/classes';
 import { BaseAuditableOrmEntity } from './base-auditable.orm-entity';
 import { CompanyOrmEntity } from './company.orm-entity';
+import { GarageOrmEntity } from './garage.orm-entity';
 
 @Entity('employees')
 export class EmployeeOrmEntity extends BaseAuditableOrmEntity {
@@ -49,9 +52,35 @@ export class EmployeeOrmEntity extends BaseAuditableOrmEntity {
   @Column({ length: 50 })
   nidNumber: string;
 
+  @AutoMap()
+  @Column({ type: 'boolean', default: false })
+  canCreate: boolean;
+
+  @AutoMap()
+  @Column({ type: 'boolean', default: false })
+  canEdit: boolean;
+
+  @AutoMap()
+  @Column({ type: 'boolean', default: false })
+  canDelete: boolean;
+
+  @AutoMap()
+  @Column({ type: 'boolean', default: true })
+  canView: boolean;
+
   @ManyToOne(() => CompanyOrmEntity, (company) => company.employees, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'companyId' })
   company: CompanyOrmEntity;
+
+  @ManyToMany(() => GarageOrmEntity, (garage) => garage.employees, {
+    cascade: false,
+  })
+  @JoinTable({
+    name: 'employee_garages',
+    joinColumn: { name: 'employeeId', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'garageId', referencedColumnName: 'id' },
+  })
+  permittedGarages: GarageOrmEntity[];
 }

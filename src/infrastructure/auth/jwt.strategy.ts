@@ -1,8 +1,9 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';
+import { EMPLOYEE_REPOSITORY_TOKEN, IEmployeeRepository } from '@domain/index';
 
 const cookieExtractor = (req: Request): string | null => {
   if (req && req.cookies) {
@@ -25,7 +26,11 @@ export interface JwtPayload {
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor(private readonly configService: ConfigService) {
+  constructor(
+    private readonly configService: ConfigService,
+    @Inject(EMPLOYEE_REPOSITORY_TOKEN)
+    private readonly employeeRepo: IEmployeeRepository,
+  ) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -43,16 +48,50 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     if (!payload || !payload.sub) {
       throw new UnauthorizedException();
     }
+
+    if (payload.role === 'SUPER_ADMIN') {
+      return {
+        id: payload.sub,
+        email: payload.email,
+        name: payload.name || payload.fullName,
+        role: 'SUPER_ADMIN',
+        companyId: payload.companyId,
+        companyName: payload.companyName,
+        phoneNumber: payload.phoneNumber,
+        nidNumber: payload.nidNumber,
+        garageName: payload.garageName,
+        isSuperAdmin: true,
+        canCreate: true,
+        canEdit: true,
+        canDelete: true,
+        canView: true,
+        garageIds: null,
+      };
+    }
+
+    // General Employee: retrieve live state from employee repository
+    const employee = await this.employeeRepo.findById(payload.sub);
+    if (!employee || !employee.isActive || employee.isDeleted) {
+      throw new UnauthorizedException('Employee account is inactive, suspended, or not found.');
+    }
+
+    const isSuperAdmin = employee.role === 'SUPER_ADMIN';
+
     return {
-      id: payload.sub,
-      email: payload.email,
-      name: payload.name || payload.fullName,
-      role: payload.role,
-      companyId: payload.companyId,
+      id: employee.id,
+      email: employee.email,
+      name: employee.name,
+      role: employee.role || 'GENERAL',
+      companyId: employee.companyId,
       companyName: payload.companyName,
-      phoneNumber: payload.phoneNumber,
-      nidNumber: payload.nidNumber,
-      garageName: payload.garageName,
+      phoneNumber: employee.phoneNumber,
+      nidNumber: employee.nidNumber,
+      isSuperAdmin,
+      canCreate: isSuperAdmin ? true : Boolean(employee.canCreate),
+      canEdit: isSuperAdmin ? true : Boolean(employee.canEdit),
+      canDelete: isSuperAdmin ? true : Boolean(employee.canDelete),
+      canView: isSuperAdmin ? true : Boolean(employee.canView),
+      garageIds: isSuperAdmin ? null : (employee.permittedGarageIds || []),
     };
   }
 }

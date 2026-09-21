@@ -75,4 +75,38 @@ describe('Employee Entity', () => {
 
     expect(() => emp.updateRole('INVALID_ROLE')).toThrow(/Invalid role/);
   });
+
+  it('should manage granular action permissions and garage access', () => {
+    const emp = Employee.create({
+      id: 'emp-205',
+      companyId: 'comp-101',
+      name: 'Bruce Wayne',
+      address: 'Gotham',
+      email: 'bruce@wayne.com',
+      password: 'password',
+      phoneNumber: '+1-555-9999',
+      nidNumber: 'NID-9988776655',
+    });
+
+    // Default permissions
+    expect(emp.canCreate).toBe(false);
+    expect(emp.canEdit).toBe(false);
+    expect(emp.canDelete).toBe(false);
+    expect(emp.canView).toBe(true);
+    expect(emp.permittedGarageIds).toEqual([]);
+    expect(emp.hasGarageAccess('gar-1')).toBe(false);
+
+    // Update permissions
+    emp.updatePermissions(true, false, false, true, ['gar-1', 'gar-2'], 'admin');
+
+    expect(emp.canPerform('create')).toBe(true);
+    expect(emp.canPerform('edit')).toBe(false);
+    expect(emp.canPerform('delete')).toBe(false);
+    expect(emp.canPerform('view')).toBe(true);
+
+    expect(emp.hasGarageAccess('gar-1')).toBe(true);
+    expect(emp.hasGarageAccess('gar-2')).toBe(true);
+    expect(emp.hasGarageAccess('gar-3')).toBe(false);
+    expect(emp.hasGarageAccess(null)).toBe(false);
+  });
 });

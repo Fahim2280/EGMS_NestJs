@@ -85,6 +85,21 @@ export class EmployeeResponseDto {
   isActive: boolean;
 
   @AutoMap()
+  canCreate: boolean;
+
+  @AutoMap()
+  canEdit: boolean;
+
+  @AutoMap()
+  canDelete: boolean;
+
+  @AutoMap()
+  canView: boolean;
+
+  permittedGarageIds?: string[];
+  permittedGarages?: any[];
+
+  @AutoMap()
   createdAt: string;
 
   @AutoMap()

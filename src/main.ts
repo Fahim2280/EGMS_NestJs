@@ -12,6 +12,7 @@ import {
   formatNumberWithLang,
   formatDateWithLang,
 } from './infrastructure/i18n/i18n.service';
+import { CurrentUserInterceptor } from './infrastructure/auth/current-user.interceptor';
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
@@ -43,6 +44,14 @@ async function bootstrap() {
     if (token) {
       try {
         const decoded = jwtService.verify(token);
+        if (decoded.role === 'SUPER_ADMIN') {
+          decoded.isSuperAdmin = true;
+          decoded.canCreate = true;
+          decoded.canEdit = true;
+          decoded.canDelete = true;
+          decoded.canView = true;
+          decoded.garageIds = null;
+        }
         req.user = decoded;
         res.locals.currentUser = decoded;
       } catch {
@@ -96,6 +105,13 @@ async function bootstrap() {
   hbs.registerHelper('or', (a: any, b: any) => Boolean(a || b));
   hbs.registerHelper('not', (a: any) => !a);
   hbs.registerHelper('json', (context: any) => JSON.stringify(context, null, 2));
+  hbs.registerHelper('includes', (arr: any, val: any) => {
+    if (!arr) return false;
+    if (Array.isArray(arr)) {
+      return arr.includes(val);
+    }
+    return false;
+  });
 
   // Translation & Numeral formatting helpers
   hbs.registerHelper('t', function (key: string, options: any) {
@@ -140,6 +156,9 @@ async function bootstrap() {
       forbidUnknownValues: false,
     }),
   );
+
+  // Global interceptor to synchronize req.user to res.locals.currentUser for Handlebars
+  app.useGlobalInterceptors(new CurrentUserInterceptor());
 
   const port = process.env.PORT || 3000;
   await app.listen(port);

@@ -27,6 +27,9 @@ import { ForgotPasswordHandler } from './commands/handlers/forgot-password.handl
 import { ResetPasswordHandler } from './commands/handlers/reset-password.handler';
 import { UpdateCompanyHandler } from './commands/handlers/update-company.handler';
 import { UpdateEmployeePermissionHandler } from './commands/handlers/update-employee-permission.handler';
+import { CreateGuarantorHandler } from './commands/handlers/create-guarantor.handler';
+import { UpdateGuarantorHandler } from './commands/handlers/update-guarantor.handler';
+import { DeleteGuarantorHandler } from './commands/handlers/delete-guarantor.handler';
 
 // Query Handlers
 import { GetCompanyByIdHandler } from './queries/handlers/get-company-by-id.handler';
@@ -43,6 +46,7 @@ import { GetElectricBillByIdHandler } from './queries/handlers/get-electric-bill
 import { GetCustomerBillSummaryHandler } from './queries/handlers/get-customer-bill-summary.handler';
 import { PreviewElectricBillHandler } from './queries/handlers/preview-electric-bill.handler';
 import { GetExecutiveDashboardHandler } from './queries/handlers/get-executive-dashboard.handler';
+import { GetGuarantorsByCustomerHandler } from './queries/handlers/get-guarantors-by-customer.handler';
 
 // AutoMapper Profiles
 import { CompanyProfile } from './mappings/company.profile';
@@ -68,6 +72,9 @@ const CommandHandlers = [
   ResetPasswordHandler,
   UpdateCompanyHandler,
   UpdateEmployeePermissionHandler,
+  CreateGuarantorHandler,
+  UpdateGuarantorHandler,
+  DeleteGuarantorHandler,
 ];
 
 const QueryHandlers = [
@@ -85,6 +92,7 @@ const QueryHandlers = [
   GetCustomerBillSummaryHandler,
   PreviewElectricBillHandler,
   GetExecutiveDashboardHandler,
+  GetGuarantorsByCustomerHandler,
 ];
 
 const Profiles = [

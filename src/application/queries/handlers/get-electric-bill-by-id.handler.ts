@@ -35,6 +35,8 @@ export class GetElectricBillByIdHandler
       billNumber: bill.billNumber,
       customerId: bill.customerId,
       customerName: customer?.name || 'Unknown Customer',
+      customerCode: customer?.customerCode || null,
+      customerCId: customer?.cId,
       companyId: bill.companyId,
       date: bill.date,
       previousUnit: bill.previousUnit,

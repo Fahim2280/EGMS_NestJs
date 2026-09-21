@@ -43,6 +43,14 @@ export class UpdateCustomerHandler implements ICommandHandler<UpdateCustomerComm
       throw new ConflictException(`Another customer with mobile '${dto.mobileNumber}' already exists.`);
     }
 
+    // Check unique customerCode (excluding self, only among active records)
+    if (dto.customerCode && dto.customerCode.trim()) {
+      const existingCode = await this.customerRepo.findByCustomerCode(companyId, dto.customerCode.trim(), id);
+      if (existingCode) {
+        throw new ConflictException(`Customer ID '${dto.customerCode.trim()}' is already in use. Choose another.`);
+      }
+    }
+
     customer.updateDetails(
       dto.name,
       dto.fatherName || '',
@@ -53,6 +61,7 @@ export class UpdateCustomerHandler implements ICommandHandler<UpdateCustomerComm
       dto.previousUnit,
       dto.advanceMoney,
       dto.garageId,
+      dto.customerCode?.trim() || null,
       actorStamp || `${companyId}|SUPER_ADMIN`,
     );
 

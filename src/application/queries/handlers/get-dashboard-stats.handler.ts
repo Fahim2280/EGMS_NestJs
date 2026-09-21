@@ -39,7 +39,11 @@ export class GetDashboardStatsHandler
     let companyEmployeesCount = 0;
 
     if (query.companyId) {
-      const companyGarages = await this.garageRepo.findByCompanyId(query.companyId);
+      let companyGarages = await this.garageRepo.findByCompanyId(query.companyId);
+      if (query.allowedGarageIds !== undefined && query.allowedGarageIds !== null) {
+        const allowedSet = new Set(query.allowedGarageIds);
+        companyGarages = companyGarages.filter((g) => allowedSet.has(g.id));
+      }
       companyGaragesCount = companyGarages.length;
       companyEmployeesCount = await this.employeeRepo.countByCompanyId(query.companyId);
     }

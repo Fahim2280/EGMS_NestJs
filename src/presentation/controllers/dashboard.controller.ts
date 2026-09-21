@@ -19,18 +19,27 @@ export class DashboardController {
     }
 
     const companyId = user.companyId;
+    const isSuperAdmin = user.role === 'SUPER_ADMIN' || user.isSuperAdmin;
+    const allowedGarageIds = isSuperAdmin ? null : (user.garageIds || []);
+
     const [company, garages, employees, stats, execDashboard] = await Promise.all([
       this.queryBus.execute(new GetCompanyByIdQuery(companyId)),
-      this.queryBus.execute(new GetGaragesByCompanyQuery(companyId)),
+      this.queryBus.execute(new GetGaragesByCompanyQuery(companyId, allowedGarageIds)),
       this.queryBus.execute(new GetEmployeesByCompanyQuery(companyId)),
-      this.queryBus.execute(new GetDashboardStatsQuery(companyId)),
-      this.queryBus.execute(new GetExecutiveDashboardQuery(companyId)),
+      this.queryBus.execute(new GetDashboardStatsQuery(companyId, allowedGarageIds)),
+      this.queryBus.execute(new GetExecutiveDashboardQuery(companyId, allowedGarageIds)),
     ]);
 
     return res.render('dashboard', {
       title: `${company?.companyName || 'Dashboard'} - Electric Garage Portal`,
       activeNav: 'dashboard',
       user,
+      isSuperAdmin,
+      canCreate: isSuperAdmin || Boolean(user.canCreate),
+      canEdit: isSuperAdmin || Boolean(user.canEdit),
+      canDelete: isSuperAdmin || Boolean(user.canDelete),
+      canView: isSuperAdmin || Boolean(user.canView),
+      hasAssignedGarages: isSuperAdmin || (user.garageIds && user.garageIds.length > 0),
       company,
       garages,
       employees,

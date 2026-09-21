@@ -16,6 +16,23 @@ export abstract class GenericTypeOrmRepository<
   protected abstract toDomain(orm: TOrm): TDomain;
   protected abstract toOrm(domain: TDomain): TOrm;
 
+  protected parseRelations(relations?: any): Record<string, boolean> | undefined {
+    if (!relations) return undefined;
+    if (Array.isArray(relations)) {
+      if (relations.length === 0) return undefined;
+      return relations.reduce((acc, rel) => {
+        if (typeof rel === 'string' && rel.trim().length > 0) {
+          acc[rel.trim()] = true;
+        }
+        return acc;
+      }, {} as Record<string, boolean>);
+    }
+    if (typeof relations === 'object') {
+      return relations;
+    }
+    return undefined;
+  }
+
   async getAllAsync(options?: QueryOptions): Promise<TDomain[]> {
     const where: FindOptionsWhere<TOrm> = (options?.filter || {}) as FindOptionsWhere<TOrm>;
 
@@ -25,7 +42,7 @@ export abstract class GenericTypeOrmRepository<
 
     const ormList = await this.repository.find({
       where,
-      relations: options?.relations as any,
+      relations: this.parseRelations(options?.relations) as any,
       order: (options?.orderBy || { createdDate: 'DESC' }) as any,
       take: options?.limit || 1000,
     });
@@ -36,7 +53,7 @@ export abstract class GenericTypeOrmRepository<
   async getByIdAsync(id: string, relations?: string[]): Promise<TDomain | null> {
     const orm = await this.repository.findOne({
       where: { id, isDeleted: false } as any,
-      relations: relations as any,
+      relations: this.parseRelations(relations) as any,
     });
     return orm ? this.toDomain(orm) : null;
   }
@@ -52,7 +69,7 @@ export abstract class GenericTypeOrmRepository<
 
     const orm = await this.repository.findOne({
       where: where as any,
-      relations: relations as any,
+      relations: this.parseRelations(relations) as any,
     });
     return orm ? this.toDomain(orm) : null;
   }
@@ -119,7 +136,7 @@ export abstract class GenericTypeOrmRepository<
 
     const [items, totalCount] = await this.repository.findAndCount({
       where,
-      relations: options?.relations as any,
+      relations: this.parseRelations(options?.relations) as any,
       order: (options?.orderBy || { createdDate: 'DESC' }) as any,
       skip: (safePage - 1) * safePageSize,
       take: safePageSize,
