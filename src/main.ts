@@ -173,19 +173,17 @@ async function bootstrap() {
     return '🌐 Web Client';
   });
 
-  hbs.registerHelper('formatDate', (date: any) => {
-    if (!date) return 'N/A';
-    try {
-      const d = new Date(date);
-      return isNaN(d.getTime()) ? 'N/A' : d.toISOString().split('T')[0];
-    } catch {
-      return String(date);
-    }
+  hbs.registerHelper('formatDate', function (date: any, options: any) {
+    const lang = options?.data?.root?.lang || 'en';
+    return formatDateWithLang(date, lang);
   });
 
-  hbs.registerHelper('roleBadge', (role: string) => {
+  hbs.registerHelper('roleBadge', function (role: string, options: any) {
     const isSuperAdmin = role === 'SUPER_ADMIN';
-    const label = isSuperAdmin ? 'Super Admin' : 'General Employee';
+    const lang = options?.data?.root?.lang || 'en';
+    const label = isSuperAdmin
+      ? (lang === 'bn' ? 'সুপার অ্যাডমিন' : 'Super Admin')
+      : (lang === 'bn' ? 'সাধারণ কর্মকর্তা' : 'General Employee');
     const badgeClass = isSuperAdmin ? 'badge-admin' : 'badge-officer';
     return new (hbs as any).handlebars.SafeString(
       `<span class="badge ${badgeClass}"><span class="badge-dot"></span>${label}</span>`,

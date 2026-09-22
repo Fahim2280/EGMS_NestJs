@@ -3,8 +3,8 @@
   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
     <div>
       <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
-        <span class="badge badge-admin" style="font-size: 0.75rem;">Security &amp; RBAC</span>
-        <span style="color: var(--color-text-muted); font-size: 0.85rem;">/ Management Portal</span>
+        <span class="badge badge-admin" style="font-size: 0.75rem;">{{t 'permissions.securityBadge'}}</span>
+        <span style="color: var(--color-text-muted); font-size: 0.85rem;">/ {{#if isBn}}পরিচালনা পোর্টাল{{else}}Management Portal{{/if}}</span>
       </div>
       <h1 style="font-size: 1.6rem; font-weight: 800; color: #fff; margin: 0; display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
         <span style="display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 10px; background: rgba(99, 102, 241, 0.15); color: #818cf8; border: 1px solid rgba(99, 102, 241, 0.3);">
@@ -12,10 +12,10 @@
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
           </svg>
         </span>
-        User Permissions &amp; Garage Access Control
+        {{t 'permissions.title'}}
       </h1>
       <p style="color: var(--color-text-muted); margin: 0.35rem 0 0 0; font-size: 0.9rem;">
-        Configure fine-grained action permissions (Create, Edit, Delete, View) and assign authorized garage facilities for each employee.
+        {{t 'permissions.subtitle'}}
       </p>
     </div>
     <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;" class="header-actions">
@@ -24,14 +24,14 @@
           <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
           <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
         </svg>
-        Employee Roster
+        {{t 'employees.roster'}}
       </a>
       <a href="/employees/new" class="btn btn-primary">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <line x1="12" y1="5" x2="12" y2="19"/>
           <line x1="5" y1="12" x2="19" y2="12"/>
         </svg>
-        Add Employee
+        {{t 'employees.addEmployee'}}
       </a>
     </div>
   </div>
@@ -43,8 +43,8 @@
         👥
       </div>
       <div>
-        <div style="color: var(--color-text-muted); font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Total Employees</div>
-        <div style="color: #fff; font-size: 1.5rem; font-weight: 800;" data-counter="{{stats.total}}">{{stats.total}}</div>
+        <div style="color: var(--color-text-muted); font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">{{t 'permissions.totalEmployees'}}</div>
+        <div style="color: #fff; font-size: 1.5rem; font-weight: 800;" data-counter="{{stats.total}}">{{bnNum stats.total isBn}}</div>
       </div>
     </div>
 
@@ -53,8 +53,8 @@
         👑
       </div>
       <div>
-        <div style="color: var(--color-text-muted); font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Super Admins</div>
-        <div style="color: #fbbf24; font-size: 1.5rem; font-weight: 800;" data-counter="{{stats.superAdmins}}">{{stats.superAdmins}}</div>
+        <div style="color: var(--color-text-muted); font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">{{t 'permissions.superAdmins'}}</div>
+        <div style="color: #fbbf24; font-size: 1.5rem; font-weight: 800;" data-counter="{{stats.superAdmins}}">{{bnNum stats.superAdmins isBn}}</div>
       </div>
     </div>
 
@@ -63,8 +63,8 @@
         🧑‍💼
       </div>
       <div>
-        <div style="color: var(--color-text-muted); font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">General Staff</div>
-        <div style="color: #22d3ee; font-size: 1.5rem; font-weight: 800;" data-counter="{{stats.generalStaff}}">{{stats.generalStaff}}</div>
+        <div style="color: var(--color-text-muted); font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">{{t 'permissions.limitedAccess'}}</div>
+        <div style="color: #22d3ee; font-size: 1.5rem; font-weight: 800;" data-counter="{{stats.generalStaff}}">{{bnNum stats.generalStaff isBn}}</div>
       </div>
     </div>
 
@@ -73,8 +73,8 @@
         🟢
       </div>
       <div>
-        <div style="color: var(--color-text-muted); font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Active Accounts</div>
-        <div style="color: #34d399; font-size: 1.5rem; font-weight: 800;" data-counter="{{stats.active}}">{{stats.active}}</div>
+        <div style="color: var(--color-text-muted); font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">{{t 'common.active'}}</div>
+        <div style="color: #34d399; font-size: 1.5rem; font-weight: 800;" data-counter="{{stats.active}}">{{bnNum stats.active isBn}}</div>
       </div>
     </div>
   </div>
@@ -83,13 +83,13 @@
   <div class="card" style="padding: 0; overflow: hidden; box-shadow: var(--shadow-md); margin-bottom: 2.5rem;">
     <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--color-border); background: rgba(15, 23, 42, 0.6); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
       <div>
-        <h2 style="font-size: 1.15rem; font-weight: 700; color: #fff; margin: 0;">Employee Access &amp; Garage Permissions</h2>
+        <h2 style="font-size: 1.15rem; font-weight: 700; color: #fff; margin: 0;">{{t 'permissions.configureRbac'}}</h2>
         <p style="color: var(--color-text-muted); font-size: 0.85rem; margin: 0.2rem 0 0 0;">
-          Select action capabilities and assign authorized garages. Click "Configure" to modify and commit changes.
+          {{#if isBn}}কার্যক্রম অনুমোদন নির্বাচন করুন এবং গ্যারেজ নির্ধারণ করুন। পরিবর্তন করতে "কনফিগার" ক্লিক করুন।{{else}}Select action capabilities and assign authorized garages. Click "Configure" to modify and commit changes.{{/if}}
         </p>
       </div>
       <span style="color: var(--color-text-muted); font-size: 0.85rem; background: rgba(255, 255, 255, 0.05); padding: 0.35rem 0.75rem; border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.1);">
-        🔒 Restricted to Company Super Admin
+        🔒 {{#if isBn}}শুধুমাত্র সুপার অ্যাডমিন{{else}}Restricted to Company Super Admin{{/if}}
       </span>
     </div>
 
@@ -107,14 +107,14 @@
                   <div style="color: #fff; font-weight: 700; font-size: 1rem;">
                     <a href="/employees/{{this.id}}" style="color: #fff; text-decoration: none;" title="View Profile">{{this.name}}</a>
                     {{#if (eq this.role 'SUPER_ADMIN')}}
-                      <span class="badge badge-admin" style="margin-left: 0.5rem; font-size: 0.7rem;">Super Admin</span>
+                      <span class="badge badge-admin" style="margin-left: 0.5rem; font-size: 0.7rem;">{{t 'employees.roleSuperAdmin'}}</span>
                     {{else}}
-                      <span class="badge badge-officer" style="margin-left: 0.5rem; font-size: 0.7rem;">General Staff</span>
+                      <span class="badge badge-officer" style="margin-left: 0.5rem; font-size: 0.7rem;">{{t 'employees.roleGeneral'}}</span>
                     {{/if}}
                     {{#if this.isActive}}
-                      <span class="badge badge-active" style="margin-left: 0.25rem; font-size: 0.7rem;"><span class="badge-dot"></span>Active</span>
+                      <span class="badge badge-active" style="margin-left: 0.25rem; font-size: 0.7rem;"><span class="badge-dot"></span>{{t 'common.active'}}</span>
                     {{else}}
-                      <span class="badge" style="margin-left: 0.25rem; font-size: 0.7rem; background: rgba(239, 68, 68, 0.15); color: #ef4444;"><span class="badge-dot" style="background:#ef4444;"></span>Suspended</span>
+                      <span class="badge" style="margin-left: 0.25rem; font-size: 0.7rem; background: rgba(239, 68, 68, 0.15); color: #ef4444;"><span class="badge-dot" style="background:#ef4444;"></span>{{t 'employees.suspended'}}</span>
                     {{/if}}
                   </div>
                   <div style="color: var(--color-text-muted); font-size: 0.85rem; margin-top: 0.15rem;">{{this.email}} &bull; NID: <span style="font-family: monospace;">{{this.nidNumber}}</span></div>
@@ -125,36 +125,36 @@
               <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
                 <!-- Action Badges -->
                 <div style="display: flex; gap: 0.35rem; align-items: center;">
-                  <span style="font-size: 0.75rem; color: var(--color-text-muted); margin-right: 0.25rem;">Actions:</span>
+                  <span style="font-size: 0.75rem; color: var(--color-text-muted); margin-right: 0.25rem;">{{t 'permissions.actionPermissions'}}:</span>
                   <span class="badge" style="font-size: 0.75rem; {{#if (or (eq this.role 'SUPER_ADMIN') this.canCreate)}}background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3);{{else}}background: rgba(255, 255, 255, 0.05); color: #64748b; border: 1px solid rgba(255, 255, 255, 0.1);{{/if}}">
-                    Create
+                    {{t 'permissions.canCreate'}}
                   </span>
                   <span class="badge" style="font-size: 0.75rem; {{#if (or (eq this.role 'SUPER_ADMIN') this.canEdit)}}background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3);{{else}}background: rgba(255, 255, 255, 0.05); color: #64748b; border: 1px solid rgba(255, 255, 255, 0.1);{{/if}}">
-                    Edit
+                    {{t 'permissions.canEdit'}}
                   </span>
                   <span class="badge" style="font-size: 0.75rem; {{#if (or (eq this.role 'SUPER_ADMIN') this.canDelete)}}background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3);{{else}}background: rgba(255, 255, 255, 0.05); color: #64748b; border: 1px solid rgba(255, 255, 255, 0.1);{{/if}}">
-                    Delete
+                    {{t 'permissions.canDelete'}}
                   </span>
                   <span class="badge" style="font-size: 0.75rem; {{#if (or (eq this.role 'SUPER_ADMIN') this.canView)}}background: rgba(139, 92, 246, 0.15); color: #c084fc; border: 1px solid rgba(139, 92, 246, 0.3);{{else}}background: rgba(255, 255, 255, 0.05); color: #64748b; border: 1px solid rgba(255, 255, 255, 0.1);{{/if}}">
-                    View
+                    {{t 'permissions.canView'}}
                   </span>
                 </div>
 
                 <!-- Garage Permission Badges -->
                 <div style="display: flex; gap: 0.35rem; align-items: center; margin-left: 0.5rem;">
-                  <span style="font-size: 0.75rem; color: var(--color-text-muted); margin-right: 0.25rem;">Garages:</span>
+                  <span style="font-size: 0.75rem; color: var(--color-text-muted); margin-right: 0.25rem;">{{t 'nav.garages'}}:</span>
                   {{#if (eq this.role 'SUPER_ADMIN')}}
                     <span class="badge" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); font-size: 0.75rem;">
-                      👑 All Company Garages
+                      👑 {{t 'permissions.allGaragesFull'}}
                     </span>
                   {{else}}
                     {{#if this.permittedGarageIds.length}}
                       <span class="badge" style="background: rgba(6, 182, 212, 0.15); color: #22d3ee; border: 1px solid rgba(6, 182, 212, 0.3); font-size: 0.75rem;">
-                        🏢 {{this.permittedGarageIds.length}} Assigned
+                        🏢 {{bnNum this.permittedGarageIds.length isBn}} {{#if isBn}}নির্ধারিত{{else}}Assigned{{/if}}
                       </span>
                     {{else}}
                       <span class="badge" style="background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); font-size: 0.75rem;">
-                        ⚠️ None (No Access)
+                        ⚠️ {{#if isBn}}কোনো গ্যারেজ নেই{{else}}None (No Access){{/if}}
                       </span>
                     {{/if}}
                   {{/if}}
@@ -178,21 +178,21 @@
                   <!-- Column 1: Role & Account Status -->
                   <div>
                     <h4 style="font-size: 0.9rem; color: #fff; margin: 0 0 0.75rem 0; display: flex; align-items: center; gap: 0.4rem;">
-                      <span>🛡️</span> Role &amp; Account Status
+                      <span>🛡️</span> {{t 'employees.role'}} &amp; {{t 'common.status'}}
                     </h4>
                     <div style="margin-bottom: 0.75rem;">
-                      <label style="display: block; font-size: 0.8rem; color: var(--color-text-muted); margin-bottom: 0.25rem;">System Role</label>
+                      <label style="display: block; font-size: 0.8rem; color: var(--color-text-muted); margin-bottom: 0.25rem;">{{#if isBn}}সিস্টেম ভূমিকা{{else}}System Role{{/if}}</label>
                       <select name="role" class="form-control" style="width: 100%; padding: 0.5rem 0.75rem; font-size: 0.85rem; background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(99, 102, 241, 0.3); color: #fff; border-radius: 6px;" onchange="handleRoleChange('{{this.id}}', this.value)">
-                        <option value="GENERAL" {{#if (eq this.role 'GENERAL')}}selected{{/if}}>🧑‍💼 GENERAL (Staff Member)</option>
-                        <option value="SUPER_ADMIN" {{#if (eq this.role 'SUPER_ADMIN')}}selected{{/if}}>👑 SUPER_ADMIN (Full Company Access)</option>
+                        <option value="GENERAL" {{#if (eq this.role 'GENERAL')}}selected{{/if}}>🧑‍💼 GENERAL ({{#if isBn}}সাধারণ কর্মী{{else}}Staff Member{{/if}})</option>
+                        <option value="SUPER_ADMIN" {{#if (eq this.role 'SUPER_ADMIN')}}selected{{/if}}>👑 SUPER_ADMIN ({{#if isBn}}সম্পূর্ণ কোম্পানি অ্যাক্সেস{{else}}Full Company Access{{/if}})</option>
                       </select>
                     </div>
 
                     <div>
-                      <label style="display: block; font-size: 0.8rem; color: var(--color-text-muted); margin-bottom: 0.25rem;">Account Access State</label>
+                      <label style="display: block; font-size: 0.8rem; color: var(--color-text-muted); margin-bottom: 0.25rem;">{{#if isBn}}অ্যাকাউন্ট অ্যাক্সেস অবস্থা{{else}}Account Access State{{/if}}</label>
                       <select name="isActive" class="form-control" style="width: 100%; padding: 0.5rem 0.75rem; font-size: 0.85rem; background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(99, 102, 241, 0.3); color: #fff; border-radius: 6px;">
-                        <option value="true" {{#if this.isActive}}selected{{/if}}>🟢 Active (Permitted to Log In)</option>
-                        <option value="false" {{#unless this.isActive}}selected{{/unless}}>🔴 Suspended (Blocked Immediately)</option>
+                        <option value="true" {{#if this.isActive}}selected{{/if}}>🟢 {{#if isBn}}সক্রিয় (লগইনের অনুমতি আছে){{else}}Active (Permitted to Log In){{/if}}</option>
+                        <option value="false" {{#unless this.isActive}}selected{{/unless}}>🔴 {{#if isBn}}স্থগিত (তাৎক্ষণিকভাবে বাধা){{else}}Suspended (Blocked Immediately){{/if}}</option>
                       </select>
                     </div>
                   </div>
@@ -200,7 +200,7 @@
                   <!-- Column 2: Action Permissions -->
                   <div>
                     <h4 style="font-size: 0.9rem; color: #fff; margin: 0 0 0.75rem 0; display: flex; align-items: center; gap: 0.4rem;">
-                      <span>⚡</span> Action Permissions
+                      <span>⚡</span> {{t 'permissions.actionPermissions'}}
                     </h4>
                     <div style="display: flex; flex-direction: column; gap: 0.6rem;">
                       <label style="display: flex; align-items: center; gap: 0.6rem; cursor: pointer; color: #e2e8f0; font-size: 0.85rem;">
@@ -226,16 +226,16 @@
                   <div style="grid-column: 1 / -1;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
                       <h4 style="font-size: 0.9rem; color: #fff; margin: 0; display: flex; align-items: center; gap: 0.4rem;">
-                        <span>🏢</span> Authorized Garages (Resource Access)
+                        <span>🏢</span> {{t 'permissions.assignedGarages'}}
                       </h4>
                       <div style="display: flex; gap: 0.4rem;">
-                        <button type="button" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; padding: 0.2rem 0.6rem;" onclick="selectAllGarages('{{this.id}}', true)">Select All</button>
-                        <button type="button" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; padding: 0.2rem 0.6rem;" onclick="selectAllGarages('{{this.id}}', false)">Clear All</button>
+                        <button type="button" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; padding: 0.2rem 0.6rem;" onclick="selectAllGarages('{{this.id}}', true)">{{#if isBn}}সব নির্বাচন{{else}}Select All{{/if}}</button>
+                        <button type="button" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; padding: 0.2rem 0.6rem;" onclick="selectAllGarages('{{this.id}}', false)">{{#if isBn}}সব বাতিল{{else}}Clear All{{/if}}</button>
                       </div>
                     </div>
 
                     <p style="color: var(--color-text-muted); font-size: 0.8rem; margin: 0 0 0.75rem 0;">
-                      The employee will <strong>only</strong> see information, dashboard stats, customers, and bills belonging to the selected garages. Unselected garages are strictly hidden.
+                      {{#if isBn}}কর্মী শুধুমাত্র নির্বাচিত গ্যারেজের তথ্য, ড্যাশবোর্ড পরিসংখ্যান, গ্রাহক ও বিল দেখতে পাবে। অনির্বাচিত গ্যারেজ সম্পূর্ণ লুকানো থাকবে।{{else}}The employee will <strong>only</strong> see information, dashboard stats, customers, and bills belonging to the selected garages. Unselected garages are strictly hidden.{{/if}}
                     </p>
 
                     <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 0.75rem;" id="garage-list-{{this.id}}">
@@ -254,14 +254,14 @@
 
                 <!-- Form Action Buttons -->
                 <div style="display: flex; justify-content: flex-end; gap: 0.75rem; border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 1rem;">
-                  <button type="button" class="btn btn-secondary btn-sm" onclick="togglePermForm('{{this.id}}')">Cancel</button>
+                  <button type="button" class="btn btn-secondary btn-sm" onclick="togglePermForm('{{this.id}}')">{{t 'common.cancel'}}</button>
                   <button type="submit" class="btn btn-primary btn-sm" style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.4rem 1.25rem;">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
                       <polyline points="17 21 17 13 7 13 7 21"/>
                       <polyline points="7 3 7 8 15 8"/>
                     </svg>
-                    Save Permissions
+                    {{t 'permissions.savePermissions'}}
                   </button>
                 </div>
               </form>
@@ -277,11 +277,11 @@
             <circle cx="9" cy="7" r="4"/>
           </svg>
         </div>
-        <h3 style="color: #fff; font-size: 1.15rem; font-weight: 700; margin: 0 0 0.5rem 0;">No Employees Found</h3>
+        <h3 style="color: #fff; font-size: 1.15rem; font-weight: 700; margin: 0 0 0.5rem 0;">{{t 'employees.noEmployees'}}</h3>
         <p style="color: var(--color-text-muted); max-width: 420px; margin: 0 auto 1.5rem; font-size: 0.9rem;">
-          Add employees to your company directory first before configuring their roles and system permissions.
+          {{#if isBn}}ভূমিকা ও সিস্টেম পারমিশন কনফিগার করার আগে কোম্পানির ডিরেক্টরিতে কর্মী যোগ করুন।{{else}}Add employees to your company directory first before configuring their roles and system permissions.{{/if}}
         </p>
-        <a href="/employees/new" class="btn btn-primary">Add First Employee</a>
+        <a href="/employees/new" class="btn btn-primary">{{t 'employees.addFirst'}}</a>
       </div>
     {{/if}}
   </div>
@@ -291,9 +291,9 @@
     <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.25rem;">
       <span style="font-size: 1.25rem;">📋</span>
       <div>
-        <h3 style="font-size: 1.1rem; font-weight: 700; color: #fff; margin: 0;">Access Control &amp; Permissions Matrix</h3>
+        <h3 style="font-size: 1.1rem; font-weight: 700; color: #fff; margin: 0;">{{t 'permissions.breakdownTitle'}}</h3>
         <p style="color: var(--color-text-muted); font-size: 0.85rem; margin: 0.15rem 0 0 0;">
-          Detailed breakdown of action and garage permissions
+          {{t 'permissions.breakdownSubtitle'}}
         </p>
       </div>
     </div>
@@ -302,65 +302,65 @@
       <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
         <thead>
           <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); text-align: left;">
-            <th style="padding: 0.75rem 1rem; color: #94a3b8; font-weight: 600;">System Module</th>
+            <th style="padding: 0.75rem 1rem; color: #94a3b8; font-weight: 600;">{{t 'permissions.systemModule'}}</th>
             <th style="padding: 0.75rem 1rem; color: #fbbf24; font-weight: 700;">👑 SUPER_ADMIN</th>
-            <th style="padding: 0.75rem 1rem; color: #22d3ee; font-weight: 700;">🧑‍💼 GENERAL (Employee)</th>
+            <th style="padding: 0.75rem 1rem; color: #22d3ee; font-weight: 700;">🧑‍💼 GENERAL ({{#if isBn}}কর্মী{{else}}Employee{{/if}})</th>
           </tr>
         </thead>
         <tbody>
           <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
             <td style="padding: 0.75rem 1rem; color: #e2e8f0; font-weight: 500;">
-              🏠 <strong>Garage Scope</strong>
+              🏠 <strong>{{t 'permissions.garageScope'}}</strong>
             </td>
             <td style="padding: 0.75rem 1rem; color: #34d399;">
-              ✅ All Company Garages (Full visibility)
+              ✅ {{t 'permissions.allGaragesFull'}}
             </td>
             <td style="padding: 0.75rem 1rem; color: #38bdf8;">
-              🔍 <strong>Only Assigned Garages</strong> (Unassigned garages like Garage - 1 are completely hidden)
+              🔍 <strong>{{t 'permissions.assignedGaragesOnly'}}</strong> ({{#if isBn}}অনির্বাচিত গ্যারেজ সম্পূর্ণ লুকানো{{else}}Unassigned garages are completely hidden{{/if}})
             </td>
           </tr>
           <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
             <td style="padding: 0.75rem 1rem; color: #e2e8f0; font-weight: 500;">
-              📊 <strong>Dashboard &amp; KPI Metrics</strong>
+              📊 <strong>{{#if isBn}}ড্যাশবোর্ড ও কেপিআই মেট্রিক্স{{else}}Dashboard &amp; KPI Metrics{{/if}}</strong>
             </td>
             <td style="padding: 0.75rem 1rem; color: #34d399;">
-              ✅ Company-wide aggregates
+              ✅ {{#if isBn}}সম্পূর্ণ কোম্পানির সারসংখ্যান{{else}}Company-wide aggregates{{/if}}
             </td>
             <td style="padding: 0.75rem 1rem; color: #38bdf8;">
-              🔍 Aggregates scoped strictly to authorized garages
+              🔍 {{#if isBn}}শুধুমাত্র অনুমোদিত গ্যারেজের ডেটা{{else}}Aggregates scoped strictly to authorized garages{{/if}}
             </td>
           </tr>
           <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
             <td style="padding: 0.75rem 1rem; color: #e2e8f0; font-weight: 500;">
-              ➕ <strong>Create (Customers &amp; Bills)</strong>
+              ➕ <strong>{{t 'permissions.canCreate'}} ({{t 'nav.customers'}} &amp; {{t 'nav.bills'}})</strong>
             </td>
             <td style="padding: 0.75rem 1rem; color: #34d399;">
-              ✅ Allowed
+              ✅ {{#if isBn}}অনুমতিপ্রাপ্ত{{else}}Allowed{{/if}}
             </td>
             <td style="padding: 0.75rem 1rem; color: #94a3b8;">
-              Controlled by <code>canCreate</code> permission (within authorized garages)
+              {{#if isBn}}<code>canCreate</code> পারমিশন দ্বারা নিয়ন্ত্রিত (অনুমোদিত গ্যারেজে){{else}}Controlled by <code>canCreate</code> permission (within authorized garages){{/if}}
             </td>
           </tr>
           <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
             <td style="padding: 0.75rem 1rem; color: #e2e8f0; font-weight: 500;">
-              ✏️ <strong>Edit (Customers &amp; Bills)</strong>
+              ✏️ <strong>{{t 'permissions.canEdit'}} ({{t 'nav.customers'}} &amp; {{t 'nav.bills'}})</strong>
             </td>
             <td style="padding: 0.75rem 1rem; color: #34d399;">
-              ✅ Allowed
+              ✅ {{#if isBn}}অনুমতিপ্রাপ্ত{{else}}Allowed{{/if}}
             </td>
             <td style="padding: 0.75rem 1rem; color: #94a3b8;">
-              Controlled by <code>canEdit</code> permission (within authorized garages)
+              {{#if isBn}}<code>canEdit</code> পারমিশন দ্বারা নিয়ন্ত্রিত (অনুমোদিত গ্যারেজে){{else}}Controlled by <code>canEdit</code> permission (within authorized garages){{/if}}
             </td>
           </tr>
           <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
             <td style="padding: 0.75rem 1rem; color: #e2e8f0; font-weight: 500;">
-              🗑️ <strong>Delete (Customers &amp; Bills)</strong>
+              🗑️ <strong>{{t 'permissions.canDelete'}} ({{t 'nav.customers'}} &amp; {{t 'nav.bills'}})</strong>
             </td>
             <td style="padding: 0.75rem 1rem; color: #34d399;">
-              ✅ Allowed
+              ✅ {{#if isBn}}অনুমতিপ্রাপ্ত{{else}}Allowed{{/if}}
             </td>
             <td style="padding: 0.75rem 1rem; color: #94a3b8;">
-              Controlled by <code>canDelete</code> permission (within authorized garages)
+              {{#if isBn}}<code>canDelete</code> পারমিশন দ্বারা নিয়ন্ত্রিত (অনুমোদিত গ্যারেজে){{else}}Controlled by <code>canDelete</code> permission (within authorized garages){{/if}}
             </td>
           </tr>
         </tbody>

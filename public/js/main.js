@@ -534,3 +534,91 @@ document.addEventListener('DOMContentLoaded', () => {
 
 });
 
+/* ================================================================
+   DATE FILTER BAR — Global Helpers
+   Exported to window so HBS onclick attributes can call them.
+   ================================================================ */
+
+/**
+ * Sets fromDate and toDate inputs in the form identified by formId
+ * based on the provided preset string, then submits the form.
+ * @param {'today'|'thisMonth'|'lastMonth'|'last30'|'thisYear'|'all'} preset
+ * @param {string} formId  — ID of the <form> element
+ */
+window.setDatePreset = function setDatePreset(preset, formId) {
+  const form = document.getElementById(formId);
+  if (!form) return;
+
+  const fromInput = form.querySelector('[name="fromDate"]');
+  const toInput   = form.querySelector('[name="toDate"]');
+  const presetInput = document.getElementById(formId + '_preset');
+
+  const now   = new Date();
+  const pad   = (n) => String(n).padStart(2, '0');
+  const fmt   = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  const today = fmt(now);
+
+  let from = '', to = today;
+
+  switch (preset) {
+    case 'today':
+      from = today;
+      break;
+    case 'thisMonth':
+      from = fmt(new Date(now.getFullYear(), now.getMonth(), 1));
+      break;
+    case 'lastMonth': {
+      const lm = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      from = fmt(lm);
+      to   = fmt(new Date(now.getFullYear(), now.getMonth(), 0));
+      break;
+    }
+    case 'last30': {
+      const d = new Date(now);
+      d.setDate(d.getDate() - 30);
+      from = fmt(d);
+      break;
+    }
+    case 'thisYear':
+      from = `${now.getFullYear()}-01-01`;
+      break;
+    case 'all':
+      from = '';
+      to   = '';
+      break;
+    default:
+      return;
+  }
+
+  if (fromInput) fromInput.value = from;
+  if (toInput)   toInput.value   = to;
+  if (presetInput) presetInput.value = preset;
+
+  form.submit();
+};
+
+/**
+ * Clears the hidden preset field when the user manually changes a date input.
+ * @param {string} formId  — ID of the <form> element
+ */
+window.clearPreset = function clearPreset(formId) {
+  const presetInput = document.getElementById(formId + '_preset');
+  if (presetInput) presetInput.value = '';
+};
+
+/**
+ * Toggles the mobile filter drawer (adds/removes .dfb-open class).
+ * Also updates the toggle button chevron and label.
+ * @param {string} formId  — ID of the <form> element to toggle
+ */
+window.toggleFilterDrawer = function toggleFilterDrawer(formId) {
+  const form   = document.getElementById(formId);
+  if (!form) return;
+
+  const wrapper  = form.closest('.card, .dfb-wrapper') || form.parentElement;
+  const toggle   = wrapper ? wrapper.querySelector('.dfb-mobile-toggle') : null;
+
+  form.classList.toggle('dfb-open');
+  if (toggle) toggle.classList.toggle('open');
+};
+

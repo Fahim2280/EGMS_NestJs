@@ -50,6 +50,9 @@ export class CustomerController {
     @Res() res: Response,
     @Query('search') search?: string,
     @Query('garageId') garageId?: string,
+    @Query('fromDate') fromDate?: string,
+    @Query('toDate') toDate?: string,
+    @Query('preset') preset?: string,
     @Query('page') page?: string,
   ) {
     const user = (req as any).user;
@@ -70,6 +73,20 @@ export class CustomerController {
     // Filter by garage if selected
     if (garageId && garageId.trim()) {
       customers = customers.filter((c: any) => c.garageId === garageId.trim());
+    }
+
+    // Filter by registration date range
+    if (fromDate) {
+      const fromTime = new Date(fromDate).setHours(0, 0, 0, 0);
+      customers = customers.filter(
+        (c: any) => c.createdDate && new Date(c.createdDate).getTime() >= fromTime,
+      );
+    }
+    if (toDate) {
+      const toTime = new Date(toDate).setHours(23, 59, 59, 999);
+      customers = customers.filter(
+        (c: any) => c.createdDate && new Date(c.createdDate).getTime() <= toTime,
+      );
     }
 
     // Client-side search filter
@@ -105,6 +122,9 @@ export class CustomerController {
       garages,
       selectedGarageId: garageId || '',
       search: search || '',
+      fromDate: fromDate || '',
+      toDate: toDate || '',
+      preset: preset || '',
       pagination: {
         page: safePage,
         totalPages,
@@ -241,6 +261,9 @@ export class CustomerController {
     @Param('id') id: string,
     @Req() req: Request,
     @Res() res: Response,
+    @Query('fromDate') fromDate?: string,
+    @Query('toDate') toDate?: string,
+    @Query('preset') preset?: string,
   ) {
     const user = (req as any).user;
     const isSuperAdmin = user.role === 'SUPER_ADMIN' || user.isSuperAdmin;
@@ -255,6 +278,30 @@ export class CustomerController {
         return res.redirect('/customers?error=You+do+not+have+permission+to+view+this+customer');
       }
 
+      let bills = customer.bills || [];
+
+      // Filter customer bills by date range
+      if (fromDate) {
+        const fromTime = new Date(fromDate).setHours(0, 0, 0, 0);
+        bills = bills.filter((b: any) => new Date(b.date).getTime() >= fromTime);
+      }
+      if (toDate) {
+        const toTime = new Date(toDate).setHours(23, 59, 59, 999);
+        bills = bills.filter((b: any) => new Date(b.date).getTime() <= toTime);
+      }
+
+      // Sort descending
+      bills.sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+      let periodUnits = 0;
+      let periodBilled = 0;
+      let periodPaid = 0;
+      for (const b of bills) {
+        periodUnits += b.totalUnit || 0;
+        periodBilled += b.totalBill || 0;
+        periodPaid += b.clearMoney || 0;
+      }
+
       return res.render('customers/details', {
         title: `Customer: ${customer.name} - EGMS Portal`,
         activeNav: 'customers',
@@ -264,7 +311,16 @@ export class CustomerController {
         canEdit: isSuperAdmin || Boolean(user.canEdit),
         canDelete: isSuperAdmin || Boolean(user.canDelete),
         customer,
-        bills: customer.bills || [],
+        bills,
+        totalBillsCount: bills.length,
+        periodSummary: {
+          units: periodUnits,
+          billed: periodBilled,
+          paid: periodPaid,
+        },
+        fromDate: fromDate || '',
+        toDate: toDate || '',
+        preset: preset || '',
       });
     } catch {
       return res.redirect('/customers');

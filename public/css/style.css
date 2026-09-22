@@ -603,23 +603,23 @@ a {
   width: 100%;
   border-collapse: collapse;
   text-align: left;
-  font-size: 0.88rem;
-  min-width: 650px;
+  font-size: 0.84rem;
 }
 
 .data-table th {
-  padding: 0.85rem 1.15rem;
+  padding: 0.7rem 0.65rem;
   background: rgba(15, 23, 42, 0.5);
   color: var(--color-text-muted);
-  font-size: 0.74rem;
+  font-size: 0.72rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
   border-bottom: 1px solid var(--color-border);
+  white-space: nowrap;
 }
 
 .data-table td {
-  padding: 0.95rem 1.15rem;
+  padding: 0.68rem 0.65rem;
   border-bottom: 1px solid rgba(51, 65, 85, 0.4);
   color: var(--color-text);
   vertical-align: middle;
@@ -627,6 +627,19 @@ a {
 
 .data-table tbody tr:hover {
   background: rgba(255, 255, 255, 0.03);
+}
+
+/* Compact / dense variant for tables with many columns (e.g. Bills ledger) */
+.table-dense th,
+.table-dense td {
+  padding: 0.58rem 0.5rem !important;
+  font-size: 0.81rem !important;
+}
+
+/* Touch / swipe scroll cues — strictly HIDDEN on desktop view */
+.table-scroll-hint,
+.audit-scroll-hint {
+  display: none !important;
 }
 
 .table-code {
@@ -3042,8 +3055,9 @@ html[lang="bn"] button {
     justify-content: center !important;
   }
 
-  /* Touch-Friendly Data Tables with Visible Scroll Cue */
-  .table-scroll-hint {
+  /* Touch-Friendly Data Tables with Visible Scroll Cue (Mobile only) */
+  .table-scroll-hint,
+  .audit-scroll-hint {
     display: inline-flex !important;
     align-items: center;
     gap: 0.35rem;
@@ -3692,4 +3706,291 @@ select.filter-select {
   gap: 0.35rem;
   justify-content: flex-end;
   white-space: nowrap;
+}
+
+/* ================================================================
+   DATE FILTER BAR (DFB) — Universal filter component styles
+   ================================================================ */
+
+/* --- Wrapper --- */
+.dfb-wrapper {
+  width: 100%;
+}
+
+/* --- Mobile toggle button (hidden on desktop) --- */
+.dfb-mobile-toggle {
+  display: none;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 0.5rem;
+  cursor: pointer;
+  border-radius: var(--radius-md);
+  transition: background 0.15s;
+  user-select: none;
+}
+.dfb-mobile-toggle:hover { background: rgba(255,255,255,0.04); }
+.dfb-toggle-icon { color: var(--color-primary); flex-shrink: 0; }
+.dfb-toggle-label {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--color-text-primary);
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.dfb-toggle-chevron {
+  color: var(--color-text-muted);
+  transition: transform 0.2s;
+  flex-shrink: 0;
+}
+.dfb-mobile-toggle.open .dfb-toggle-chevron { transform: rotate(180deg); }
+
+/* Active filter dot indicator */
+.dfb-active-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #38bdf8;
+  box-shadow: 0 0 6px rgba(56, 189, 248, 0.8);
+  animation: pulseDot 2s ease-in-out infinite;
+}
+@keyframes pulseDot {
+  0%, 100% { box-shadow: 0 0 4px rgba(56, 189, 248, 0.6); }
+  50% { box-shadow: 0 0 10px rgba(56, 189, 248, 0.9); }
+}
+
+/* --- Filter Form --- */
+.dfb-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  align-items: flex-end;
+  padding-top: 0.5rem;
+}
+
+/* --- Collapsible state (used on mobile) --- */
+.dfb-collapse {
+  /* On desktop: always visible */
+  overflow: visible;
+  max-height: none;
+}
+
+/* --- Individual filter group --- */
+.dfb-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 130px;
+}
+
+/* --- Label --- */
+.dfb-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  white-space: nowrap;
+}
+
+/* --- Date / Text / Select inputs --- */
+.dfb-input {
+  height: 38px;
+  padding: 0 0.75rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: rgba(15, 23, 42, 0.6);
+  color: var(--color-text-primary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+}
+.dfb-input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18);
+}
+.dfb-input::placeholder { color: var(--color-text-dim); }
+.dfb-select { cursor: pointer; }
+
+/* Light theme overrides */
+[data-theme="light"] .dfb-input {
+  background: #fff;
+  color: #1e293b;
+}
+
+/* --- Actions row --- */
+.dfb-actions {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+  align-self: flex-end;
+  padding-bottom: 0;
+  flex-shrink: 0;
+}
+.dfb-btn {
+  height: 38px;
+  padding: 0 0.9rem;
+  font-size: 0.82rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  white-space: nowrap;
+}
+
+/* --- Preset Pills --- */
+.dfb-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  width: 100%;
+  padding-top: 0.4rem;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  margin-top: 0.3rem;
+}
+[data-theme="light"] .dfb-presets { border-top-color: rgba(0,0,0,0.08); }
+
+.dfb-preset-pill {
+  padding: 0.25rem 0.7rem;
+  border-radius: 9999px;
+  border: 1px solid var(--color-border);
+  background: rgba(255,255,255,0.04);
+  color: var(--color-text-secondary);
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+  line-height: 1.5;
+}
+.dfb-preset-pill:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: rgba(59, 130, 246, 0.1);
+}
+.dfb-preset-active {
+  border-color: #38bdf8 !important;
+  background: rgba(56, 189, 248, 0.15) !important;
+  color: #38bdf8 !important;
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.2);
+}
+[data-theme="light"] .dfb-preset-pill {
+  background: rgba(0,0,0,0.04);
+  color: #475569;
+}
+[data-theme="light"] .dfb-preset-pill:hover { color: #1d4ed8; background: rgba(59,130,246,0.08); }
+
+/* ================================================================
+   RESPONSIVE TABLE IMPROVEMENTS
+   ================================================================ */
+
+/* Sticky table headers */
+.data-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: rgba(15, 23, 42, 0.92);
+  backdrop-filter: blur(4px);
+}
+[data-theme="light"] .data-table thead th {
+  background: rgba(248, 250, 252, 0.96);
+}
+
+/* Tabular numeric alignment for financial columns */
+.data-table td {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Table scroll fade gradient hint */
+.table-responsive {
+  position: relative;
+}
+
+/* ================================================================
+   PAGINATION BAR
+   ================================================================ */
+.pagination-bar { margin-top: 0.75rem; }
+.pagination-bar .btn-sm {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.82rem;
+  height: auto;
+  min-height: 34px;
+}
+
+/* ================================================================
+   MOBILE RESPONSIVE — DFB
+   ================================================================ */
+@media (max-width: 768px) {
+  /* Show mobile toggle */
+  .dfb-mobile-toggle {
+    display: flex;
+  }
+
+  /* Collapse the form by default */
+  .dfb-form.dfb-collapse {
+    display: none;
+    overflow: hidden;
+    padding-top: 0;
+    margin-top: 0.5rem;
+    border-top: 1px solid var(--color-border);
+    animation: dfbSlideIn 0.2s ease-out;
+  }
+  .dfb-form.dfb-collapse.dfb-open {
+    display: flex;
+  }
+  @keyframes dfbSlideIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Full-width inputs on mobile */
+  .dfb-group {
+    width: 100%;
+    min-width: unset;
+  }
+  .dfb-input {
+    height: 44px; /* Touch-friendly */
+    font-size: 1rem;
+  }
+  .dfb-actions {
+    width: 100%;
+  }
+  .dfb-btn {
+    flex: 1;
+    justify-content: center;
+    height: 44px;
+    font-size: 0.9rem;
+  }
+  .dfb-presets {
+    gap: 0.4rem;
+  }
+  .dfb-preset-pill {
+    padding: 0.4rem 0.85rem;
+    font-size: 0.82rem;
+    min-height: 36px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  /* Form layout inside dfb-form: stack vertically */
+  .dfb-form {
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  /* Audit-logs filter on mobile */
+  .audit-filter-selects { flex-direction: column; }
+  .audit-filter-selects .form-input,
+  .audit-filter-selects select { width: 100%; }
+
+  /* Pagination bar mobile */
+  .pagination-bar { justify-content: center; }
 }

@@ -9,9 +9,9 @@
           </svg>
         </div>
         <div>
-          <h1 style="font-size: 1.35rem; font-weight: 700; margin: 0; color: #fff;">Edit Garage Facility</h1>
+          <h1 style="font-size: 1.35rem; font-weight: 700; margin: 0; color: #fff;">{{t 'garages.editTitle'}}</h1>
           <p style="font-size: 0.85rem; color: var(--color-text-muted); margin: 0.2rem 0 0 0;">
-            Update facility details for {{garage.garageName}}
+            {{t 'garages.editSubtitle'}} {{garage.garageName}}
           </p>
         </div>
       </div>
@@ -27,7 +27,7 @@
       <form action="/garages/{{garage.id}}/edit" method="POST">
         <div class="form-group" style="margin-bottom: 1.5rem;">
           <label class="form-label" for="garageName" style="display: block; margin-bottom: 0.4rem; font-size: 0.875rem; font-weight: 600;">
-            Garage / Facility Name *
+            {{t 'garages.garageName'}} *
           </label>
           <input
             type="text"
@@ -35,7 +35,7 @@
             name="garageName"
             class="form-control"
             required
-            placeholder="e.g. Apex North Diagnostic Center"
+            placeholder="{{#if isBn}}যেমন: উত্তর সার্ভিস সেন্টার{{else}}e.g. Apex North Diagnostic Center{{/if}}"
             value="{{garage.garageName}}"
             style="width: 100%; padding: 0.75rem; border-radius: var(--radius-md); background: rgba(15, 23, 42, 0.8); border: 1px solid var(--color-border); color: #fff;"
           />
@@ -43,7 +43,7 @@
 
         <div class="form-group" style="margin-bottom: 2rem;">
           <label class="form-label" for="garageAddress" style="display: block; margin-bottom: 0.4rem; font-size: 0.875rem; font-weight: 600;">
-            Physical Address *
+            {{t 'garages.address'}} *
           </label>
           <textarea
             id="garageAddress"
@@ -51,15 +51,15 @@
             class="form-control"
             rows="3"
             required
-            placeholder="e.g. Plot 44, North Highway, Commercial Hub"
+            placeholder="{{#if isBn}}যেমন: প্লট ৪৪, উত্তর হাইওয়ে, বাণিজ্যিক এলাকা{{else}}e.g. Plot 44, North Highway, Commercial Hub{{/if}}"
             style="width: 100%; padding: 0.75rem; border-radius: var(--radius-md); background: rgba(15, 23, 42, 0.8); border: 1px solid var(--color-border); color: #fff; resize: vertical;"
           >{{garage.address}}</textarea>
         </div>
 
         <div style="display: flex; gap: 1rem; justify-content: flex-end;">
-          <a href="/garages/{{garage.id}}" class="btn btn-secondary">Cancel</a>
+          <a href="/garages/{{garage.id}}" class="btn btn-secondary">{{t 'common.cancel'}}</a>
           <button type="submit" class="btn btn-primary" style="padding: 0.75rem 1.75rem; font-weight: 600;">
-            Update Garage
+            {{t 'garages.updateGarage'}}
           </button>
         </div>
       </form>

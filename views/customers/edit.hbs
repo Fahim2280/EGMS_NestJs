@@ -29,7 +29,7 @@
         <span class="section-icon-badge">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         </span>
-        Facility &amp; Identity Profile
+        {{t 'customers.facilityAndProfile'}}
       </div>
 
       <div class="form-group" style="margin-bottom: 1.25rem;">
@@ -44,7 +44,7 @@
             </option>
           {{/each}}
         </select>
-        <span class="form-hint">Physical garage branch managing this customer.</span>
+        <span class="form-hint">{{t 'customers.garageBranchManageHint'}}</span>
       </div>
 
       <div class="form-grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
@@ -84,13 +84,13 @@
 
       <div class="form-group" style="margin-bottom: 0; margin-top: 1.25rem;">
         <label class="form-label" for="customerCode">
-          <span>Customer ID <span style="color: var(--color-text-muted); font-size: 0.8rem; font-weight: 400;">(optional)</span></span>
+          <span>{{t 'customers.code'}} <span style="color: var(--color-text-muted); font-size: 0.8rem; font-weight: 400;">({{#if isBn}}ঐচ্ছিক{{else}}optional{{/if}})</span></span>
         </label>
         <div style="display: flex; gap: 0.5rem; align-items: center;">
           <input type="text" id="customerCode" name="customerCode" class="form-input" placeholder="e.g. CUST-001" value="{{customer.customerCode}}" maxlength="50" autocomplete="off" data-exclude="{{customer.id}}">
           <span id="codeStatus" style="font-size: 0.8rem; white-space: nowrap;"></span>
         </div>
-        <span class="form-hint">Unique ID you assign. Leave blank to skip. Changing it is allowed as long as the new code is not taken.</span>
+        <span class="form-hint">{{#if isBn}}গ্রাহকের জন্য নির্ধারিত আইডি। খালি রাখতে পারেন। কোডটি অন্য গ্রাহকের না হলে পরিবর্তনযোগ্য।{{else}}Unique ID you assign. Leave blank to skip. Changing it is allowed as long as the new code is not taken.{{/if}}</span>
       </div>
     </div>
 
@@ -100,7 +100,7 @@
         <span class="section-icon-badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399;">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
         </span>
-        Premises &amp; Electricity Metering
+        {{t 'customers.premisesAndMeter'}}
       </div>
 
       <div class="form-group" style="margin-bottom: 1.25rem;">
@@ -153,16 +153,16 @@
         status.innerHTML = '';
         return;
       }
-      status.innerHTML = '<span style="color: var(--color-text-muted); font-size: 0.75rem;">checking...</span>';
+      status.innerHTML = '<span style="color: var(--color-text-muted); font-size: 0.75rem;">{{t "customers.checking"}}</span>';
       timer = setTimeout(async () => {
         try {
           const url = `/customers/check-code?code=${encodeURIComponent(val)}${exclude ? '&exclude=' + encodeURIComponent(exclude) : ''}`;
           const res = await fetch(url);
           const data = await res.json();
           if (data.available) {
-            status.innerHTML = '<span style="color: #10b981; font-weight: 600; font-size: 0.8rem;">✓ Available</span>';
+            status.innerHTML = '<span style="color: #10b981; font-weight: 600; font-size: 0.8rem;">{{t "customers.codeAvailable"}}</span>';
           } else {
-            status.innerHTML = '<span style="color: #f43f5e; font-weight: 600; font-size: 0.8rem;">✕ In use</span>';
+            status.innerHTML = '<span style="color: #f43f5e; font-weight: 600; font-size: 0.8rem;">{{t "customers.codeInUse"}}</span>';
           }
         } catch (e) {
           status.innerHTML = '';

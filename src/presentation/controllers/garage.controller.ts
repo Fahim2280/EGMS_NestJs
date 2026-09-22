@@ -33,14 +33,48 @@ export class GarageController {
 
   // --- VIEW: All company garages ---
   @Get()
-  async listGarages(@Req() req: Request, @Res() res: Response) {
+  async listGarages(
+    @Req() req: Request,
+    @Res() res: Response,
+    @Query('search') search?: string,
+    @Query('fromDate') fromDate?: string,
+    @Query('toDate') toDate?: string,
+    @Query('preset') preset?: string,
+  ) {
     const user = (req as any).user;
     const isSuperAdmin = user.role === 'SUPER_ADMIN' || user.isSuperAdmin;
     const allowedGarageIds = isSuperAdmin ? null : (user.garageIds || []);
 
-    const garages = await this.queryBus.execute(
+    let garages = await this.queryBus.execute(
       new GetGaragesByCompanyQuery(user.companyId, allowedGarageIds),
     );
+
+    // Filter by search query (name, address)
+    if (search && search.trim()) {
+      const q = search.trim().toLowerCase();
+      garages = garages.filter(
+        (g: any) =>
+          g.garageName?.toLowerCase().includes(q) ||
+          g.address?.toLowerCase().includes(q),
+      );
+    }
+
+    // Filter by creation date range
+    if (fromDate) {
+      const fromTime = new Date(fromDate).setHours(0, 0, 0, 0);
+      garages = garages.filter((g: any) => {
+        const d = g.createdDate || g.createdAt;
+        return d && new Date(d).getTime() >= fromTime;
+      });
+    }
+
+    if (toDate) {
+      const toTime = new Date(toDate).setHours(23, 59, 59, 999);
+      garages = garages.filter((g: any) => {
+        const d = g.createdDate || g.createdAt;
+        return d && new Date(d).getTime() <= toTime;
+      });
+    }
 
     return res.render('garages/index', {
       title: 'Company Garages - EGMS Portal',
@@ -52,6 +86,11 @@ export class GarageController {
       canDelete: isSuperAdmin || Boolean(user.canDelete),
       canView: isSuperAdmin || Boolean(user.canView),
       garages,
+      totalGaragesCount: garages.length,
+      search: search || '',
+      fromDate: fromDate || '',
+      toDate: toDate || '',
+      preset: preset || '',
     });
   }
 
@@ -113,6 +152,9 @@ export class GarageController {
     @Param('id') id: string,
     @Req() req: Request,
     @Res() res: Response,
+    @Query('fromDate') fromDate?: string,
+    @Query('toDate') toDate?: string,
+    @Query('preset') preset?: string,
     @Query('success') success?: string,
   ) {
     const user = (req as any).user;
@@ -127,8 +169,11 @@ export class GarageController {
     }
 
     try {
+      const parsedFromDate = fromDate ? new Date(fromDate) : undefined;
+      const parsedToDate = toDate ? new Date(toDate) : undefined;
+
       const data = await this.queryBus.execute(
-        new GetGarageDashboardQuery(id, user.companyId),
+        new GetGarageDashboardQuery(id, user.companyId, parsedFromDate, parsedToDate),
       );
 
       return res.render('garages/dashboard', {
@@ -143,6 +188,10 @@ export class GarageController {
         metrics: data.metrics,
         customers: data.customers,
         recentBills: data.recentBills,
+        totalFilteredBillsCount: data.totalFilteredBillsCount || data.recentBills.length,
+        fromDate: fromDate || '',
+        toDate: toDate || '',
+        preset: preset || '',
         successMessage: success,
       });
     } catch (err: any) {

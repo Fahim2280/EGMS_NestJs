@@ -2,14 +2,14 @@
   <!-- Left Hero Panel -->
   <div class="auth-hero">
     <div class="auth-hero-icon">⚡</div>
-    <h2>Electric Garage<br>Management System</h2>
-    <p>A complete platform to manage customers, generate electric bills, and monitor financials — all in one place.</p>
+    <h2>{{t 'auth.heroTitle'}}</h2>
+    <p>{{t 'auth.heroDesc'}}</p>
     <ul class="auth-hero-features">
-      <li>Real-time electric bill calculation</li>
-      <li>Executive financial dashboard</li>
-      <li>Customer ledger & billing history</li>
-      <li>Role-based access control</li>
-      <li>Automated monthly billing</li>
+      <li>{{t 'auth.heroFeature1'}}</li>
+      <li>{{t 'auth.heroFeature2'}}</li>
+      <li>{{t 'auth.heroFeature3'}}</li>
+      <li>{{t 'auth.heroFeature4'}}</li>
+      <li>{{t 'auth.heroFeature5'}}</li>
     </ul>
   </div>
 
@@ -17,8 +17,8 @@
   <div class="auth-card-pane">
     <div class="auth-card-inner">
       <div style="margin-bottom: 2rem;">
-        <h1 style="font-size: 1.75rem; font-weight: 800; color: #f1f5f9; margin-bottom: 0.4rem;">Welcome back 👋</h1>
-        <p style="color: #64748b; font-size: 0.9rem;">Sign in to your EGMS account — Company or Employee</p>
+        <h1 style="font-size: 1.75rem; font-weight: 800; color: #f1f5f9; margin-bottom: 0.4rem;">{{t 'auth.welcomeBack'}}</h1>
+        <p style="color: #64748b; font-size: 0.9rem;">{{t 'auth.signInSubtitle'}}</p>
       </div>
 
       {{#if successMessage}}
@@ -31,7 +31,7 @@
 
       <form action="/login" method="POST" id="loginForm">
         <div class="form-group" style="margin-bottom: 1.25rem;">
-          <label class="form-label" for="loginEmail" style="display:block;margin-bottom:0.4rem;font-size:0.875rem;font-weight:600;color:#94a3b8;">Email Address</label>
+          <label class="form-label" for="loginEmail" style="display:block;margin-bottom:0.4rem;font-size:0.875rem;font-weight:600;color:#94a3b8;">{{t 'auth.emailAddress'}}</label>
           <input
             type="email"
             id="loginEmail"
@@ -46,8 +46,8 @@
 
         <div class="form-group" style="margin-bottom: 1.75rem;">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem;">
-            <label class="form-label" for="loginPassword" style="font-size:0.875rem;font-weight:600;color:#94a3b8;margin:0;">Password</label>
-            <a href="/forgot-password" style="font-size:0.8rem;color:#818cf8;text-decoration:none;font-weight:500;transition:color 0.15s;" onmouseover="this.style.color='#a5b4fc'" onmouseout="this.style.color='#818cf8'">Forgot password?</a>
+            <label class="form-label" for="loginPassword" style="font-size:0.875rem;font-weight:600;color:#94a3b8;margin:0;">{{t 'auth.password'}}</label>
+            <a href="/forgot-password" style="font-size:0.8rem;color:#818cf8;text-decoration:none;font-weight:500;transition:color 0.15s;" onmouseover="this.style.color='#a5b4fc'" onmouseout="this.style.color='#818cf8'">{{t 'auth.forgotPassword'}}</a>
           </div>
           <input
             type="password"
@@ -61,27 +61,27 @@
         </div>
 
         <button type="submit" class="btn btn-primary" style="width:100%;padding:0.875rem;font-weight:700;font-size:0.95rem;border-radius:10px;" id="loginSubmitBtn">
-          Sign In to Portal
+          {{t 'auth.signInBtn'}}
         </button>
       </form>
 
       <!-- Demo Quick Fill Buttons -->
       <div style="margin-top: 1.75rem; padding-top: 1.5rem; border-top: 1px solid rgba(99,102,241,0.1);">
         <p style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#475569;text-align:center;margin-bottom:0.75rem;">
-          Demo Accounts
+          {{t 'auth.demoAccounts'}}
         </p>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
           <button type="button" class="btn btn-secondary btn-sm quick-fill-btn" data-email="admin@apexauto.com" data-pass="Admin@123" style="font-size:0.8rem;">
-            🏢 Super Admin
+            🏢 {{t 'nav.superAdmin'}}
           </button>
           <button type="button" class="btn btn-secondary btn-sm quick-fill-btn" data-email="john.doe@apexauto.com" data-pass="Employee@123" style="font-size:0.8rem;">
-            👤 Employee
+            👤 {{t 'nav.employees'}}
           </button>
         </div>
       </div>
 
       <p style="text-align:center;margin-top:1.5rem;font-size:0.85rem;color:#475569;">
-        New company? <a href="/register" style="color:#818cf8;font-weight:600;text-decoration:none;">Register here →</a>
+        {{t 'auth.newCompanyPrompt'}} <a href="/register" style="color:#818cf8;font-weight:600;text-decoration:none;">{{t 'auth.registerHere'}}</a>
       </p>
     </div>
   </div>

@@ -7,9 +7,9 @@
           <circle cx="12" cy="7" r="4"/>
         </svg>
       </div>
-      <h1 style="font-size: 1.6rem; font-weight: 800; color: #ffffff;">Register Your Company</h1>
+      <h1 style="font-size: 1.6rem; font-weight: 800; color: #ffffff;">{{t 'auth.registerTitle'}}</h1>
       <p style="font-size: 0.85rem; color: var(--color-text-muted);">
-        Creates a new tenant account with <strong style="color: #60a5fa;">SUPER_ADMIN</strong> privileges and initial garage facility
+        {{#if isBn}}সুপার অ্যাডমিন সুবিধাসহ নতুন কোম্পানি অ্যাকাউন্ট ও প্রাথমিক গ্যারেজ সুবিধা তৈরি করে{{else}}{{t 'auth.registerSubtitle'}}{{/if}}
       </p>
     </div>
 
@@ -23,7 +23,7 @@
       <form action="/register" method="POST">
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
           <div class="form-group">
-            <label class="form-label" for="regName" style="display: block; margin-bottom: 0.35rem; font-size: 0.85rem; font-weight: 600;">Owner / Contact Name *</label>
+            <label class="form-label" for="regName" style="display: block; margin-bottom: 0.35rem; font-size: 0.85rem; font-weight: 600;">{{t 'auth.ownerName'}} *</label>
             <input
               type="text"
               id="regName"
@@ -37,7 +37,7 @@
           </div>
 
           <div class="form-group">
-            <label class="form-label" for="regCompanyName" style="display: block; margin-bottom: 0.35rem; font-size: 0.85rem; font-weight: 600;">Company Name *</label>
+            <label class="form-label" for="regCompanyName" style="display: block; margin-bottom: 0.35rem; font-size: 0.85rem; font-weight: 600;">{{t 'auth.companyName'}} *</label>
             <input
               type="text"
               id="regCompanyName"
@@ -53,7 +53,7 @@
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
           <div class="form-group">
-            <label class="form-label" for="regEmail" style="display: block; margin-bottom: 0.35rem; font-size: 0.85rem; font-weight: 600;">Business Email Address *</label>
+            <label class="form-label" for="regEmail" style="display: block; margin-bottom: 0.35rem; font-size: 0.85rem; font-weight: 600;">{{t 'auth.businessEmail'}} *</label>
             <input
               type="email"
               id="regEmail"
@@ -67,7 +67,7 @@
           </div>
 
           <div class="form-group">
-            <label class="form-label" for="regPassword" style="display: block; margin-bottom: 0.35rem; font-size: 0.85rem; font-weight: 600;">Password *</label>
+            <label class="form-label" for="regPassword" style="display: block; margin-bottom: 0.35rem; font-size: 0.85rem; font-weight: 600;">{{t 'auth.password'}} *</label>
             <input
               type="password"
               id="regPassword"
@@ -83,7 +83,7 @@
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
           <div class="form-group">
-            <label class="form-label" for="regPhone" style="display: block; margin-bottom: 0.35rem; font-size: 0.85rem; font-weight: 600;">Phone Number *</label>
+            <label class="form-label" for="regPhone" style="display: block; margin-bottom: 0.35rem; font-size: 0.85rem; font-weight: 600;">{{t 'auth.phone'}} *</label>
             <input
               type="text"
               id="regPhone"
@@ -97,7 +97,7 @@
           </div>
 
           <div class="form-group">
-            <label class="form-label" for="regAddress" style="display: block; margin-bottom: 0.35rem; font-size: 0.85rem; font-weight: 600;">Company Headquarters Address *</label>
+            <label class="form-label" for="regAddress" style="display: block; margin-bottom: 0.35rem; font-size: 0.85rem; font-weight: 600;">{{t 'employees.address'}} *</label>
             <input
               type="text"
               id="regAddress"
@@ -117,11 +117,11 @@
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2">
               <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
             </svg>
-            <span style="font-size: 0.9rem; font-weight: 600; color: #fff;">Initial Garage Facility (Optional)</span>
+            <span style="font-size: 0.9rem; font-weight: 600; color: #fff;">{{#if isBn}}প্রাথমিক গ্যারেজ (ঐচ্ছিক){{else}}Initial Garage Facility (Optional){{/if}}</span>
           </div>
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
             <div class="form-group">
-              <label class="form-label" for="initGarageName" style="display: block; margin-bottom: 0.3rem; font-size: 0.8rem; color: var(--color-text-muted);">Garage Name</label>
+              <label class="form-label" for="initGarageName" style="display: block; margin-bottom: 0.3rem; font-size: 0.8rem; color: var(--color-text-muted);">{{t 'garages.name'}}</label>
               <input
                 type="text"
                 id="initGarageName"
@@ -133,7 +133,7 @@
               />
             </div>
             <div class="form-group">
-              <label class="form-label" for="initGarageAddress" style="display: block; margin-bottom: 0.3rem; font-size: 0.8rem; color: var(--color-text-muted);">Garage Address</label>
+              <label class="form-label" for="initGarageAddress" style="display: block; margin-bottom: 0.3rem; font-size: 0.8rem; color: var(--color-text-muted);">{{t 'garages.address'}}</label>
               <input
                 type="text"
                 id="initGarageAddress"
@@ -148,12 +148,12 @@
         </div>
 
         <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.85rem; font-weight: 700; font-size: 1rem;">
-          Register Company &amp; Start Operating
+          {{t 'auth.registerBtn'}}
         </button>
       </form>
 
       <div style="text-align: center; margin-top: 1.5rem; font-size: 0.85rem; color: var(--color-text-muted);">
-        Already registered? <a href="/login" style="color: var(--color-primary); font-weight: 600;">Sign in to your account</a>
+        {{t 'auth.alreadyRegistered'}} <a href="/login" style="color: var(--color-primary); font-weight: 600;">{{t 'auth.signInHere'}}</a>
       </div>
     </div>
   </div>

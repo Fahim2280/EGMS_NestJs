@@ -28,6 +28,9 @@ export class GetElectricBillsByCompanyHandler
       this.customerRepo.findByCompanyId(query.companyId),
     ]);
 
+    const customerMap = new Map(customers.map((c) => [c.id, c]));
+
+    // Enforce role-based allowed garages
     if (query.allowedGarageIds !== undefined && query.allowedGarageIds !== null) {
       const allowedSet = new Set(query.allowedGarageIds);
       const allowedCustomerIds = new Set(
@@ -36,7 +39,42 @@ export class GetElectricBillsByCompanyHandler
       bills = bills.filter((b) => allowedCustomerIds.has(b.customerId));
     }
 
-    const customerMap = new Map(customers.map((c) => [c.id, c]));
+    // Filter by specific user-selected garage
+    if (query.garageId && query.garageId.trim()) {
+      const targetGarageId = query.garageId.trim();
+      const targetCustomerIds = new Set(
+        customers.filter((c) => c.garageId === targetGarageId).map((c) => c.id),
+      );
+      bills = bills.filter((b) => targetCustomerIds.has(b.customerId));
+    }
+
+    // Filter by fromDate (start of day)
+    if (query.fromDate) {
+      const fromTime = new Date(query.fromDate).setHours(0, 0, 0, 0);
+      bills = bills.filter((b) => new Date(b.date).getTime() >= fromTime);
+    }
+
+    // Filter by toDate (end of day)
+    if (query.toDate) {
+      const toTime = new Date(query.toDate).setHours(23, 59, 59, 999);
+      bills = bills.filter((b) => new Date(b.date).getTime() <= toTime);
+    }
+
+    // Filter by search query (customer name, customer code, bill number)
+    if (query.search && query.search.trim()) {
+      const q = query.search.trim().toLowerCase();
+      bills = bills.filter((b) => {
+        const cust = customerMap.get(b.customerId);
+        const nameMatch = cust?.name?.toLowerCase().includes(q);
+        const codeMatch = cust?.customerCode?.toLowerCase().includes(q);
+        const phoneMatch = cust?.mobileNumber?.includes(q);
+        const billNumMatch = String(b.billNumber || '').includes(q);
+        return nameMatch || codeMatch || phoneMatch || billNumMatch;
+      });
+    }
+
+    // Sort descending by date (newest first)
+    bills.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
     return bills.map((b) => {
       const cust = customerMap.get(b.customerId);
@@ -47,18 +85,20 @@ export class GetElectricBillsByCompanyHandler
         customerName: cust?.name || 'Unknown Customer',
         customerCode: cust?.customerCode || null,
         customerCId: cust?.cId,
+        garageId: cust?.garageId,
+        garageName: cust?.garageName,
         companyId: b.companyId,
-      date: b.date,
-      previousUnit: b.previousUnit,
-      currentUnit: b.currentUnit,
-      totalUnit: b.totalUnit,
-      electricBill: b.electricBill,
-      previousDues: b.previousDues,
-      rentBill: b.rentBill,
-      loan: b.loan,
-      totalBill: b.totalBill,
-      clearMoney: b.clearMoney,
-      presentDues: b.presentDues,
+        date: b.date,
+        previousUnit: b.previousUnit,
+        currentUnit: b.currentUnit,
+        totalUnit: b.totalUnit,
+        electricBill: b.electricBill,
+        previousDues: b.previousDues,
+        rentBill: b.rentBill,
+        loan: b.loan,
+        totalBill: b.totalBill,
+        clearMoney: b.clearMoney,
+        presentDues: b.presentDues,
       };
     });
   }

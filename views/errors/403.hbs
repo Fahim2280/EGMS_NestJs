@@ -88,15 +88,15 @@
     <div class="error-card">
       <div class="error-icon">🔒</div>
       <div class="error-code">403</div>
-      <h1 class="error-title">Access Denied</h1>
+      <h1 class="error-title">{{t 'common.accessDenied'}}</h1>
       <p class="error-desc">
-        You don't have permission to access this page. This area is restricted to administrators only.
+        {{t 'common.accessDeniedDesc'}}
       </p>
       <div class="error-role-info">
-        Your current role: <strong>{{currentUser.role}}</strong> — does not have the required privileges.
+        {{#if isBn}}আপনার বর্তমান ভূমিকা: <strong>{{currentUser.role}}</strong> — এই পাতায় প্রবেশের অধিকার নেই।{{else}}Your current role: <strong>{{currentUser.role}}</strong> — does not have the required privileges.{{/if}}
       </div>
-      <a href="javascript:history.back()" class="btn-back">← Go Back</a>
-      <a href="/" class="btn-dash">🏠 Dashboard</a>
+      <a href="javascript:history.back()" class="btn-back">← {{#if isBn}}ফিরে যান{{else}}Go Back{{/if}}</a>
+      <a href="/" class="btn-dash">🏠 {{t 'nav.dashboard'}}</a>
     </div>
   </div>
 </body>

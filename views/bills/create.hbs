@@ -29,7 +29,7 @@
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
         {{t 'bills.billDetails'}}
       </h2>
-      <span class="badge" style="background: rgba(16, 185, 129, 0.12); color: #34d399; font-size: 0.72rem;">STEP 1 OF 1</span>
+      <span class="badge" style="background: rgba(16, 185, 129, 0.12); color: #34d399; font-size: 0.72rem;">{{t 'bills.step1'}}</span>
     </div>
 
     <form action="/bills" method="POST" id="billForm">
@@ -37,7 +37,7 @@
       <div style="background: rgba(15, 23, 42, 0.4); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 1.25rem;">
         <div style="font-size: 0.76rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #94a3b8; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.4rem;">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          Customer &amp; Date
+          {{t 'bills.customerAndDate'}}
         </div>
 
         <div class="form-group" style="margin-bottom: 1rem;">
@@ -66,14 +66,14 @@
             <label class="form-label" for="unitRate">
               <span>{{t 'bills.ratePerUnit'}} ({{t 'common.currency'}}) <span style="color: #f43f5e;">*</span></span>
               {{#if (eq user.role 'SUPER_ADMIN')}}
-              <span style="font-size: 0.7rem; color: #10b981; font-weight: 600;">Editable</span>
+              <span style="font-size: 0.7rem; color: #10b981; font-weight: 600;">{{t 'bills.editable'}}</span>
               {{else}}
-              <span style="font-size: 0.7rem; color: var(--color-text-dim);">Locked</span>
+              <span style="font-size: 0.7rem; color: var(--color-text-dim);">{{t 'bills.locked'}}</span>
               {{/if}}
             </label>
             <input type="number" step="0.01" min="0.01" id="unitRate" name="unitRate" class="form-input" required 
               value="{{#if formData.unitRate}}{{formData.unitRate}}{{else}}{{defaultUnitRate}}{{/if}}"
-              {{#unless (eq user.role 'SUPER_ADMIN')}}readonly title="Only Super Admin can change the electricity unit rate"{{/unless}}>
+              {{#unless (eq user.role 'SUPER_ADMIN')}}readonly title="{{t 'bills.superAdminRateHint'}}"{{/unless}}>
           </div>
         </div>
       </div>
@@ -82,14 +82,14 @@
       <div style="background: rgba(15, 23, 42, 0.4); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 1.25rem;">
         <div style="font-size: 0.76rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #94a3b8; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.4rem;">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-          Electricity Meter Readings
+          {{t 'bills.electricityMeterReadings'}}
         </div>
 
         <div class="form-grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
           <div class="form-group" style="margin-bottom: 0;">
             <label class="form-label">
               <span>{{t 'bills.prevUnit'}}</span>
-              <span style="font-size: 0.7rem; color: var(--color-text-dim);">Auto-Loaded</span>
+              <span style="font-size: 0.7rem; color: var(--color-text-dim);">{{t 'bills.autoLoaded'}}</span>
             </label>
             <input type="text" id="displayPreviousUnit" class="form-input" readonly value="0.00">
           </div>
@@ -107,7 +107,7 @@
       <div style="background: rgba(15, 23, 42, 0.4); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 1.5rem;">
         <div style="font-size: 0.76rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #94a3b8; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.4rem;">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-          Charges &amp; Payment Settlement
+          {{t 'bills.chargesAndSettlement'}}
         </div>
 
         <div class="form-grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
@@ -125,7 +125,7 @@
         <div class="form-group" style="margin-bottom: 0;">
           <label class="form-label" for="clearMoney">
             <span>{{t 'bills.paid'}} ({{t 'common.currency'}}) <span style="color: #f43f5e;">*</span></span>
-            <span style="font-size: 0.7rem; color: #10b981;">Customer Handover</span>
+            <span style="font-size: 0.7rem; color: #10b981;">{{t 'bills.customerHandover'}}</span>
           </label>
           <input type="number" step="0.01" min="0" id="clearMoney" name="clearMoney" class="form-input" required placeholder="0.00" value="{{#if formData.clearMoney}}{{formData.clearMoney}}{{else}}0.00{{/if}}" style="font-size: 1.05rem; font-weight: 700; color: #34d399;">
         </div>
@@ -151,10 +151,10 @@
             <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #10b981; box-shadow: 0 0 10px #10b981;"></span>
             {{t 'bills.livePreview'}}
           </h3>
-          <span style="font-size: 0.72rem; color: var(--color-text-dim);">Real-time calculation breakdown</span>
+          <span style="font-size: 0.72rem; color: var(--color-text-dim);">{{t 'bills.realtimeBreakdown'}}</span>
         </div>
         <span class="badge" id="previewRateBadge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); font-size: 0.75rem; font-weight: 700;">
-          {{t 'bills.ratePerUnit'}}: ৳{{defaultUnitRate}}/{{t 'common.units'}}
+          {{t 'bills.ratePerUnitLabel'}} {{t 'common.currency'}}{{bnNum defaultUnitRate}}/{{t 'common.units'}}
         </span>
       </div>
 
@@ -168,12 +168,12 @@
       <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(56, 189, 248, 0.2); border-radius: 8px; padding: 0.85rem 1rem; margin-bottom: 1.25rem;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
           <span style="font-size: 0.76rem; font-weight: 600; text-transform: uppercase; color: #94a3b8;">{{t 'bills.meterReadings'}}</span>
-          <span style="font-size: 0.76rem; color: #38bdf8; font-weight: 700;" id="previewConsumedUnits">0.00 Units</span>
+          <span style="font-size: 0.76rem; color: #38bdf8; font-weight: 700;" id="previewConsumedUnits">{{bnNum '0.00'}} {{t 'common.units'}}</span>
         </div>
         <div style="display: flex; align-items: center; justify-content: space-between; font-family: monospace; font-size: 1rem; font-weight: 700; color: #ffffff;">
-          <span id="previewPrevUnit" style="color: #94a3b8;">0.00</span>
+          <span id="previewPrevUnit" style="color: #94a3b8;">{{bnNum '0.00'}}</span>
           <span style="color: #38bdf8; font-size: 1.15rem;">&rarr;</span>
-          <span id="previewCurrUnit" style="color: #38bdf8;">0.00</span>
+          <span id="previewCurrUnit" style="color: #38bdf8;">{{bnNum '0.00'}}</span>
         </div>
       </div>
 
@@ -181,17 +181,17 @@
       <div style="display: flex; flex-direction: column; gap: 0.65rem; font-size: 0.88rem; margin-bottom: 1.25rem;">
         <div style="display: flex; justify-content: space-between; padding-bottom: 0.45rem; border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
           <span style="color: var(--color-text-muted);" id="previewElectricLabel">{{t 'bills.electricBill'}}:</span>
-          <strong id="previewElectricBill" style="color: #ffffff; font-family: monospace;">৳0.00</strong>
+          <strong id="previewElectricBill" style="color: #ffffff; font-family: monospace;">{{t 'common.currency'}}{{bnNum '0.00'}}</strong>
         </div>
 
         <div style="display: flex; justify-content: space-between; padding-bottom: 0.45rem; border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
           <span style="color: var(--color-text-muted);">{{t 'bills.prevDues'}}:</span>
-          <strong id="previewPrevDues" style="color: #fbbf24; font-family: monospace;">৳0.00</strong>
+          <strong id="previewPrevDues" style="color: #fbbf24; font-family: monospace;">{{t 'common.currency'}}{{bnNum '0.00'}}</strong>
         </div>
 
         <div style="display: flex; justify-content: space-between; padding-bottom: 0.45rem; border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
           <span style="color: var(--color-text-muted);">{{t 'bills.rentLoan'}}:</span>
-          <strong id="previewRentLoan" style="color: #ffffff; font-family: monospace;">৳0.00</strong>
+          <strong id="previewRentLoan" style="color: #ffffff; font-family: monospace;">{{t 'common.currency'}}{{bnNum '0.00'}}</strong>
         </div>
       </div>
 
@@ -199,24 +199,24 @@
       <div style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(56, 189, 248, 0.1)); border: 1px solid rgba(99, 102, 241, 0.3); border-radius: 10px; padding: 1rem 1.15rem; margin-bottom: 0.85rem; display: flex; justify-content: space-between; align-items: center;">
         <div>
           <div style="font-size: 0.76rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #a5b4fc;">{{t 'bills.totalBill'}}</div>
-          <div style="font-size: 0.72rem; color: var(--color-text-dim);">Combined billing obligation</div>
+          <div style="font-size: 0.72rem; color: var(--color-text-dim);">{{t 'bills.combinedObligation'}}</div>
         </div>
-        <strong id="previewTotalBill" style="font-size: 1.5rem; font-weight: 800; color: #ffffff; letter-spacing: -0.02em;">৳0.00</strong>
+        <strong id="previewTotalBill" style="font-size: 1.5rem; font-weight: 800; color: #ffffff; letter-spacing: -0.02em;">{{t 'common.currency'}}{{bnNum '0.00'}}</strong>
       </div>
 
       <!-- Paid Amount Row -->
       <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.65rem 0.85rem; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 8px; margin-bottom: 0.85rem;">
         <span style="font-size: 0.82rem; font-weight: 600; color: #34d399;">{{t 'bills.paid'}}</span>
-        <strong id="previewPaidAmount" style="font-size: 1.1rem; color: #34d399; font-weight: 800;">৳0.00</strong>
+        <strong id="previewPaidAmount" style="font-size: 1.1rem; color: #34d399; font-weight: 800;">{{t 'common.currency'}}{{bnNum '0.00'}}</strong>
       </div>
 
       <!-- Present Net Dues Alert -->
       <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.85rem 1rem; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 10px;">
         <div>
           <div style="font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #f87171;">{{t 'bills.presentDues'}}</div>
-          <div style="font-size: 0.7rem; color: #fca5a5;">Outstanding balance carryover</div>
+          <div style="font-size: 0.7rem; color: #fca5a5;">{{t 'bills.outstandingCarryover'}}</div>
         </div>
-        <strong id="previewPresentDues" style="font-size: 1.5rem; font-weight: 800; color: #ef4444; letter-spacing: -0.02em;">৳0.00</strong>
+        <strong id="previewPresentDues" style="font-size: 1.5rem; font-weight: 800; color: #ef4444; letter-spacing: -0.02em;">{{t 'common.currency'}}{{bnNum '0.00'}}</strong>
       </div>
     </div>
   </div>
@@ -262,6 +262,13 @@
       }
     }
 
+    const isBn = {{#if isBn}}true{{else}}false{{/if}};
+    const bnDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+    function toBn(val) {
+      if (!isBn) return String(val);
+      return String(val).replace(/[0-9]/g, (d) => bnDigits[d]);
+    }
+
     function recalc() {
       const currentUnit = Number(currentUnitInput.value) || 0;
       const rent = Number(rentBillInput.value) || 0;
@@ -275,23 +282,23 @@
       const presentDues = total - clearMoney;
 
       if (previewRateBadge) {
-        previewRateBadge.textContent = 'Rate: ৳' + rate.toFixed(2) + '/Unit';
+        previewRateBadge.textContent = (isBn ? 'রেট: ৳' : 'Rate: ৳') + toBn(rate.toFixed(2)) + (isBn ? '/ইউনিট' : '/Unit');
       }
       if (previewElectricLabel) {
-        previewElectricLabel.innerHTML = 'Electricity (' + consumed.toFixed(1) + 'u &times; ৳' + rate.toFixed(2) + '):';
+        previewElectricLabel.innerHTML = (isBn ? 'বিদ্যুৎ বিল (' : 'Electric Bill (') + toBn(consumed.toFixed(1)) + (isBn ? ' ইউ &times; ৳' : 'u &times; ৳') + toBn(rate.toFixed(2)) + '):';
       }
 
-      document.getElementById('previewPrevUnit').textContent = previousUnit.toFixed(2);
-      document.getElementById('previewCurrUnit').textContent = currentUnit.toFixed(2);
-      document.getElementById('previewConsumedUnits').textContent = consumed.toFixed(2) + ' Units';
-      document.getElementById('previewElectricBill').textContent = '৳' + electric.toFixed(2);
-      document.getElementById('previewPrevDues').textContent = '৳' + previousDues.toFixed(2);
-      document.getElementById('previewRentLoan').textContent = '৳' + (rent + loan).toFixed(2);
-      document.getElementById('previewTotalBill').textContent = '৳' + total.toFixed(2);
-      document.getElementById('previewPaidAmount').textContent = '৳' + clearMoney.toFixed(2);
+      document.getElementById('previewPrevUnit').textContent = toBn(previousUnit.toFixed(2));
+      document.getElementById('previewCurrUnit').textContent = toBn(currentUnit.toFixed(2));
+      document.getElementById('previewConsumedUnits').textContent = toBn(consumed.toFixed(2)) + (isBn ? ' ইউনিট' : ' Units');
+      document.getElementById('previewElectricBill').textContent = '৳' + toBn(electric.toFixed(2));
+      document.getElementById('previewPrevDues').textContent = '৳' + toBn(previousDues.toFixed(2));
+      document.getElementById('previewRentLoan').textContent = '৳' + toBn((rent + loan).toFixed(2));
+      document.getElementById('previewTotalBill').textContent = '৳' + toBn(total.toFixed(2));
+      document.getElementById('previewPaidAmount').textContent = '৳' + toBn(clearMoney.toFixed(2));
       
       const duesEl = document.getElementById('previewPresentDues');
-      duesEl.textContent = '৳' + presentDues.toFixed(2);
+      duesEl.textContent = '৳' + toBn(presentDues.toFixed(2));
       if (presentDues <= 0) {
         duesEl.style.color = '#34d399';
         duesEl.parentElement.style.background = 'rgba(16, 185, 129, 0.1)';

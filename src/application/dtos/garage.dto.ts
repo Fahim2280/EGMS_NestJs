@@ -75,5 +75,8 @@ export class GarageDashboardDto {
   metrics: GarageMetricsDto;
   customers: any[];
   recentBills: any[];
+  totalFilteredBillsCount?: number;
+  fromDate?: string;
+  toDate?: string;
 }
 

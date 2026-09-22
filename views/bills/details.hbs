@@ -1,10 +1,10 @@
 <div class="page-header" style="margin-bottom: 1.5rem;">
   <div class="header-content">
     <a href="/bills" style="color: #94a3b8; text-decoration: none; font-size: 0.875rem; display: inline-flex; align-items: center; gap: 0.25rem; margin-bottom: 0.5rem;">
-      &larr; Back to Bills
+      &larr; {{t 'bills.backToBills'}}
     </a>
-    <h1 class="page-title">Electric Bill Invoice Receipt</h1>
-    <p class="page-subtitle">Official billing receipt #{{#if bill.billNumber}}{{bill.billNumber}}{{else}}{{bill.id}}{{/if}}</p>
+    <h1 class="page-title">{{t 'bills.receiptTitle'}}</h1>
+    <p class="page-subtitle">{{t 'bills.officialReceiptSub'}} #{{#if bill.billNumber}}{{bnNum bill.billNumber}}{{else}}{{bnNum bill.id}}{{/if}}</p>
   </div>
   <div class="header-actions">
     <button onclick="window.print()" class="btn btn-primary" style="background: #3b82f6; border-color: #3b82f6;">
@@ -13,10 +13,10 @@
         <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
         <rect x="6" y="14" width="12" height="8"/>
       </svg>
-      Print Receipt
+      {{t 'bills.printReceipt'}}
     </button>
     {{#if (or isSuperAdmin currentUser.canEdit)}}
-    <a href="/bills/{{bill.id}}/edit" class="btn btn-secondary">Edit Bill</a>
+    <a href="/bills/{{bill.id}}/edit" class="btn btn-secondary">{{t 'bills.editBill'}}</a>
     {{/if}}
   </div>
 </div>
@@ -25,49 +25,49 @@
   <!-- Invoice Header -->
   <div style="display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 2rem; border-bottom: 2px solid rgba(255,255,255,0.1); margin-bottom: 2rem;">
     <div>
-      <h2 style="font-size: 1.75rem; font-weight: 800; color: #f8fafc; margin-bottom: 0.25rem;">EGMS Electric Garage</h2>
-      <p style="color: #94a3b8; font-size: 0.9rem;">Automated Electric Billing &amp; Garage Services</p>
+      <h2 style="font-size: 1.75rem; font-weight: 800; color: #f8fafc; margin-bottom: 0.25rem;">{{t 'nav.brand'}}</h2>
+      <p style="color: #94a3b8; font-size: 0.9rem;">{{t 'nav.subBrand'}}</p>
     </div>
     <div style="text-align: right;">
-      <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #10b981; font-size: 0.9rem; padding: 0.4rem 0.8rem;">OFFICIAL RECEIPT</span>
-      <div style="font-size: 0.85rem; color: #94a3b8; margin-top: 0.5rem;">Date: <strong>{{bill.date}}</strong></div>
+      <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #10b981; font-size: 0.9rem; padding: 0.4rem 0.8rem;">{{t 'bills.officialReceiptBadge'}}</span>
+      <div style="font-size: 0.85rem; color: #94a3b8; margin-top: 0.5rem;">{{t 'common.date'}}: <strong>{{tDate bill.date}}</strong></div>
     </div>
   </div>
 
   <!-- Customer & Account Info -->
   <div class="bill-receipt-info-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
     <div>
-      <div style="font-size: 0.8rem; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.05em; margin-bottom: 0.25rem;">Billed To</div>
+      <div style="font-size: 0.8rem; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.05em; margin-bottom: 0.25rem;">{{t 'bills.billedTo'}}</div>
       <div style="font-size: 1.25rem; font-weight: 700; color: #f8fafc;">{{bill.customerName}}</div>
-      <div style="color: #94a3b8; font-size: 0.9rem; margin-top: 0.25rem;">Customer ID: {{#if bill.customerCode}}<strong style="color: #2dd4bf;">{{bill.customerCode}}</strong>{{else if bill.customerCId}}#{{bill.customerCId}}{{else}}#{{bill.customerId}}{{/if}}</div>
+      <div style="color: #94a3b8; font-size: 0.9rem; margin-top: 0.25rem;">{{t 'bills.customerId'}}: {{#if bill.customerCode}}<strong style="color: #2dd4bf;">{{bill.customerCode}}</strong>{{else if bill.customerCId}}#{{bnNum bill.customerCId}}{{else}}#{{bnNum bill.customerId}}{{/if}}</div>
     </div>
     <div style="text-align: right;">
-      <div style="font-size: 0.8rem; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.05em; margin-bottom: 0.25rem;">Tariff &amp; Rate</div>
-      <div style="font-size: 1.1rem; font-weight: 700; color: #38bdf8;">৳15.00 / Unit</div>
-      <div style="color: #94a3b8; font-size: 0.9rem;">Standard Commercial Garage Rate</div>
+      <div style="font-size: 0.8rem; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.05em; margin-bottom: 0.25rem;">{{t 'bills.tariffAndRate'}}</div>
+      <div style="font-size: 1.1rem; font-weight: 700; color: #38bdf8;">{{t 'common.currency'}}{{#if bill.unitRate}}{{bnNum bill.unitRate}}{{else}}{{bnNum '15.00'}}{{/if}} / {{t 'common.unitShort'}}</div>
+      <div style="color: #94a3b8; font-size: 0.9rem;">{{t 'bills.standardCommercialRate'}}</div>
     </div>
   </div>
 
   <!-- Meter Readings Table -->
   <div style="margin-bottom: 2rem;">
-    <h3 style="font-size: 1rem; font-weight: 600; color: #f8fafc; margin-bottom: 0.75rem;">Meter Readings &amp; Consumption</h3>
+    <h3 style="font-size: 1rem; font-weight: 600; color: #f8fafc; margin-bottom: 0.75rem;">{{t 'bills.meterReadingsAndCons'}}</h3>
     <table class="data-table" style="background: rgba(0,0,0,0.2);">
       <thead>
         <tr>
-          <th>Previous Reading</th>
-          <th>Current Reading</th>
-          <th>Consumed Units</th>
-          <th>Rate</th>
-          <th style="text-align: right;">Electric Amount</th>
+          <th>{{t 'bills.prevReading'}}</th>
+          <th>{{t 'bills.currReading'}}</th>
+          <th>{{t 'bills.consumedUnits'}}</th>
+          <th>{{t 'bills.rate'}}</th>
+          <th style="text-align: right;">{{t 'bills.electricAmount'}}</th>
         </tr>
       </thead>
       <tbody>
         <tr>
-          <td>{{bill.previousUnit}} Units</td>
-          <td><strong>{{bill.currentUnit}} Units</strong></td>
-          <td><span class="badge" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8;">{{bill.totalUnit}} Units</span></td>
-          <td>৳{{#if bill.unitRate}}{{bill.unitRate}}{{else}}15.00{{/if}}</td>
-          <td style="text-align: right; font-weight: 700; color: #f8fafc;">৳{{bill.electricBill}}</td>
+          <td>{{bnNum bill.previousUnit}} {{t 'common.units'}}</td>
+          <td><strong>{{bnNum bill.currentUnit}} {{t 'common.units'}}</strong></td>
+          <td><span class="badge" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8;">{{bnNum bill.totalUnit}} {{t 'common.units'}}</span></td>
+          <td>{{t 'common.currency'}}{{#if bill.unitRate}}{{bnNum bill.unitRate}}{{else}}{{bnNum '15.00'}}{{/if}}</td>
+          <td style="text-align: right; font-weight: 700; color: #f8fafc;">{{t 'common.currency'}}{{bnNum bill.electricBill}}</td>
         </tr>
       </tbody>
     </table>
@@ -76,33 +76,33 @@
   <!-- Financial Calculation Ledger Breakdown -->
   <div style="background: rgba(0,0,0,0.15); border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem;">
     <div style="display: flex; justify-content: space-between; margin-bottom: 0.75rem;">
-      <span style="color: #94a3b8;">Electric Charge ({{bill.totalUnit}} Units &times; ৳{{#if bill.unitRate}}{{bill.unitRate}}{{else}}15.00{{/if}}):</span>
-      <span style="color: #f8fafc; font-weight: 600;">৳{{bill.electricBill}}</span>
+      <span style="color: #94a3b8;">{{t 'bills.electricCharge'}} ({{bnNum bill.totalUnit}} {{t 'common.units'}} &times; {{t 'common.currency'}}{{#if bill.unitRate}}{{bnNum bill.unitRate}}{{else}}{{bnNum '15.00'}}{{/if}}):</span>
+      <span style="color: #f8fafc; font-weight: 600;">{{t 'common.currency'}}{{bnNum bill.electricBill}}</span>
     </div>
     <div style="display: flex; justify-content: space-between; margin-bottom: 0.75rem;">
-      <span style="color: #94a3b8;">Previous Dues:</span>
-      <span style="color: #fbbf24; font-weight: 600;">৳{{bill.previousDues}}</span>
+      <span style="color: #94a3b8;">{{t 'bills.previousDuesLabel'}}</span>
+      <span style="color: #fbbf24; font-weight: 600;">{{t 'common.currency'}}{{bnNum bill.previousDues}}</span>
     </div>
     <div style="display: flex; justify-content: space-between; margin-bottom: 0.75rem;">
-      <span style="color: #94a3b8;">Rent Bill:</span>
-      <span style="color: #f8fafc;">৳{{bill.rentBill}}</span>
+      <span style="color: #94a3b8;">{{t 'bills.rentBillLabel'}}</span>
+      <span style="color: #f8fafc;">{{t 'common.currency'}}{{bnNum bill.rentBill}}</span>
     </div>
     <div style="display: flex; justify-content: space-between; margin-bottom: 0.75rem;">
-      <span style="color: #94a3b8;">Loan / Adjustment:</span>
-      <span style="color: #f8fafc;">৳{{bill.loan}}</span>
+      <span style="color: #94a3b8;">{{t 'bills.loanAdjustmentLabel'}}</span>
+      <span style="color: #f8fafc;">{{t 'common.currency'}}{{bnNum bill.loan}}</span>
     </div>
     <div style="display: flex; justify-content: space-between; padding-top: 0.75rem; border-top: 1px solid rgba(255,255,255,0.1); margin-bottom: 0.75rem;">
-      <span style="font-weight: 700; color: #f8fafc;">Total Bill Amount:</span>
-      <strong style="font-size: 1.2rem; color: #f8fafc;">৳{{bill.totalBill}}</strong>
+      <span style="font-weight: 700; color: #f8fafc;">{{t 'bills.totalBillAmount'}}</span>
+      <strong style="font-size: 1.2rem; color: #f8fafc;">{{t 'common.currency'}}{{bnNum bill.totalBill}}</strong>
     </div>
     <div style="display: flex; justify-content: space-between; margin-bottom: 0.75rem;">
-      <span style="color: #94a3b8;">Amount Paid (Clear Money):</span>
-      <strong style="color: #10b981; font-weight: 700;">৳{{bill.clearMoney}}</strong>
+      <span style="color: #94a3b8;">{{t 'bills.amountPaidLabel'}}</span>
+      <strong style="color: #10b981; font-weight: 700;">{{t 'common.currency'}}{{bnNum bill.clearMoney}}</strong>
     </div>
     <div style="display: flex; justify-content: space-between; padding-top: 0.75rem; border-top: 2px solid rgba(255,255,255,0.15);">
-      <span style="font-size: 1.1rem; font-weight: 800; color: #f8fafc;">Net Present Dues:</span>
+      <span style="font-size: 1.1rem; font-weight: 800; color: #f8fafc;">{{t 'bills.presentOutstandingDues'}}</span>
       <strong style="font-size: 1.35rem; color: {{#if (ne bill.presentDues 0)}}#ef4444{{else}}#10b981{{/if}};">
-        ৳{{bill.presentDues}}
+        {{t 'common.currency'}}{{bnNum bill.presentDues}}
       </strong>
     </div>
   </div>
@@ -110,11 +110,11 @@
   <!-- Receipt Footer -->
   <div style="display: flex; justify-content: space-between; align-items: flex-end; padding-top: 2rem; border-top: 1px dashed rgba(255,255,255,0.1);">
     <div style="color: #94a3b8; font-size: 0.8rem;">
-      This is a computer-generated billing receipt.<br>Thank you for your business!
+      {{t 'bills.computerGenerated'}}
     </div>
     <div style="text-align: center;">
       <div style="width: 150px; border-bottom: 1px solid #94a3b8; margin-bottom: 0.25rem;"></div>
-      <span style="font-size: 0.8rem; color: #94a3b8;">Authorized Signature</span>
+      <span style="font-size: 0.8rem; color: #94a3b8;">{{t 'bills.authorizedSignature'}}</span>
     </div>
   </div>
 </div>

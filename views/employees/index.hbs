@@ -25,19 +25,81 @@
     {{/if}}
   </div>
 
+  <!-- Search & Filter Toolbar -->
+  <div class="card" style="padding: 1rem 1.25rem; margin-bottom: 1.5rem;">
+    <form method="GET" action="/employees" style="display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: flex-end;">
+      <!-- Search -->
+      <div class="dfb-group" style="flex: 1; min-width: 180px;">
+        <label class="dfb-label">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          {{#if isBn}}কর্মী খুঁজুন{{else}}Search Employees{{/if}}
+        </label>
+        <input type="text" name="search" class="dfb-input" placeholder="{{#if isBn}}নাম বা ইমেইল...{{else}}Name or email...{{/if}}" value="{{search}}">
+      </div>
+      <!-- Role filter -->
+      <div class="dfb-group">
+        <label class="dfb-label">{{#if isBn}}ভূমিকা{{else}}Role{{/if}}</label>
+        <select name="role" class="dfb-input dfb-select">
+          <option value="">{{#if isBn}}সব ভূমিকা{{else}}All Roles{{/if}}</option>
+          <option value="SUPER_ADMIN" {{#if (eq role 'SUPER_ADMIN')}}selected{{/if}}>Super Admin</option>
+          <option value="ADMIN" {{#if (eq role 'ADMIN')}}selected{{/if}}>Admin</option>
+          <option value="EMPLOYEE" {{#if (eq role 'EMPLOYEE')}}selected{{/if}}>Employee</option>
+        </select>
+      </div>
+      <!-- Status filter -->
+      <div class="dfb-group">
+        <label class="dfb-label">{{#if isBn}}স্ট্যাটাস{{else}}Status{{/if}}</label>
+        <select name="status" class="dfb-input dfb-select">
+          <option value="">{{#if isBn}}সবাই{{else}}All Status{{/if}}</option>
+          <option value="active" {{#if (eq status 'active')}}selected{{/if}}>{{t 'common.active'}}</option>
+          <option value="inactive" {{#if (eq status 'inactive')}}selected{{/if}}>{{t 'employees.suspended'}}</option>
+        </select>
+      </div>
+      <!-- Date Joined From -->
+      <div class="dfb-group" style="min-width: 130px;">
+        <label class="dfb-label">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          {{#if isBn}}যোগদান শুরু{{else}}Joined From{{/if}}
+        </label>
+        <input type="date" name="fromDate" class="dfb-input" value="{{fromDate}}">
+      </div>
+      <!-- Date Joined To -->
+      <div class="dfb-group" style="min-width: 130px;">
+        <label class="dfb-label">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          {{#if isBn}}যোগদান শেষ{{else}}Joined To{{/if}}
+        </label>
+        <input type="date" name="toDate" class="dfb-input" value="{{toDate}}">
+      </div>
+      <!-- Actions -->
+      <div class="dfb-actions">
+        <button type="submit" class="btn btn-primary dfb-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          {{#if isBn}}ফিল্টার{{else}}Filter{{/if}}
+        </button>
+        {{#if (or search role status fromDate toDate)}}
+          <a href="/employees" class="btn btn-secondary dfb-btn" style="color: #ef4444;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            {{#if isBn}}রিসেট{{else}}Reset{{/if}}
+          </a>
+        {{/if}}
+      </div>
+    </form>
+  </div>
+
   {{#if employees.length}}
     <div class="card" style="padding: 0; overflow: hidden; box-shadow: var(--shadow-md);">
-      <div class="table-container" style="overflow-x: auto;">
-        <table class="data-table" style="width: 100%; border-collapse: collapse;">
+      <div class="table-responsive">
+        <table class="data-table table-dense" style="width: 100%; border-collapse: collapse;">
           <thead>
             <tr style="background: rgba(15, 23, 42, 0.8); border-bottom: 1px solid var(--color-border); text-align: left;">
-              <th style="padding: 1rem;">{{t 'employees.name'}}</th>
-              <th style="padding: 1rem;">{{t 'employees.email'}}</th>
-              <th style="padding: 1rem;">{{t 'employees.phone'}}</th>
-              <th style="padding: 1rem;">{{t 'employees.role'}}</th>
-              <th style="padding: 1rem;">{{t 'employees.status'}}</th>
-              <th style="padding: 1rem;">{{t 'employees.nid'}}</th>
-              <th style="padding: 1rem; text-align: right;">{{t 'common.actions'}}</th>
+              <th style="padding: 0.75rem 0.85rem;">{{t 'employees.name'}}</th>
+              <th style="padding: 0.75rem 0.85rem;">{{t 'employees.email'}}</th>
+              <th style="padding: 0.75rem 0.85rem;">{{t 'employees.phone'}}</th>
+              <th style="padding: 0.75rem 0.85rem;">{{t 'employees.role'}}</th>
+              <th style="padding: 0.75rem 0.85rem;">{{t 'employees.status'}}</th>
+              <th style="padding: 0.75rem 0.85rem;">{{t 'employees.nid'}}</th>
+              <th style="padding: 0.75rem 0.85rem; text-align: right;">{{t 'common.actions'}}</th>
             </tr>
           </thead>
           <tbody>

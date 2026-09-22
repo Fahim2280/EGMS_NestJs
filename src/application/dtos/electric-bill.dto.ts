@@ -82,6 +82,8 @@ export class ElectricBillResponseDto {
   customerName?: string;
   customerCode?: string | null;
   customerCId?: number;
+  garageId?: string;
+  garageName?: string;
   companyId: string;
   date: Date;
   previousUnit: number;

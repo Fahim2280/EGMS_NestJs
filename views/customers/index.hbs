@@ -19,7 +19,7 @@
 <div class="card">
   <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
     <h2 class="card-title" style="margin: 0;">{{t 'customers.registeredCount'}} ({{bnNum customerCount}})</h2>
-    <form method="GET" action="/customers" class="table-filter-form">
+    <form method="GET" action="/customers" class="table-filter-form" style="display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: flex-end;">
       <select name="garageId" class="form-input filter-select" onchange="this.form.submit()">
         <option value="">{{t 'common.allGarages'}}</option>
         {{#each garages}}
@@ -28,10 +28,25 @@
           </option>
         {{/each}}
       </select>
+      <!-- Date range -->
+      <div class="dfb-group" style="min-width: 130px;">
+        <label class="dfb-label" for="custFrom">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          {{#if isBn}}শুরু{{else}}From{{/if}}
+        </label>
+        <input type="date" id="custFrom" name="fromDate" class="dfb-input" value="{{fromDate}}">
+      </div>
+      <div class="dfb-group" style="min-width: 130px;">
+        <label class="dfb-label" for="custTo">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          {{#if isBn}}শেষ{{else}}To{{/if}}
+        </label>
+        <input type="date" id="custTo" name="toDate" class="dfb-input" value="{{toDate}}">
+      </div>
       <div class="search-input-group">
         <input type="text" name="search" class="form-input" placeholder="{{t 'customers.searchPlaceholder'}}" value="{{search}}">
         <button type="submit" class="btn btn-secondary btn-sm">{{t 'common.search'}}</button>
-        {{#if (or selectedGarageId search)}}
+        {{#if (or selectedGarageId search fromDate toDate)}}
           <a href="/customers" class="btn btn-secondary btn-sm" style="color: #ef4444;">{{t 'common.reset'}}</a>
         {{/if}}
       </div>
@@ -44,7 +59,7 @@
       <span>{{#if isBn}}সম্পূর্ণ বিবরণ দেখতে ডানে স্ক্রোল করুন{{else}}Scroll horizontally to view all{{/if}}</span>
     </div>
     <div class="table-responsive">
-      <table class="data-table">
+      <table class="data-table table-dense">
         <thead>
           <tr>
             <th>{{t 'customers.id'}}</th>

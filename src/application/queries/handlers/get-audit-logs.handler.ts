@@ -26,7 +26,11 @@ export class GetAuditLogsHandler
       limit: query.limit,
     };
 
-    if (query.days && query.days > 0) {
+    if (query.fromDate) {
+      const from = new Date(query.fromDate);
+      from.setHours(0, 0, 0, 0);
+      filter.fromDate = from;
+    } else if (query.days && query.days > 0) {
       const fromDate = new Date();
       if (query.days === 1) {
         // Today
@@ -35,6 +39,12 @@ export class GetAuditLogsHandler
         fromDate.setDate(fromDate.getDate() - query.days);
       }
       filter.fromDate = fromDate;
+    }
+
+    if (query.toDate) {
+      const to = new Date(query.toDate);
+      to.setHours(23, 59, 59, 999);
+      filter.toDate = to;
     }
 
     const [filteredResult, stats] = await Promise.all([

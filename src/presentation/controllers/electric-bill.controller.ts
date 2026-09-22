@@ -27,6 +27,7 @@ import { GetCustomerByIdQuery } from '@application/queries/impl/get-customer-by-
 import { GetCustomerBillSummaryQuery } from '@application/queries/impl/get-customer-bill-summary.query';
 import { PreviewElectricBillQuery } from '@application/queries/impl/preview-electric-bill.query';
 import { GetCompanyByIdQuery } from '@application/queries/impl/get-company-by-id.query';
+import { GetGaragesByCompanyQuery } from '@application/queries/impl/get-garages-by-company.query';
 import { JwtAuthGuard } from '@infrastructure/auth/jwt-auth.guard';
 import { PermissionsGuard } from '@infrastructure/auth/permissions.guard';
 import { RequirePermissions } from '@infrastructure/auth/permissions.decorator';
@@ -45,6 +46,11 @@ export class ElectricBillController {
   async listBills(
     @Req() req: Request,
     @Res() res: Response,
+    @Query('fromDate') fromDate?: string,
+    @Query('toDate') toDate?: string,
+    @Query('garageId') garageId?: string,
+    @Query('search') search?: string,
+    @Query('preset') preset?: string,
     @Query('page') page?: string,
   ) {
     const user = (req as any).user;
@@ -54,9 +60,45 @@ export class ElectricBillController {
     const currentPage = Math.max(1, parseInt(page || '1', 10));
     const pageSize = 15;
 
-    const bills = await this.queryBus.execute(
-      new GetElectricBillsByCompanyQuery(user.companyId, allowedGarageIds),
-    );
+    const parsedFromDate = fromDate ? new Date(fromDate) : undefined;
+    const parsedToDate = toDate ? new Date(toDate) : undefined;
+
+    const [bills, garages] = await Promise.all([
+      this.queryBus.execute(
+        new GetElectricBillsByCompanyQuery(
+          user.companyId,
+          allowedGarageIds,
+          parsedFromDate,
+          parsedToDate,
+          garageId,
+          search,
+        ),
+      ),
+      this.queryBus.execute(
+        new GetGaragesByCompanyQuery(user.companyId, allowedGarageIds),
+      ),
+    ]);
+
+    // Aggregate metrics across all filtered bills
+    let totalUnits = 0;
+    let totalElectric = 0;
+    let totalBilled = 0;
+    let totalPaid = 0;
+    let totalDues = 0;
+    for (const b of bills) {
+      totalUnits += b.totalUnit || 0;
+      totalElectric += b.electricBill || 0;
+      totalBilled += b.totalBill || 0;
+      totalPaid += b.clearMoney || 0;
+      totalDues += b.presentDues || 0;
+    }
+    const summary = {
+      totalUnits,
+      totalElectric,
+      totalBilled,
+      totalPaid,
+      totalDues,
+    };
 
     const totalCount = bills.length;
     const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
@@ -78,6 +120,13 @@ export class ElectricBillController {
       canView: isSuperAdmin || Boolean(user.canView),
       bills: paginated,
       totalBillsCount: totalCount,
+      garages,
+      selectedGarageId: garageId || '',
+      fromDate: fromDate || '',
+      toDate: toDate || '',
+      search: search || '',
+      preset: preset || '',
+      summary,
       defaultFromDate,
       defaultToDate,
       todayDate: defaultToDate,
