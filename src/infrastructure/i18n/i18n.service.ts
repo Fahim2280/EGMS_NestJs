@@ -43,3 +43,21 @@ export function formatDateWithLang(date: any, lang: 'en' | 'bn' = 'en'): string 
     return String(date);
   }
 }
+
+export function formatTimeWithLang(date: any, lang: 'en' | 'bn' = 'en'): string {
+  if (!date) return '';
+  try {
+    const d = new Date(date);
+    if (isNaN(d.getTime())) return '';
+    const hours = String(d.getHours()).padStart(2, '0');
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+    const seconds = String(d.getSeconds()).padStart(2, '0');
+    const timeStr = `${hours}:${minutes}:${seconds}`;
+    if (lang === 'bn') {
+      return toBengaliDigits(timeStr);
+    }
+    return timeStr;
+  } catch {
+    return '';
+  }
+}

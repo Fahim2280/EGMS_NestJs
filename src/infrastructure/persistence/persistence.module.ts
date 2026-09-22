@@ -9,6 +9,7 @@ import {
   ELECTRIC_BILL_REPOSITORY_TOKEN,
   GUARANTOR_REPOSITORY_TOKEN,
   PASSWORD_RESET_TOKEN_REPOSITORY_TOKEN,
+  AUDIT_LOG_REPOSITORY_TOKEN,
 } from '@domain/index';
 import { CompanyOrmEntity } from './typeorm/entities/company.orm-entity';
 import { GarageOrmEntity } from './typeorm/entities/garage.orm-entity';
@@ -17,6 +18,7 @@ import { CustomerOrmEntity } from './typeorm/entities/customer.orm-entity';
 import { ElectricBillOrmEntity } from './typeorm/entities/electric-bill.orm-entity';
 import { GuarantorOrmEntity } from './typeorm/entities/guarantor.orm-entity';
 import { PasswordResetTokenOrmEntity } from './typeorm/entities/password-reset-token.orm-entity';
+import { AuditLogOrmEntity } from './typeorm/entities/audit-log.orm-entity';
 import { TypeOrmCompanyRepository } from './typeorm/repositories/typeorm-company.repository';
 import { TypeOrmGarageRepository } from './typeorm/repositories/typeorm-garage.repository';
 import { TypeOrmEmployeeRepository } from './typeorm/repositories/typeorm-employee.repository';
@@ -24,6 +26,7 @@ import { TypeOrmCustomerRepository } from './typeorm/repositories/typeorm-custom
 import { TypeOrmElectricBillRepository } from './typeorm/repositories/typeorm-electric-bill.repository';
 import { TypeOrmGuarantorRepository } from './typeorm/repositories/typeorm-guarantor.repository';
 import { TypeOrmPasswordResetTokenRepository } from './typeorm/repositories/typeorm-password-reset-token.repository';
+import { TypeOrmAuditLogRepository } from './typeorm/repositories/typeorm-audit-log.repository';
 import { DatabaseSeederService } from './typeorm/database-seeder.service';
 
 @Global()
@@ -46,6 +49,7 @@ import { DatabaseSeederService } from './typeorm/database-seeder.service';
           ElectricBillOrmEntity,
           GuarantorOrmEntity,
           PasswordResetTokenOrmEntity,
+          AuditLogOrmEntity,
         ],
         synchronize: true,
       }),
@@ -59,6 +63,7 @@ import { DatabaseSeederService } from './typeorm/database-seeder.service';
       ElectricBillOrmEntity,
       GuarantorOrmEntity,
       PasswordResetTokenOrmEntity,
+      AuditLogOrmEntity,
     ]),
   ],
   providers: [
@@ -69,6 +74,7 @@ import { DatabaseSeederService } from './typeorm/database-seeder.service';
     TypeOrmElectricBillRepository,
     TypeOrmGuarantorRepository,
     TypeOrmPasswordResetTokenRepository,
+    TypeOrmAuditLogRepository,
     DatabaseSeederService,
     {
       provide: COMPANY_REPOSITORY_TOKEN,
@@ -98,6 +104,10 @@ import { DatabaseSeederService } from './typeorm/database-seeder.service';
       provide: PASSWORD_RESET_TOKEN_REPOSITORY_TOKEN,
       useExisting: TypeOrmPasswordResetTokenRepository,
     },
+    {
+      provide: AUDIT_LOG_REPOSITORY_TOKEN,
+      useExisting: TypeOrmAuditLogRepository,
+    },
   ],
   exports: [
     TypeOrmModule,
@@ -108,6 +118,8 @@ import { DatabaseSeederService } from './typeorm/database-seeder.service';
     ELECTRIC_BILL_REPOSITORY_TOKEN,
     GUARANTOR_REPOSITORY_TOKEN,
     PASSWORD_RESET_TOKEN_REPOSITORY_TOKEN,
+    AUDIT_LOG_REPOSITORY_TOKEN,
   ],
 })
 export class PersistenceModule {}
+

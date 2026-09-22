@@ -20,7 +20,7 @@ export class RolesGuard implements CanActivate {
     const response = context.switchToHttp().getResponse();
     const user = request.user;
 
-    if (!user || !user.role) {
+    if (!user || (!user.role && !user.isSuperAdmin)) {
       const isApi = request.url.startsWith('/api') ||
         (request.headers.accept && request.headers.accept.includes('application/json'));
       if (!isApi) {
@@ -31,7 +31,16 @@ export class RolesGuard implements CanActivate {
       return false;
     }
 
-    const hasRole = requiredRoles.includes(user.role);
+    const isSuperAdmin =
+      user.role === 'SUPER_ADMIN' ||
+      user.isSuperAdmin === true ||
+      user.role?.toUpperCase() === 'SUPER_ADMIN';
+
+    const hasRole =
+      (isSuperAdmin && requiredRoles.includes('SUPER_ADMIN')) ||
+      (user.role && requiredRoles.includes(user.role)) ||
+      (user.role && requiredRoles.includes(user.role.toUpperCase()));
+
     if (!hasRole) {
       const isApi = request.url.startsWith('/api') ||
         (request.headers.accept && request.headers.accept.includes('application/json'));
@@ -40,7 +49,7 @@ export class RolesGuard implements CanActivate {
         return false;
       }
       response.status(403).json({
-        message: `Insufficient privileges. Required: [${requiredRoles.join(', ')}], Current: ${user.role}`,
+        message: `Insufficient privileges. Required: [${requiredRoles.join(', ')}], Current: ${user.role || 'GENERAL'}`,
       });
       return false;
     }

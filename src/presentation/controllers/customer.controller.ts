@@ -32,6 +32,7 @@ import { GetGuarantorsByCustomerQuery } from '@application/queries/impl/get-guar
 import { JwtAuthGuard } from '@infrastructure/auth/jwt-auth.guard';
 import { PermissionsGuard } from '@infrastructure/auth/permissions.guard';
 import { RequirePermissions } from '@infrastructure/auth/permissions.decorator';
+import { AuditLogService } from '@application/services/audit-log.service';
 
 @Controller('customers')
 @UseGuards(JwtAuthGuard)
@@ -39,6 +40,7 @@ export class CustomerController {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
+    private readonly auditLogService: AuditLogService,
   ) {}
 
   // --- VIEW: List customers ---
@@ -179,6 +181,19 @@ export class CustomerController {
           `${user.sub || user.companyId}|${user.role || 'SUPER_ADMIN'}`,
         ),
       );
+
+      await this.auditLogService.record({
+        companyId: user.companyId,
+        userId: user.sub || user.companyId,
+        userName: user.name,
+        userRole: user.role,
+        action: 'CREATE',
+        entityType: 'CUSTOMER',
+        entityName: dto.name,
+        details: `Registered customer ${dto.name} (${dto.customerCode || 'auto-ID'}) with advance ৳${dto.advanceMoney}`,
+        req,
+      });
+
       return res.redirect('/customers?success=Customer+registered+successfully');
     } catch (err: any) {
       const garages = await this.queryBus.execute(
@@ -324,6 +339,20 @@ export class CustomerController {
           `${user.sub || user.companyId}|${user.role || 'SUPER_ADMIN'}`,
         ),
       );
+
+      await this.auditLogService.record({
+        companyId: user.companyId,
+        userId: user.sub || user.companyId,
+        userName: user.name,
+        userRole: user.role,
+        action: 'UPDATE',
+        entityType: 'CUSTOMER',
+        entityId: id,
+        entityName: dto.name,
+        details: `Updated customer profile ${dto.name} (${dto.customerCode || id})`,
+        req,
+      });
+
       return res.redirect(`/customers/${id}?success=Customer+updated`);
     } catch (err: any) {
       const garages = await this.queryBus.execute(
@@ -369,6 +398,19 @@ export class CustomerController {
           `${user.sub || user.companyId}|${user.role || 'SUPER_ADMIN'}`,
         ),
       );
+
+      await this.auditLogService.record({
+        companyId: user.companyId,
+        userId: user.sub || user.companyId,
+        userName: user.name,
+        userRole: user.role,
+        action: 'DELETE',
+        entityType: 'CUSTOMER',
+        entityId: id,
+        entityName: existing?.name || id,
+        details: `Deleted customer record ${existing?.name || id}`,
+        req,
+      });
     } catch {
       // silently continue
     }

@@ -11,6 +11,7 @@ import {
   translate,
   formatNumberWithLang,
   formatDateWithLang,
+  formatTimeWithLang,
 } from './infrastructure/i18n/i18n.service';
 import { CurrentUserInterceptor } from './infrastructure/auth/current-user.interceptor';
 
@@ -20,6 +21,14 @@ async function bootstrap() {
 
   // Parse HTTP cookies
   app.use(cookieParser());
+
+  // Handle Chrome DevTools well-known probe cleanly without 404 error noise
+  app.use((req: any, res: any, next: any) => {
+    if (req.url && req.url.startsWith('/.well-known/appspecific/com.chrome.devtools.json')) {
+      return res.status(204).end();
+    }
+    next();
+  });
 
   // Attach user, language, and theme to res.locals for Handlebars template rendering
   const jwtService = app.get(JwtService);
@@ -44,7 +53,12 @@ async function bootstrap() {
     if (token) {
       try {
         const decoded = jwtService.verify(token);
-        if (decoded.role === 'SUPER_ADMIN') {
+        if (
+          decoded.role === 'SUPER_ADMIN' ||
+          decoded.isSuperAdmin ||
+          decoded.role?.toUpperCase() === 'SUPER_ADMIN'
+        ) {
+          decoded.role = 'SUPER_ADMIN';
           decoded.isSuperAdmin = true;
           decoded.canCreate = true;
           decoded.canEdit = true;
@@ -54,6 +68,7 @@ async function bootstrap() {
         }
         req.user = decoded;
         res.locals.currentUser = decoded;
+        res.locals.isSuperAdmin = Boolean(decoded.isSuperAdmin);
       } catch {
         // Token expired or invalid
       }
@@ -101,8 +116,18 @@ async function bootstrap() {
   // Register Handlebars helpers
   hbs.registerHelper('eq', (a: any, b: any) => a === b);
   hbs.registerHelper('ne', (a: any, b: any) => a !== b);
-  hbs.registerHelper('and', (a: any, b: any) => Boolean(a && b));
-  hbs.registerHelper('or', (a: any, b: any) => Boolean(a || b));
+  hbs.registerHelper('gt', (a: any, b: any) => Number(a) > Number(b));
+  hbs.registerHelper('gte', (a: any, b: any) => Number(a) >= Number(b));
+  hbs.registerHelper('lt', (a: any, b: any) => Number(a) < Number(b));
+  hbs.registerHelper('lte', (a: any, b: any) => Number(a) <= Number(b));
+  hbs.registerHelper('and', function (...args: any[]) {
+    const values = args.slice(0, -1);
+    return values.every((val) => Boolean(val));
+  });
+  hbs.registerHelper('or', function (...args: any[]) {
+    const values = args.slice(0, -1);
+    return values.some((val) => Boolean(val));
+  });
   hbs.registerHelper('not', (a: any) => !a);
   hbs.registerHelper('json', (context: any) => JSON.stringify(context, null, 2));
   hbs.registerHelper('includes', (arr: any, val: any) => {
@@ -127,6 +152,25 @@ async function bootstrap() {
   hbs.registerHelper('tDate', function (date: any, options: any) {
     const lang = options?.data?.root?.lang || 'en';
     return formatDateWithLang(date, lang);
+  });
+
+  hbs.registerHelper('tTime', function (date: any, options: any) {
+    const lang = options?.data?.root?.lang || 'en';
+    return formatTimeWithLang(date, lang);
+  });
+
+  hbs.registerHelper('deviceChip', (ua: string) => {
+    if (!ua) return '🌐 Web Client';
+    if (ua.includes('iPhone')) return '📱 iPhone';
+    if (ua.includes('iPad')) return '📱 iPad';
+    if (ua.includes('Android')) return '📱 Android';
+    if (ua.includes('Windows')) return '💻 Windows';
+    if (ua.includes('Macintosh') || ua.includes('Mac OS')) return '💻 Mac';
+    if (ua.includes('Linux')) return '💻 Linux';
+    if (ua.includes('Chrome')) return '🌐 Chrome';
+    if (ua.includes('Firefox')) return '🌐 Firefox';
+    if (ua.includes('Safari')) return '🌐 Safari';
+    return '🌐 Web Client';
   });
 
   hbs.registerHelper('formatDate', (date: any) => {

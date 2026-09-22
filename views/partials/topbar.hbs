@@ -21,6 +21,7 @@
         {{else if (eq activeNav 'garages')}}{{t 'nav.garages'}}
         {{else if (eq activeNav 'employees')}}{{t 'nav.employees'}}
         {{else if (eq activeNav 'permissions')}}{{t 'nav.permissions'}}
+        {{else if (eq activeNav 'audit-logs')}}{{t 'nav.auditLogs'}}
         {{else}}{{title}}
         {{/if}}
       </span>
@@ -67,7 +68,7 @@
       <span>{{t 'nav.systemActive'}}</span>
     </div>
 
-    {{#if (eq currentUser.role 'SUPER_ADMIN')}}
+    {{#if (or (eq currentUser.role 'SUPER_ADMIN') currentUser.isSuperAdmin isSuperAdmin)}}
       <a href="/bills/new" class="btn btn-primary btn-sm topbar-action-btn desktop-only" style="background: #10b981; border-color: #10b981;">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
@@ -82,7 +83,7 @@
         <div class="topbar-user-details desktop-only">
           <span class="topbar-user-name">{{currentUser.name}}</span>
           <span class="topbar-user-role">
-            {{#if (eq currentUser.role 'SUPER_ADMIN')}}{{t 'nav.superAdmin'}}{{else}}{{t 'nav.generalStaff'}}{{/if}}
+            {{#if (or (eq currentUser.role 'SUPER_ADMIN') currentUser.isSuperAdmin isSuperAdmin)}}{{t 'nav.superAdmin'}}{{else}}{{t 'nav.generalStaff'}}{{/if}}
           </span>
         </div>
       </div>

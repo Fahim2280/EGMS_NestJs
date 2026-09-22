@@ -276,11 +276,6 @@ document.addEventListener('DOMContentLoaded', () => {
         wrapper.classList.add('filter-select-wrapper');
       }
 
-      // Preserve existing inline width / flex if set
-      if (select.style.width && select.style.width !== '100%') {
-        wrapper.style.width = select.style.width;
-      }
-
       // Insert wrapper before select, then move select inside
       select.parentNode.insertBefore(wrapper, select);
       wrapper.appendChild(select);
@@ -292,6 +287,18 @@ document.addEventListener('DOMContentLoaded', () => {
       trigger.className = 'custom-select-trigger';
       trigger.setAttribute('aria-haspopup', 'listbox');
       trigger.setAttribute('aria-expanded', 'false');
+
+      // Preserve existing inline width / flex / minWidth if set (now safe after trigger declaration)
+      if (select.style.width && select.style.width !== '100%') {
+        wrapper.style.width = select.style.width;
+      }
+      if (select.style.minWidth) {
+        wrapper.style.minWidth = select.style.minWidth;
+        trigger.style.minWidth = select.style.minWidth;
+      }
+      if (select.style.flex) {
+        wrapper.style.flex = select.style.flex;
+      }
 
       const triggerText = document.createElement('span');
       triggerText.className = 'custom-select-trigger-text';
@@ -423,8 +430,59 @@ document.addEventListener('DOMContentLoaded', () => {
         if (searchInput) {
           searchInput.value = '';
           dropdown.querySelectorAll('.custom-select-item').forEach(i => i.style.display = 'flex');
-          setTimeout(() => searchInput.focus(), 50);
+          // Only auto-focus on desktop screens to avoid soft keyboard pop & unwanted page shifts
+          if (window.innerWidth > 640) {
+            setTimeout(() => {
+              try {
+                searchInput.focus({ preventScroll: true });
+              } catch (e) {
+                searchInput.focus();
+              }
+            }, 50);
+          }
         }
+
+        // ---- Viewport-overflow & Mobile Sizing Engine ----
+        dropdown.style.removeProperty('width');
+        dropdown.style.removeProperty('max-width');
+        dropdown.style.removeProperty('min-width');
+        dropdown.style.removeProperty('left');
+        dropdown.style.removeProperty('right');
+        dropdown.style.removeProperty('box-sizing');
+
+        requestAnimationFrame(() => {
+          const vw = document.documentElement.clientWidth || window.innerWidth;
+          const isMobile = vw <= 640;
+          const wrapperRect = wrapper.getBoundingClientRect();
+
+          if (isMobile) {
+            // If the wrapper spans nearly full width (e.g. mobile stacked selects / forms),
+            // match the dropdown 100% to the wrapper width so it stays perfectly flush.
+            if (wrapperRect.width >= vw - 80 || wrapper.classList.contains('filter-select-wrapper')) {
+              dropdown.style.setProperty('left', '0px', 'important');
+              dropdown.style.setProperty('right', '0px', 'important');
+              dropdown.style.setProperty('width', '100%', 'important');
+              dropdown.style.setProperty('min-width', '100%', 'important');
+              dropdown.style.setProperty('max-width', '100%', 'important');
+              dropdown.style.setProperty('box-sizing', 'border-box', 'important');
+            } else {
+              // Non-full-width mobile select: clamp so it never overflows right edge
+              const maxW = Math.min(vw - 20, Math.max(160, vw - wrapperRect.left - 10));
+              dropdown.style.setProperty('left', '0px', 'important');
+              dropdown.style.setProperty('max-width', maxW + 'px', 'important');
+              dropdown.style.setProperty('box-sizing', 'border-box', 'important');
+            }
+          } else {
+            // Desktop: if dropdown bleeds past right viewport edge, shift it left
+            const dropRect = dropdown.getBoundingClientRect();
+            if (dropRect.right > vw - 8) {
+              const overflow = dropRect.right - (vw - 8);
+              const currentLeft = parseFloat(getComputedStyle(dropdown).left) || 0;
+              const newLeft = Math.max(0, currentLeft - overflow);
+              dropdown.style.setProperty('left', newLeft + 'px', 'important');
+            }
+          }
+        });
       }
 
       function closeDropdown() {

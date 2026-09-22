@@ -30,6 +30,7 @@ import { GetCompanyByIdQuery } from '@application/queries/impl/get-company-by-id
 import { JwtAuthGuard } from '@infrastructure/auth/jwt-auth.guard';
 import { PermissionsGuard } from '@infrastructure/auth/permissions.guard';
 import { RequirePermissions } from '@infrastructure/auth/permissions.decorator';
+import { AuditLogService } from '@application/services/audit-log.service';
 
 @Controller('bills')
 @UseGuards(JwtAuthGuard)
@@ -37,6 +38,7 @@ export class ElectricBillController {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
+    private readonly auditLogService: AuditLogService,
   ) {}
 
   @Get()
@@ -183,6 +185,17 @@ export class ElectricBillController {
         ),
       );
 
+      await this.auditLogService.record({
+        companyId: user.companyId,
+        userId: user.sub || user.companyId,
+        userName: user.name,
+        userRole: user.role,
+        action: 'CREATE',
+        entityType: 'ELECTRIC_BILL',
+        details: `Generated electric bill for customer ${dto.customerId} (meter reading: ${dto.currentUnit})`,
+        req,
+      });
+
       return res.redirect('/bills');
     } catch (err: any) {
       const [customers, company] = await Promise.all([
@@ -326,6 +339,18 @@ export class ElectricBillController {
         ),
       );
 
+      await this.auditLogService.record({
+        companyId: user.companyId,
+        userId: user.sub || user.companyId,
+        userName: user.name,
+        userRole: user.role,
+        action: 'UPDATE',
+        entityType: 'ELECTRIC_BILL',
+        entityId: id,
+        details: `Updated electric bill #${id}`,
+        req,
+      });
+
       return res.redirect(`/bills/${id}`);
     } catch (err: any) {
       const bill = await this.queryBus.execute(
@@ -379,6 +404,18 @@ export class ElectricBillController {
           `${user.sub || user.companyId}|${user.role || 'SUPER_ADMIN'}`,
         ),
       );
+
+      await this.auditLogService.record({
+        companyId: user.companyId,
+        userId: user.sub || user.companyId,
+        userName: user.name,
+        userRole: user.role,
+        action: 'DELETE',
+        entityType: 'ELECTRIC_BILL',
+        entityId: id,
+        details: `Deleted electric bill #${id}`,
+        req,
+      });
     } catch {
       // ignore
     }
@@ -416,6 +453,17 @@ export class ElectricBillController {
         fromDate,
       ),
     );
+
+    await this.auditLogService.record({
+      companyId: user.companyId,
+      userId: user.sub || user.companyId,
+      userName: user.name,
+      userRole: user.role,
+      action: 'CREATE',
+      entityType: 'ELECTRIC_BILL',
+      details: `Generated monthly electric bills for all eligible customers`,
+      req,
+    });
 
     return res.redirect('/bills');
   }

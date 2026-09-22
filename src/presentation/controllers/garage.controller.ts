@@ -20,6 +20,7 @@ import { GetGarageDashboardQuery } from '@application/queries/impl/get-garage-da
 import { JwtAuthGuard } from '@infrastructure/auth/jwt-auth.guard';
 import { RolesGuard } from '@infrastructure/auth/roles.guard';
 import { Roles } from '@infrastructure/auth/roles.decorator';
+import { AuditLogService } from '@application/services/audit-log.service';
 
 @Controller('garages')
 @UseGuards(JwtAuthGuard)
@@ -27,6 +28,7 @@ export class GarageController {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
+    private readonly auditLogService: AuditLogService,
   ) {}
 
   // --- VIEW: All company garages ---
@@ -80,6 +82,19 @@ export class GarageController {
       await this.commandBus.execute(
         new CreateGarageCommand(user.companyId, dto),
       );
+
+      await this.auditLogService.record({
+        companyId: user.companyId,
+        userId: user.sub || user.companyId,
+        userName: user.name,
+        userRole: user.role,
+        action: 'CREATE',
+        entityType: 'GARAGE',
+        entityName: dto.garageName,
+        details: `Registered new garage facility: ${dto.garageName} located at ${dto.address || 'N/A'}`,
+        req,
+      });
+
       return res.redirect('/garages?success=Garage+registered+successfully');
     } catch (err: any) {
       return res.render('garages/create', {
@@ -182,6 +197,20 @@ export class GarageController {
           `${user.sub || user.companyId}|${user.role || 'SUPER_ADMIN'}`,
         ),
       );
+
+      await this.auditLogService.record({
+        companyId: user.companyId,
+        userId: user.sub || user.companyId,
+        userName: user.name,
+        userRole: user.role,
+        action: 'UPDATE',
+        entityType: 'GARAGE',
+        entityId: id,
+        entityName: dto.garageName,
+        details: `Updated garage facility: ${dto.garageName}`,
+        req,
+      });
+
       return res.redirect(`/garages/${id}?success=Garage+details+updated+successfully`);
     } catch (err: any) {
       return res.render('garages/edit', {

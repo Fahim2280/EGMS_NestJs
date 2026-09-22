@@ -245,5 +245,21 @@
         <p style="color: #94a3b8; font-size: 0.85rem;">No employees registered.</p>
       {{/if}}
     </div>
+
+    {{#if isSuperAdmin}}
+    <!-- Audit & Security Quick Card -->
+    <div class="card" style="padding: 1.5rem;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h3 style="font-size: 1.1rem; font-weight: 600; color: #f8fafc; margin: 0;">🛡️ {{t 'nav.auditLogs'}}</h3>
+        <a href="/audit-logs" class="btn btn-secondary btn-sm">{{t 'common.view'}}</a>
+      </div>
+      <p style="color: #94a3b8; font-size: 0.85rem; margin-bottom: 1.25rem;">
+        Monitor real-time system activities, user authentications, data updates, and security logs.
+      </p>
+      <a href="/audit-logs" class="btn btn-primary btn-sm" style="width: 100%; justify-content: center; background: rgba(99, 102, 241, 0.2); border: 1px solid rgba(99, 102, 241, 0.4); color: #818cf8; text-decoration: none;">
+        📜 {{t 'audit.viewLogs'}} &rarr;
+      </a>
+    </div>
+    {{/if}}
   </div>
 </div>

@@ -7,6 +7,7 @@ import { classes } from '@automapper/classes';
 
 // Services
 import { BillingCalculationService } from './services/billing-calculation.service';
+import { AuditLogService } from './services/audit-log.service';
 
 // Command Handlers
 import { RegisterCompanyHandler } from './commands/handlers/register-company.handler';
@@ -47,6 +48,7 @@ import { GetCustomerBillSummaryHandler } from './queries/handlers/get-customer-b
 import { PreviewElectricBillHandler } from './queries/handlers/preview-electric-bill.handler';
 import { GetExecutiveDashboardHandler } from './queries/handlers/get-executive-dashboard.handler';
 import { GetGuarantorsByCustomerHandler } from './queries/handlers/get-guarantors-by-customer.handler';
+import { GetAuditLogsHandler } from './queries/handlers/get-audit-logs.handler';
 
 // AutoMapper Profiles
 import { CompanyProfile } from './mappings/company.profile';
@@ -93,6 +95,7 @@ const QueryHandlers = [
   PreviewElectricBillHandler,
   GetExecutiveDashboardHandler,
   GetGuarantorsByCustomerHandler,
+  GetAuditLogsHandler,
 ];
 
 const Profiles = [
@@ -123,10 +126,11 @@ const Profiles = [
   ],
   providers: [
     BillingCalculationService,
+    AuditLogService,
     ...CommandHandlers,
     ...QueryHandlers,
     ...Profiles,
   ],
-  exports: [CqrsModule, JwtModule, AutomapperModule, BillingCalculationService],
+  exports: [CqrsModule, JwtModule, AutomapperModule, BillingCalculationService, AuditLogService],
 })
 export class ApplicationModule {}

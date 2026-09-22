@@ -1,0 +1,606 @@
+<style>
+  /* ============================================================
+     AUDIT LOG PAGE — SCOPED STYLES
+     ============================================================ */
+
+  /* ---- Table ---- */
+  .audit-table { border-collapse: separate; border-spacing: 0; }
+  .audit-table th {
+    background: rgba(15, 23, 42, 0.85);
+    font-weight: 700;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    color: #94a3b8;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .audit-table td { border-bottom: 1px solid rgba(51, 65, 85, 0.35); }
+  .audit-table tbody tr:hover td { background: rgba(99, 102, 241, 0.05) !important; }
+  .audit-table tbody tr:last-child td { border-bottom: none; }
+  [data-theme="light"] .audit-table th { background: rgba(241, 245, 249, 0.95); color: #475569; }
+  [data-theme="light"] .audit-table td { border-bottom: 1px solid rgba(226, 232, 240, 0.8); }
+  [data-theme="light"] .audit-table tbody tr:hover td { background: rgba(99, 102, 241, 0.03) !important; }
+
+  /* ---- Scroll hint ---- */
+  .audit-scroll-hint {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.78rem;
+    color: var(--color-text-muted);
+    margin-bottom: 0.5rem;
+    padding: 0 0.25rem;
+  }
+
+  /* ---- Filter form ---- */
+  .audit-filter-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .audit-filter-selects {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    align-items: center;
+  }
+  .audit-filter-search {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    flex-wrap: nowrap;
+  }
+  .audit-filter-search .form-input {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .audit-filter-search .btn {
+    flex-shrink: 0;
+  }
+
+  /* ---- Custom-select inside filter form (desktop) ---- */
+  .audit-filter-selects .custom-select-wrapper {
+    width: auto !important;
+    min-width: 165px !important;
+    flex: 0 0 auto !important;
+    position: relative !important;
+  }
+  .audit-filter-selects .custom-select-trigger {
+    min-width: 165px !important;
+    min-height: 42px !important;
+    padding: 0.55rem 2.25rem 0.55rem 1rem !important;
+    font-size: 0.88rem !important;
+    font-weight: 500 !important;
+    border-radius: var(--radius-md) !important;
+    white-space: nowrap !important;
+    background: rgba(15, 23, 42, 0.85) !important;
+    border: 1px solid var(--color-border) !important;
+  }
+  .audit-filter-selects .custom-select-trigger-text {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  .audit-filter-selects .custom-select-dropdown {
+    min-width: 220px !important;
+    width: max-content !important;
+    max-width: 92vw !important;
+    background: #0f172a !important;
+    border: 1px solid rgba(99, 102, 241, 0.4) !important;
+    border-radius: var(--radius-md) !important;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.08) !important;
+    z-index: 1060 !important;
+    padding: 0.35rem 0 !important;
+    /* Keep on-screen on mobile */
+    left: 0 !important;
+    right: auto !important;
+  }
+  .audit-filter-selects .custom-select-options-list {
+    max-height: 260px !important;
+    padding: 0.25rem !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+  }
+  .audit-filter-selects .custom-select-item {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 0.75rem !important;
+    padding: 0.65rem 0.95rem !important;
+    border-radius: var(--radius-sm) !important;
+    white-space: nowrap !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  .audit-filter-selects .item-label-group {
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    white-space: nowrap !important;
+  }
+  .audit-filter-selects .item-main-label {
+    white-space: nowrap !important;
+    word-break: normal !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    font-size: 0.88rem !important;
+    font-weight: 500 !important;
+    line-height: 1.4 !important;
+  }
+  .audit-filter-selects .item-sub-label {
+    white-space: nowrap !important;
+    word-break: normal !important;
+    font-size: 0.75rem !important;
+    color: #94a3b8 !important;
+  }
+  .audit-filter-selects .item-check { flex-shrink: 0 !important; }
+
+  /* ---- Light theme ---- */
+  [data-theme="light"] .audit-filter-selects .custom-select-trigger {
+    background: #ffffff !important;
+    border-color: #cbd5e1 !important;
+    color: #0f172a !important;
+  }
+  [data-theme="light"] .audit-filter-selects .custom-select-dropdown {
+    background: #ffffff !important;
+    border-color: #e2e8f0 !important;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.15) !important;
+  }
+  [data-theme="light"] .audit-filter-selects .custom-select-item { color: #1e293b !important; }
+  [data-theme="light"] .audit-filter-selects .custom-select-item:hover { background: #f1f5f9 !important; color: #4f46e5 !important; }
+  [data-theme="light"] .audit-filter-selects .custom-select-item.selected { background: rgba(79, 70, 229, 0.1) !important; color: #4f46e5 !important; }
+
+  /* ---- Mobile (≤ 600px) ---- */
+  @media (max-width: 600px) {
+    .audit-filter-selects {
+      flex-direction: column !important;
+      align-items: stretch !important;
+      width: 100% !important;
+    }
+    /* Make each custom-select fill the width on mobile */
+    .audit-filter-selects .custom-select-wrapper {
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      flex: 1 1 auto !important;
+      box-sizing: border-box !important;
+    }
+    .audit-filter-selects .custom-select-trigger {
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: 100% !important;
+      box-sizing: border-box !important;
+    }
+    /* Dropdown matches wrapper width exactly on mobile */
+    .audit-filter-selects .custom-select-dropdown {
+      left: 0 !important;
+      right: 0 !important;
+      min-width: 100% !important;
+      max-width: 100% !important;
+      width: 100% !important;
+      box-sizing: border-box !important;
+    }
+    /* Option labels stay on one line */
+    .audit-filter-selects .custom-select-item,
+    .audit-filter-selects .item-main-label {
+      white-space: nowrap !important;
+      word-break: normal !important;
+    }
+    /* Search row stretches */
+    .audit-filter-search {
+      width: 100% !important;
+    }
+    /* KPI grid: 2-col on mobile */
+    .audit-kpi-grid {
+      grid-template-columns: repeat(2, 1fr) !important;
+      gap: 0.65rem !important;
+    }
+    .audit-kpi-grid .stat-card {
+      padding: 0.85rem !important;
+    }
+    .audit-kpi-grid .stat-value {
+      font-size: 1.35rem !important;
+    }
+    .audit-kpi-grid .stat-label {
+      font-size: 0.72rem !important;
+    }
+    /* Page header: stack vertically */
+    .page-header {
+      flex-direction: column !important;
+      align-items: flex-start !important;
+      gap: 0.75rem !important;
+    }
+  }
+
+  /* KPI grid class */
+  .audit-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 1.75rem;
+  }
+
+  /* ---- Details cell ---- */
+  .audit-details-cell {
+    color: var(--color-text-primary);
+    font-size: 0.87rem;
+    line-height: 1.5;
+    /* Clamp to 3 lines, show ellipsis */
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    max-width: 100%;
+  }
+
+  /* ---- IP chip ---- */
+  .audit-ip-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    background: rgba(56, 189, 248, 0.1);
+    color: #38bdf8;
+    border: 1px solid rgba(56, 189, 248, 0.25);
+    font-family: 'ui-monospace', 'SFMono-Regular', monospace;
+    font-size: 0.74rem;
+    padding: 2px 7px;
+    border-radius: 4px;
+    white-space: nowrap;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* ---- Device chip ---- */
+  .audit-device-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 0.72rem;
+    color: var(--color-text-muted);
+    white-space: nowrap;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Light theme chips */
+  [data-theme="light"] .audit-ip-chip {
+    background: rgba(14, 165, 233, 0.08);
+    color: #0284c7;
+    border-color: rgba(14, 165, 233, 0.2);
+  }
+</style>
+
+<div style="padding-top: 0.5rem; padding-bottom: 2rem;">
+  <!-- Header with Actions -->
+  <div class="page-header" style="margin-bottom: 1.5rem;">
+    <div class="header-content">
+      <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.35rem;">
+        <span class="badge" style="background: rgba(99, 102, 241, 0.15); color: #818cf8; border: 1px solid rgba(99, 102, 241, 0.3); font-size: 0.8rem; font-weight: 700; padding: 0.25rem 0.6rem; border-radius: 6px;">
+          🛡️ {{t 'audit.adminOnly'}}
+        </span>
+        <h1 class="page-title" style="margin: 0; font-size: 1.75rem;">{{t 'audit.title'}}</h1>
+      </div>
+      <p class="page-subtitle" style="margin: 0;">{{t 'audit.subtitle'}}</p>
+    </div>
+    <div class="header-actions" style="display: flex; gap: 0.75rem; align-items: center;">
+      <a href="/audit-logs/export?action={{selectedAction}}&entityType={{selectedEntityType}}&search={{search}}" class="btn btn-secondary" style="display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 600;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        {{t 'audit.exportCsv'}}
+      </a>
+    </div>
+  </div>
+
+  <!-- KPI Metrics Grid -->
+  <div class="audit-kpi-grid">
+    <!-- Total Events -->
+    <div class="stat-card" style="border-top: 3px solid #6366f1; background: radial-gradient(circle at top right, rgba(99, 102, 241, 0.12), transparent 60%), rgba(30, 41, 59, 0.75);">
+      <div class="stat-card-header">
+        <span class="stat-label">{{t 'audit.totalActivities'}}</span>
+        <div class="stat-icon" style="background: rgba(99, 102, 241, 0.15); color: #818cf8;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+          </svg>
+        </div>
+      </div>
+      <div class="stat-value" style="color: #818cf8;">{{bnNum stats.totalCount}}</div>
+      <div class="stat-footer">
+        <span style="color: var(--color-text-muted); font-size: 0.8rem;">{{t 'audit.allTimeAudit'}}</span>
+      </div>
+    </div>
+
+    <!-- Today's Events -->
+    <div class="stat-card" style="border-top: 3px solid #10b981; background: radial-gradient(circle at top right, rgba(16, 185, 129, 0.12), transparent 60%), rgba(30, 41, 59, 0.75);">
+      <div class="stat-card-header">
+        <span class="stat-label">{{t 'audit.todayActivities'}}</span>
+        <div class="stat-icon" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+        </div>
+      </div>
+      <div class="stat-value" style="color: #10b981;">{{bnNum stats.todayCount}}</div>
+      <div class="stat-footer">
+        <span style="color: #10b981; font-size: 0.8rem;">{{t 'audit.recordedToday'}}</span>
+      </div>
+    </div>
+
+    <!-- Auth & Access Events -->
+    <div class="stat-card" style="border-top: 3px solid #c084fc; background: radial-gradient(circle at top right, rgba(192, 132, 252, 0.12), transparent 60%), rgba(30, 41, 59, 0.75);">
+      <div class="stat-card-header">
+        <span class="stat-label">{{t 'audit.authSecurity'}}</span>
+        <div class="stat-icon" style="background: rgba(192, 132, 252, 0.15); color: #c084fc;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+        </div>
+      </div>
+      <div class="stat-value" style="color: #c084fc;">{{bnNum stats.authCount}}</div>
+      <div class="stat-footer">
+        <span style="color: var(--color-text-muted); font-size: 0.8rem;">{{t 'audit.loginsAndSessions'}}</span>
+      </div>
+    </div>
+
+    <!-- Critical Operations -->
+    <div class="stat-card" style="border-top: 3px solid #f43f5e; background: radial-gradient(circle at top right, rgba(244, 63, 94, 0.12), transparent 60%), rgba(30, 41, 59, 0.75);">
+      <div class="stat-card-header">
+        <span class="stat-label">{{t 'audit.criticalActions'}}</span>
+        <div class="stat-icon" style="background: rgba(244, 63, 94, 0.15); color: #f43f5e;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+        </div>
+      </div>
+      <div class="stat-value" style="color: #f43f5e;">{{bnNum stats.criticalCount}}</div>
+      <div class="stat-footer">
+        <span style="color: #f43f5e; font-size: 0.8rem;">{{t 'audit.deletionsAndPermissions'}}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Card with Filters and Table -->
+  <div class="card" style="padding: 1.25rem 1.25rem 1.5rem; overflow: visible;">
+    <!-- Filter Toolbar -->
+    <form method="GET" action="/audit-logs" class="audit-filter-form">
+
+      <!-- Row 1: Select Dropdowns -->
+      <div class="audit-filter-selects">
+        <!-- Action Filter -->
+        <select name="action" class="form-input filter-select" onchange="this.form.submit()">
+          <option value="ALL" {{#if (eq selectedAction 'ALL')}}selected{{/if}}>{{t 'audit.allActions'}}</option>
+          <option value="LOGIN" {{#if (eq selectedAction 'LOGIN')}}selected{{/if}}>🔑 LOGIN</option>
+          <option value="LOGOUT" {{#if (eq selectedAction 'LOGOUT')}}selected{{/if}}>🚪 LOGOUT</option>
+          <option value="CREATE" {{#if (eq selectedAction 'CREATE')}}selected{{/if}}>➕ CREATE</option>
+          <option value="UPDATE" {{#if (eq selectedAction 'UPDATE')}}selected{{/if}}>✏️ UPDATE</option>
+          <option value="DELETE" {{#if (eq selectedAction 'DELETE')}}selected{{/if}}>🗑️ DELETE</option>
+          <option value="PERMISSIONS_UPDATE" {{#if (eq selectedAction 'PERMISSIONS_UPDATE')}}selected{{/if}}>🛡️ PERMISSIONS</option>
+          <option value="PASSWORD_RESET" {{#if (eq selectedAction 'PASSWORD_RESET')}}selected{{/if}}>🔒 PASSWORD RESET</option>
+        </select>
+
+        <!-- Entity Type Filter -->
+        <select name="entityType" class="form-input filter-select" onchange="this.form.submit()">
+          <option value="ALL" {{#if (eq selectedEntityType 'ALL')}}selected{{/if}}>{{t 'audit.allEntities'}}</option>
+          <option value="CUSTOMER" {{#if (eq selectedEntityType 'CUSTOMER')}}selected{{/if}}>👥 Customer</option>
+          <option value="ELECTRIC_BILL" {{#if (eq selectedEntityType 'ELECTRIC_BILL')}}selected{{/if}}>⚡ Electric Bill</option>
+          <option value="GARAGE" {{#if (eq selectedEntityType 'GARAGE')}}selected{{/if}}>🏢 Garage</option>
+          <option value="EMPLOYEE" {{#if (eq selectedEntityType 'EMPLOYEE')}}selected{{/if}}>🧑‍💼 Employee</option>
+          <option value="AUTH" {{#if (eq selectedEntityType 'AUTH')}}selected{{/if}}>🔐 Authentication</option>
+          <option value="COMPANY" {{#if (eq selectedEntityType 'COMPANY')}}selected{{/if}}>🏛️ Company</option>
+        </select>
+
+        <!-- Timeframe Preset Filter -->
+        <select name="days" class="form-input filter-select" onchange="this.form.submit()">
+          <option value="" {{#if (eq selectedDays '')}}selected{{/if}}>{{t 'audit.allTime'}}</option>
+          <option value="1" {{#if (eq selectedDays '1')}}selected{{/if}}>{{t 'audit.todayOnly'}}</option>
+          <option value="7" {{#if (eq selectedDays '7')}}selected{{/if}}>{{t 'audit.last7Days'}}</option>
+          <option value="30" {{#if (eq selectedDays '30')}}selected{{/if}}>{{t 'audit.last30Days'}}</option>
+        </select>
+      </div>
+
+      <!-- Row 2: Search -->
+      <div class="audit-filter-search">
+        <input type="text" name="search" class="form-input" placeholder="{{t 'audit.searchPlaceholder'}}" value="{{search}}">
+        <button type="submit" class="btn btn-secondary btn-sm" style="padding: 0.6rem 0.9rem; white-space: nowrap;">
+          {{t 'common.search'}}
+        </button>
+        {{#if (or search (ne selectedAction 'ALL') (ne selectedEntityType 'ALL') selectedDays)}}
+          <a href="/audit-logs" class="btn btn-secondary btn-sm" style="color: #f43f5e; padding: 0.6rem 0.75rem; flex-shrink: 0;" title="{{t 'common.reset'}}">
+            ✕
+          </a>
+        {{/if}}
+      </div>
+    </form>
+
+    <!-- Audit Logs Table -->
+    {{#if logs.length}}
+      <div class="audit-scroll-hint">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="8 18 2 12 8 6"/><polyline points="16 6 22 12 16 18"/></svg>
+        <span>{{#if isBn}}সম্পূর্ণ বিবরণ দেখতে ডানে স্ক্রোল করুন{{else}}Scroll right to view all columns{{/if}}</span>
+      </div>
+      <div class="table-responsive" style="border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow-x: auto;">
+        <table class="data-table audit-table" style="table-layout: fixed; width: 100%; min-width: 960px; margin: 0;">
+          <colgroup>
+            <col style="width: 130px;">
+            <col style="width: 175px;">
+            <col style="width: 120px;">
+            <col style="width: 115px;">
+            <col style="width: auto;">
+            <col style="width: 155px;">
+          </colgroup>
+          <thead>
+            <tr>
+              <th style="padding: 0.85rem 1rem;">{{t 'audit.timestamp'}}</th>
+              <th style="padding: 0.85rem 1rem;">{{t 'audit.actor'}}</th>
+              <th style="padding: 0.85rem 1rem;">{{t 'audit.action'}}</th>
+              <th style="padding: 0.85rem 1rem;">{{t 'audit.targetEntity'}}</th>
+              <th style="padding: 0.85rem 1rem;">{{t 'audit.details'}}</th>
+              <th style="padding: 0.85rem 1rem; text-align: right;">{{t 'audit.clientInfo'}}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each logs}}
+              <tr style="transition: background-color 0.15s ease;">
+                <!-- Timestamp: Clean Date & Time -->
+                <td style="padding: 0.85rem 1rem; vertical-align: middle;">
+                  <div style="display: flex; flex-direction: column; gap: 0.2rem;">
+                    <span style="font-weight: 600; font-size: 0.85rem; color: var(--color-text-primary); font-variant-numeric: tabular-nums;">
+                      {{tDate this.createdDate}}
+                    </span>
+                    <span style="font-size: 0.75rem; color: var(--color-text-muted); display: inline-flex; align-items: center; gap: 4px; font-variant-numeric: tabular-nums;">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                      {{tTime this.createdDate}}
+                    </span>
+                  </div>
+                </td>
+
+                <!-- Actor Info: Avatar, Name, Role -->
+                <td style="padding: 0.85rem 1rem; vertical-align: middle;">
+                  <div style="display: flex; align-items: center; gap: 0.65rem;">
+                    <div style="width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; flex-shrink: 0; box-shadow: 0 2px 6px rgba(99,102,241,0.25);">
+                      {{this.userName.[0]}}
+                    </div>
+                    <div style="min-width: 0; overflow: hidden;">
+                      <div style="font-weight: 600; font-size: 0.88rem; color: var(--color-text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="{{this.userName}}">
+                        {{this.userName}}
+                      </div>
+                      <span class="badge {{#if (eq this.userRole 'SUPER_ADMIN')}}badge-admin{{else}}badge-officer{{/if}}" style="font-size: 0.65rem; padding: 1px 6px; margin-top: 2px;">
+                        <span class="badge-dot"></span>{{this.userRole}}
+                      </span>
+                    </div>
+                  </div>
+                </td>
+
+                <!-- Action Badge -->
+                <td style="padding: 0.85rem 1rem; vertical-align: middle;">
+                  {{#if (eq this.action 'CREATE')}}
+                    <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); font-weight: 700; padding: 0.3rem 0.65rem; border-radius: 6px; font-size: 0.78rem;">➕ CREATE</span>
+                  {{else if (eq this.action 'UPDATE')}}
+                    <span class="badge" style="background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); font-weight: 700; padding: 0.3rem 0.65rem; border-radius: 6px; font-size: 0.78rem;">✏️ UPDATE</span>
+                  {{else if (eq this.action 'DELETE')}}
+                    <span class="badge" style="background: rgba(244, 63, 94, 0.15); color: #fb7185; border: 1px solid rgba(244, 63, 94, 0.3); font-weight: 700; padding: 0.3rem 0.65rem; border-radius: 6px; font-size: 0.78rem;">🗑️ DELETE</span>
+                  {{else if (eq this.action 'LOGIN')}}
+                    <span class="badge" style="background: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.3); font-weight: 700; padding: 0.3rem 0.65rem; border-radius: 6px; font-size: 0.78rem;">🔑 LOGIN</span>
+                  {{else if (eq this.action 'LOGOUT')}}
+                    <span class="badge" style="background: rgba(148, 163, 184, 0.15); color: #94a3b8; border: 1px solid rgba(148, 163, 184, 0.3); font-weight: 700; padding: 0.3rem 0.65rem; border-radius: 6px; font-size: 0.78rem;">🚪 LOGOUT</span>
+                  {{else if (eq this.action 'PERMISSIONS_UPDATE')}}
+                    <span class="badge" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); font-weight: 700; padding: 0.3rem 0.65rem; border-radius: 6px; font-size: 0.78rem;">🛡️ PERMISSION</span>
+                  {{else if (eq this.action 'PASSWORD_RESET')}}
+                    <span class="badge" style="background: rgba(236, 72, 153, 0.15); color: #f472b6; border: 1px solid rgba(236, 72, 153, 0.3); font-weight: 700; padding: 0.3rem 0.65rem; border-radius: 6px; font-size: 0.78rem;">🔒 RESET</span>
+                  {{else}}
+                    <span class="badge" style="background: rgba(99, 102, 241, 0.15); color: #818cf8; border: 1px solid rgba(99, 102, 241, 0.3); font-weight: 700; padding: 0.3rem 0.65rem; border-radius: 6px; font-size: 0.78rem;">{{this.action}}</span>
+                  {{/if}}
+                </td>
+
+                <!-- Target Entity -->
+                <td style="padding: 0.85rem 1rem; vertical-align: middle;">
+                  <div>
+                    <span class="badge" style="background: rgba(99, 102, 241, 0.12); color: #a5b4fc; border: 1px solid rgba(99, 102, 241, 0.25); font-size: 0.72rem; font-weight: 600; padding: 2px 7px; border-radius: 4px; text-transform: uppercase;">
+                      {{this.entityType}}
+                    </span>
+                    {{#if this.entityName}}
+                      <div style="font-weight: 600; font-size: 0.85rem; color: var(--color-text-primary); margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="{{this.entityName}}">
+                        {{this.entityName}}
+                      </div>
+                    {{else if this.entityId}}
+                      <div style="font-size: 0.75rem; color: var(--color-text-muted); font-family: monospace; margin-top: 4px;">
+                        #{{this.entityId}}
+                      </div>
+                    {{/if}}
+                  </div>
+                </td>
+
+                <!-- Details / Description -->
+                <td style="padding: 0.8rem 1rem; vertical-align: middle; min-width: 0;">
+                  {{#if this.details}}
+                    <div class="audit-details-cell" title="{{this.details}}">
+                      {{this.details}}
+                    </div>
+                  {{else}}
+                    <span style="color: var(--color-text-muted);">—</span>
+                  {{/if}}
+                </td>
+
+                <!-- Client IP & Agent -->
+                <td style="padding: 0.8rem 1rem; vertical-align: middle;">
+                  <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 0.3rem;">
+                    {{#if this.ipAddress}}
+                      <span class="audit-ip-chip" title="IP: {{this.ipAddress}}">
+                        🌐 {{#if (eq this.ipAddress '::1')}}127.0.0.1{{else}}{{this.ipAddress}}{{/if}}
+                      </span>
+                    {{/if}}
+                    {{#if this.userAgent}}
+                      <span class="audit-device-chip" title="{{this.userAgent}}">
+                        {{deviceChip this.userAgent}}
+                      </span>
+                    {{/if}}
+                  </div>
+                </td>
+              </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination Footer -->
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--color-border);">
+        <div style="font-size: 0.85rem; color: var(--color-text-muted);">
+          {{t 'audit.showingPage'}} <strong>{{bnNum page}}</strong> {{t 'audit.of'}} <strong>{{bnNum totalPages}}</strong> ({{bnNum totalCount}} {{t 'audit.totalRecords'}})
+        </div>
+
+        {{#if (or hasMultiplePages (gt totalPages 1))}}
+          <div style="display: flex; gap: 0.35rem; align-items: center;">
+            {{#if hasPrevPage}}
+              <a href="/audit-logs?page={{prevPage}}&action={{selectedAction}}&entityType={{selectedEntityType}}&days={{selectedDays}}&search={{search}}" class="btn btn-secondary btn-sm" style="padding: 0.4rem 0.75rem;">
+                &larr; {{t 'audit.prev'}}
+              </a>
+            {{/if}}
+
+            {{#each pages}}
+              <a href="/audit-logs?page={{this.number}}&action={{../selectedAction}}&entityType={{../selectedEntityType}}&days={{../selectedDays}}&search={{../search}}" class="btn {{#if this.isCurrent}}btn-primary{{else}}btn-secondary{{/if}} btn-sm" style="min-width: 32px; padding: 0.4rem 0.6rem; text-align: center;">
+                {{bnNum this.number}}
+              </a>
+            {{/each}}
+
+            {{#if hasNextPage}}
+              <a href="/audit-logs?page={{nextPage}}&action={{selectedAction}}&entityType={{selectedEntityType}}&days={{selectedDays}}&search={{search}}" class="btn btn-secondary btn-sm" style="padding: 0.4rem 0.75rem;">
+                {{t 'audit.next'}} &rarr;
+              </a>
+            {{/if}}
+          </div>
+        {{/if}}
+      </div>
+    {{else}}
+      <!-- Empty State -->
+      <div style="text-align: center; padding: 3rem 1rem;">
+        <div style="width: 56px; height: 56px; border-radius: 50%; background: rgba(99, 102, 241, 0.1); color: #818cf8; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem auto;">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+        </div>
+        <h3 style="font-size: 1.1rem; font-weight: 600; color: var(--color-text-primary); margin-bottom: 0.5rem;">
+          {{t 'audit.noLogsFound'}}
+        </h3>
+        <p style="color: var(--color-text-muted); font-size: 0.875rem; max-width: 400px; margin: 0 auto 1.25rem auto;">
+          {{t 'audit.noLogsSub'}}
+        </p>
+        {{#if (or search (ne selectedAction 'ALL') (ne selectedEntityType 'ALL') selectedDays)}}
+          <a href="/audit-logs" class="btn btn-secondary btn-sm">{{t 'audit.clearFilters'}}</a>
+        {{/if}}
+      </div>
+    {{/if}}
+  </div>
+</div>

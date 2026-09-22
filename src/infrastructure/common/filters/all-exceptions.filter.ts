@@ -31,10 +31,16 @@ export class AllExceptionsFilter implements ExceptionFilter {
       errorType = exception.name;
     }
 
-    this.logger.error(
-      `HTTP ${status} [${request.method}] ${request.url} - ${Array.isArray(message) ? message.join(', ') : message}`,
-      exception instanceof Error ? exception.stack : undefined,
-    );
+    if (status === HttpStatus.NOT_FOUND) {
+      this.logger.warn(
+        `HTTP 404 [${request.method}] ${request.url} - ${Array.isArray(message) ? message.join(', ') : message}`,
+      );
+    } else {
+      this.logger.error(
+        `HTTP ${status} [${request.method}] ${request.url} - ${Array.isArray(message) ? message.join(', ') : message}`,
+        exception instanceof Error ? exception.stack : undefined,
+      );
+    }
 
     const isApiRequest =
       request.url.startsWith('/api') ||

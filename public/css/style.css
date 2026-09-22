@@ -947,9 +947,10 @@ select option {
   position: absolute;
   top: calc(100% + 4px);
   left: 0;
-  right: 0;
-  width: 100%;
-  max-width: 100%;
+  min-width: 100%;
+  width: max-content;
+  min-width: 210px;
+  max-width: 380px;
   box-sizing: border-box;
   background: rgba(15, 23, 42, 0.98);
   backdrop-filter: blur(18px);
@@ -3316,6 +3317,25 @@ select.filter-select {
   box-sizing: border-box;
 }
 
+.filter-select-wrapper {
+  width: auto !important;
+  min-width: 155px;
+  flex: 0 0 auto;
+}
+
+.filter-select-wrapper .custom-select-trigger {
+  min-width: 155px;
+  min-height: 42px;
+  padding: 0.55rem 2.2rem 0.55rem 1rem;
+  white-space: nowrap;
+}
+
+.filter-select-wrapper .custom-select-dropdown {
+  min-width: 210px;
+  width: max-content;
+  max-width: 380px;
+}
+
 .custom-select-trigger {
   width: 100%;
   max-width: 100%;
@@ -3384,9 +3404,10 @@ select.filter-select {
   position: absolute;
   top: calc(100% + 6px);
   left: 0;
-  right: 0;
-  width: 100%;
-  max-width: 100%;
+  min-width: 100%;
+  width: max-content;
+  min-width: 210px;
+  max-width: 380px;
   box-sizing: border-box;
   background: rgba(15, 23, 42, 0.97);
   backdrop-filter: blur(16px);
@@ -3493,8 +3514,9 @@ select.filter-select {
 
 .item-main-label {
   font-weight: 500;
-  white-space: normal;
-  word-break: break-word;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   line-height: 1.35;
 }
 
@@ -3608,13 +3630,14 @@ select.filter-select {
     min-width: 0 !important;
   }
 
-  .custom-select-wrapper {
+  /* Only apply full-width wrapper to non-audit selects */
+  .custom-select-wrapper:not(.audit-filter-selects .custom-select-wrapper) {
     width: 100% !important;
     max-width: 100% !important;
   }
 
-  .custom-select-dropdown {
-    width: 100% !important;
+  /* Global dropdown cap — but audit ones override this via scoped !important rules */
+  .custom-select-dropdown:not(.audit-filter-selects .custom-select-dropdown) {
     max-width: 100% !important;
     left: 0 !important;
     right: 0 !important;

@@ -13,6 +13,10 @@ export class CurrentUserInterceptor implements NestInterceptor {
     const res = context.switchToHttp().getResponse();
     if (req.user && res && res.locals) {
       res.locals.currentUser = req.user;
+      res.locals.isSuperAdmin =
+        req.user.role === 'SUPER_ADMIN' ||
+        req.user.isSuperAdmin === true ||
+        req.user.role?.toUpperCase() === 'SUPER_ADMIN';
     }
     return next.handle();
   }

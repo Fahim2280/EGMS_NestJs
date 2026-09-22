@@ -33,7 +33,7 @@
     <span class="bottom-nav-label">{{t 'nav.bills'}}</span>
   </a>
 
-  {{#if (or (eq currentUser.role 'SUPER_ADMIN') currentUser.garageIds.length)}}
+  {{#if (or (eq currentUser.role 'SUPER_ADMIN') currentUser.isSuperAdmin isSuperAdmin currentUser.garageIds.length)}}
   <a href="/garages" class="bottom-nav-item {{#if (eq activeNav 'garages')}}active{{/if}}">
     <div class="bottom-nav-icon">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

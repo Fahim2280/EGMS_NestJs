@@ -21,6 +21,7 @@ import { GetGaragesByCompanyQuery } from '@application/queries/impl/get-garages-
 import { JwtAuthGuard } from '@infrastructure/auth/jwt-auth.guard';
 import { RolesGuard } from '@infrastructure/auth/roles.guard';
 import { Roles } from '@infrastructure/auth/roles.decorator';
+import { AuditLogService } from '@application/services/audit-log.service';
 
 @Controller('employees')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -29,6 +30,7 @@ export class EmployeeController {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
+    private readonly auditLogService: AuditLogService,
   ) {}
 
   @Get()
@@ -68,6 +70,19 @@ export class EmployeeController {
       await this.commandBus.execute(
         new CreateEmployeeCommand(user.companyId, dto),
       );
+
+      await this.auditLogService.record({
+        companyId: user.companyId,
+        userId: user.sub || user.companyId,
+        userName: user.name,
+        userRole: user.role,
+        action: 'CREATE',
+        entityType: 'EMPLOYEE',
+        entityName: dto.name,
+        details: `Registered new employee ${dto.name} (${dto.email})`,
+        req,
+      });
+
       return res.redirect('/employees?success=Employee+added+successfully');
     } catch (err: any) {
       return res.render('employees/create', {
@@ -173,6 +188,18 @@ export class EmployeeController {
         ),
       );
 
+      await this.auditLogService.record({
+        companyId: user.companyId,
+        userId: user.sub || user.companyId,
+        userName: user.name,
+        userRole: user.role,
+        action: 'PERMISSIONS_UPDATE',
+        entityType: 'EMPLOYEE',
+        entityId: id,
+        details: `Updated role & permissions for employee #${id}: role=${body.role || 'GENERAL'}, active=${isActive}, canCreate=${canCreate}, canEdit=${canEdit}, canDelete=${canDelete}`,
+        req,
+      });
+
       return res.redirect(
         '/employees/permissions?success=Permissions+and+role+updated+successfully',
       );
@@ -249,6 +276,20 @@ export class EmployeeController {
           `${user.companyId}|SUPER_ADMIN`,
         ),
       );
+
+      await this.auditLogService.record({
+        companyId: user.companyId,
+        userId: user.sub || user.companyId,
+        userName: user.name,
+        userRole: user.role,
+        action: 'UPDATE',
+        entityType: 'EMPLOYEE',
+        entityId: id,
+        entityName: body.name,
+        details: `Updated profile details for employee ${body.name}`,
+        req,
+      });
+
       return res.redirect(`/employees/${id}?success=Employee+updated`);
     } catch (err: any) {
       const employee = await this.queryBus.execute(
@@ -275,6 +316,19 @@ export class EmployeeController {
       await this.commandBus.execute(
         new DeleteEmployeeCommand(id, user.companyId, `${user.companyId}|SUPER_ADMIN`),
       );
+
+      await this.auditLogService.record({
+        companyId: user.companyId,
+        userId: user.sub || user.companyId,
+        userName: user.name,
+        userRole: user.role,
+        action: 'DELETE',
+        entityType: 'EMPLOYEE',
+        entityId: id,
+        details: `Deleted employee record #${id}`,
+        req,
+      });
+
       return res.redirect('/employees?success=Employee+removed');
     } catch {
       return res.redirect('/employees');

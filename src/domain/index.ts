@@ -9,6 +9,7 @@ export * from './entities/customer.entity';
 export * from './entities/electric-bill.entity';
 export * from './entities/guarantor.entity';
 export * from './entities/password-reset-token.entity';
+export * from './entities/audit-log.entity';
 
 // Repository Ports & Tokens
 export * from './repositories/generic.repository.interface';
@@ -19,3 +20,4 @@ export * from './repositories/customer.repository.interface';
 export * from './repositories/electric-bill.repository.interface';
 export * from './repositories/guarantor.repository.interface';
 export * from './repositories/password-reset-token.repository.interface';
+export * from './repositories/audit-log.repository.interface';

@@ -6,6 +6,7 @@ import { GarageController } from './controllers/garage.controller';
 import { EmployeeController } from './controllers/employee.controller';
 import { CustomerController } from './controllers/customer.controller';
 import { ElectricBillController } from './controllers/electric-bill.controller';
+import { AuditLogController } from './controllers/audit-log.controller';
 import { ErrorController } from './controllers/error.controller';
 
 @Module({
@@ -17,6 +18,7 @@ import { ErrorController } from './controllers/error.controller';
     EmployeeController,
     CustomerController,
     ElectricBillController,
+    AuditLogController,
     ErrorController,
   ],
 })

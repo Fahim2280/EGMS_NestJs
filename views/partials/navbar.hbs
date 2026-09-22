@@ -53,7 +53,7 @@
           Electric Bills
         </a>
       </li>
-      {{#if (eq currentUser.role 'SUPER_ADMIN')}}
+      {{#if (or (eq currentUser.role 'SUPER_ADMIN') currentUser.isSuperAdmin isSuperAdmin)}}
       <li>
         <a href="/garages" class="nav-link {{#if (eq activeNav 'garages')}}active{{/if}}">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -78,6 +78,15 @@
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
           </svg>
           Permissions
+        </a>
+      </li>
+      <li>
+        <a href="/audit-logs" class="nav-link {{#if (eq activeNav 'audit-logs')}}active{{/if}}">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <path d="M9 12l2 2 4-4"/>
+          </svg>
+          Audit Logs
         </a>
       </li>
       {{/if}}
@@ -119,7 +128,7 @@
       </button>
 
       {{#if currentUser}}
-        {{#if (eq currentUser.role 'SUPER_ADMIN')}}
+        {{#if (or (eq currentUser.role 'SUPER_ADMIN') currentUser.isSuperAdmin isSuperAdmin)}}
           <a href="/bills/new" class="btn btn-primary btn-sm desktop-only" style="background: #10b981; border-color: #10b981;">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
@@ -133,10 +142,10 @@
           <div class="user-info desktop-only">
             <span class="user-name">{{currentUser.name}}</span>
             <span class="user-role role-badge role-{{currentUser.role}}">
-              {{#if (eq currentUser.role 'SUPER_ADMIN')}}{{t 'nav.superAdmin'}}{{else}}{{t 'nav.generalStaff'}}{{/if}}
+              {{#if (or (eq currentUser.role 'SUPER_ADMIN') currentUser.isSuperAdmin isSuperAdmin)}}{{t 'nav.superAdmin'}}{{else}}{{t 'nav.generalStaff'}}{{/if}}
             </span>
           </div>
-          {{#if (eq currentUser.role 'SUPER_ADMIN')}}
+          {{#if (or (eq currentUser.role 'SUPER_ADMIN') currentUser.isSuperAdmin isSuperAdmin)}}
           <a href="/profile/edit" class="btn btn-secondary btn-sm" title="Company Profile &amp; Electricity Rate">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
@@ -169,13 +178,14 @@
     <li><a href="/" class="mobile-nav-link">📊 Dashboard</a></li>
     <li><a href="/customers" class="mobile-nav-link">👥 Customers</a></li>
     <li><a href="/bills" class="mobile-nav-link">⚡ Electric Bills</a></li>
-    {{#if (eq currentUser.role 'SUPER_ADMIN')}}
+    {{#if (or (eq currentUser.role 'SUPER_ADMIN') currentUser.isSuperAdmin isSuperAdmin)}}
       <li><a href="/garages" class="mobile-nav-link">🏠 Garages</a></li>
       <li><a href="/employees" class="mobile-nav-link">🧑‍💼 Employees</a></li>
       <li><a href="/employees/permissions" class="mobile-nav-link">🛡️ Permissions</a></li>
+      <li><a href="/audit-logs" class="mobile-nav-link">📜 {{t 'nav.auditLogs'}}</a></li>
     {{/if}}
     {{#if currentUser}}
-      {{#if (eq currentUser.role 'SUPER_ADMIN')}}
+      {{#if (or (eq currentUser.role 'SUPER_ADMIN') currentUser.isSuperAdmin isSuperAdmin)}}
         <li style="border-top:1px solid rgba(99,102,241,0.1);margin-top:0.5rem;padding-top:0.5rem;">
           <a href="/bills/new" class="mobile-nav-link" style="color: #10b981; font-weight: 600;">+ New Electric Bill</a>
         </li>

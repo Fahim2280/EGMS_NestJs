@@ -21,12 +21,14 @@ import { GetCompanyByIdQuery } from '@application/queries/impl/get-company-by-id
 import { JwtAuthGuard } from '@infrastructure/auth/jwt-auth.guard';
 import { RolesGuard } from '@infrastructure/auth/roles.guard';
 import { Roles } from '@infrastructure/auth/roles.decorator';
+import { AuditLogService } from '@application/services/audit-log.service';
 
 @Controller()
 export class AuthController {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
+    private readonly auditLogService: AuditLogService,
   ) {}
 
   @Get('login')
@@ -45,7 +47,11 @@ export class AuthController {
   }
 
   @Post('login')
-  async handleLogin(@Body() dto: LoginDto, @Res() res: Response) {
+  async handleLogin(
+    @Body() dto: LoginDto,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
     try {
       const result = await this.commandBus.execute(new LoginCommand(dto));
       const token = result.data.accessToken;
@@ -55,6 +61,17 @@ export class AuthController {
         secure: process.env.NODE_ENV === 'production',
         maxAge: 7 * 24 * 60 * 60 * 1000,
         sameSite: 'lax',
+      });
+
+      await this.auditLogService.record({
+        companyId: result.data.user.companyId,
+        userId: result.data.user.id,
+        userName: result.data.user.name,
+        userRole: result.data.user.role,
+        action: 'LOGIN',
+        entityType: 'AUTH',
+        details: `User ${result.data.user.name} (${result.data.user.email}) signed in`,
+        req,
       });
 
       return res.redirect('/');
@@ -215,6 +232,18 @@ export class AuthController {
           body.unitRate !== undefined && body.unitRate !== '' ? Number(body.unitRate) : undefined,
         ),
       );
+      await this.auditLogService.record({
+        companyId: user.companyId,
+        userId: user.sub || user.companyId,
+        userName: user.name,
+        userRole: user.role,
+        action: 'UPDATE',
+        entityType: 'COMPANY',
+        entityName: body.companyName || body.name,
+        details: `Updated company profile details and tariff rate (৳${body.unitRate || 'default'})`,
+        req,
+      });
+
       return res.redirect('/profile/edit?success=Profile+updated+successfully');
     } catch (err: any) {
       const company = await this.queryBus.execute(
@@ -231,7 +260,20 @@ export class AuthController {
   }
 
   @Get('logout')
-  handleLogout(@Res() res: Response) {
+  async handleLogout(@Req() req: Request, @Res() res: Response) {
+    const user = (req as any).user;
+    if (user) {
+      await this.auditLogService.record({
+        companyId: user.companyId,
+        userId: user.sub || user.companyId,
+        userName: user.name,
+        userRole: user.role,
+        action: 'LOGOUT',
+        entityType: 'AUTH',
+        details: `User ${user.name} logged out`,
+        req,
+      });
+    }
     res.clearCookie('jwt_token');
     return res.redirect('/login');
   }
