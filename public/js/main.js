@@ -264,7 +264,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // 11. Enterprise Glassmorphic Custom Dropdown Engine
   // -------------------------------------------------------
   function initCustomSelects() {
-    const selects = document.querySelectorAll('select.form-input, select.form-control, select.filter-select, select[data-custom-select]');
+    const selects = document.querySelectorAll('select.form-input, select.form-control, select.filter-select, select.dfb-select, select[data-custom-select]');
     
     selects.forEach((select) => {
       // Prevent duplicate wrapping
@@ -452,13 +452,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         requestAnimationFrame(() => {
           const vw = document.documentElement.clientWidth || window.innerWidth;
-          const isMobile = vw <= 640;
+          const isMobile = vw <= 768;
           const wrapperRect = wrapper.getBoundingClientRect();
 
           if (isMobile) {
-            // If the wrapper spans nearly full width (e.g. mobile stacked selects / forms),
-            // match the dropdown 100% to the wrapper width so it stays perfectly flush.
-            if (wrapperRect.width >= vw - 80 || wrapper.classList.contains('filter-select-wrapper')) {
+            // Mobile: match the dropdown 100% to wrapper or bounded within screen so it never overflows
+            if (wrapperRect.width >= vw - 80 || wrapper.classList.contains('filter-select-wrapper') || wrapper.closest('.dfb-group') || isMobile) {
               dropdown.style.setProperty('left', '0px', 'important');
               dropdown.style.setProperty('right', '0px', 'important');
               dropdown.style.setProperty('width', '100%', 'important');

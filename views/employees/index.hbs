@@ -27,7 +27,7 @@
 
   <!-- Search & Filter Toolbar -->
   <div class="card" style="padding: 1rem 1.25rem; margin-bottom: 1.5rem;">
-    <form method="GET" action="/employees" style="display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: flex-end;">
+    <form method="GET" action="/employees" class="table-filter-form dfb-form" style="display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: flex-end;">
       <!-- Search -->
       <div class="dfb-group" style="flex: 1; min-width: 180px;">
         <label class="dfb-label">
@@ -39,7 +39,7 @@
       <!-- Role filter -->
       <div class="dfb-group">
         <label class="dfb-label">{{#if isBn}}ভূমিকা{{else}}Role{{/if}}</label>
-        <select name="role" class="dfb-input dfb-select">
+        <select name="role" class="dfb-input dfb-select filter-select" data-custom-select>
           <option value="">{{#if isBn}}সব ভূমিকা{{else}}All Roles{{/if}}</option>
           <option value="SUPER_ADMIN" {{#if (eq role 'SUPER_ADMIN')}}selected{{/if}}>Super Admin</option>
           <option value="ADMIN" {{#if (eq role 'ADMIN')}}selected{{/if}}>Admin</option>
@@ -49,7 +49,7 @@
       <!-- Status filter -->
       <div class="dfb-group">
         <label class="dfb-label">{{#if isBn}}স্ট্যাটাস{{else}}Status{{/if}}</label>
-        <select name="status" class="dfb-input dfb-select">
+        <select name="status" class="dfb-input dfb-select filter-select" data-custom-select>
           <option value="">{{#if isBn}}সবাই{{else}}All Status{{/if}}</option>
           <option value="active" {{#if (eq status 'active')}}selected{{/if}}>{{t 'common.active'}}</option>
           <option value="inactive" {{#if (eq status 'inactive')}}selected{{/if}}>{{t 'employees.suspended'}}</option>
