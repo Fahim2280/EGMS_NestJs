@@ -26,8 +26,8 @@
         </div>
       {{/if}}
 
-      <form action="/employees" method="POST">
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
+      <form action="/employees" method="POST" enctype="multipart/form-data">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; margin-bottom: 1.25rem;">
           <div class="form-group">
             <label class="form-label" for="empName" style="display: block; margin-bottom: 0.35rem; font-size: 0.85rem; font-weight: 600;">{{t 'employees.name'}} *</label>
             <input
@@ -57,7 +57,7 @@
           </div>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; margin-bottom: 1.25rem;">
           <div class="form-group">
             <label class="form-label" for="empEmail" style="display: block; margin-bottom: 0.35rem; font-size: 0.85rem; font-weight: 600;">{{t 'employees.email'}} *</label>
             <input
@@ -87,31 +87,17 @@
           </div>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
-          <div class="form-group">
-            <label class="form-label" for="empPhone" style="display: block; margin-bottom: 0.35rem; font-size: 0.85rem; font-weight: 600;">{{t 'employees.phone'}} *</label>
-            <input
-              type="text"
-              id="empPhone"
-              name="phoneNumber"
-              class="form-control"
-              required
-              placeholder="01XXXXXXXXX"
-              value="{{formData.phoneNumber}}"
-              style="width: 100%; padding: 0.7rem; border-radius: var(--radius-md); background: rgba(15, 23, 42, 0.8); border: 1px solid var(--color-border); color: #fff;"
-            />
-          </div>
-
-          <div class="form-group">
-            <label class="form-label" style="display: block; margin-bottom: 0.35rem; font-size: 0.85rem; font-weight: 600;">{{t 'employees.role'}}</label>
-            <input
-              type="text"
-              value="{{#if isBn}}সাধারণ (স্বয়ংক্রিয় ডিফল্ট){{else}}GENERAL (Automated Default){{/if}}"
-              disabled
-              style="width: 100%; padding: 0.7rem; border-radius: var(--radius-md); background: rgba(15, 23, 42, 0.4); border: 1px solid var(--color-border); color: #94a3b8;"
-            />
-          </div>
+        <div class="form-group" style="margin-bottom: 1.25rem;">
+          <label class="form-label" style="display: block; margin-bottom: 0.35rem; font-size: 0.85rem; font-weight: 600;">{{t 'employees.role'}}</label>
+          <input
+            type="text"
+            value="{{#if isBn}}সাধারণ (স্বয়ংক্রিয় ডিফল্ট){{else}}GENERAL (Automated Default){{/if}}"
+            disabled
+            style="width: 100%; padding: 0.7rem; border-radius: var(--radius-md); background: rgba(15, 23, 42, 0.4); border: 1px solid var(--color-border); color: #94a3b8;"
+          />
         </div>
+
+        {{> phone-repeater containerId="employeePhones" primaryFieldName="phoneNumber" jsonFieldName="phoneNumbersJson" initialPhones=(or formData.phoneNumbers formData.phoneNumber) required=true}}
 
         <div class="form-group" style="margin-bottom: 2rem;">
           <label class="form-label" for="empAddress" style="display: block; margin-bottom: 0.35rem; font-size: 0.85rem; font-weight: 600;">{{#if isBn}}আবাসিক ঠিকানা *{{else}}Residential Address *{{/if}}</label>
@@ -124,6 +110,26 @@
             placeholder="{{#if isBn}}যেমন: ১৫ এলম স্ট্রিট, উত্তর উপনগর{{else}}e.g. 15 Elm Street, North Suburb{{/if}}"
             style="width: 100%; padding: 0.7rem; border-radius: var(--radius-md); background: rgba(15, 23, 42, 0.8); border: 1px solid var(--color-border); color: #fff; resize: vertical;"
           >{{formData.address}}</textarea>
+        </div>
+
+        <div style="margin-bottom: 2rem; padding-top: 1.25rem; border-top: 1px solid rgba(255, 255, 255, 0.08);">
+          <label class="form-label" style="display: block; margin-bottom: 0.5rem; font-size: 0.95rem; font-weight: 700; color: #fff;">
+            📁 {{t 'documents.title'}}
+          </label>
+
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="form-label" for="empCreateDocType" style="display: block; margin-bottom: 0.35rem; font-size: 0.85rem; font-weight: 600;">{{t 'documents.documentType'}}</label>
+            <select id="empCreateDocType" name="documentType" class="form-control" style="width: 100%; padding: 0.7rem; border-radius: var(--radius-md); background: rgba(15, 23, 42, 0.8); border: 1px solid var(--color-border); color: #fff;">
+              <option value="GENERAL">{{t 'documents.typeGeneral'}}</option>
+              <option value="NID">{{t 'documents.typeNid'}}</option>
+              <option value="PASSPORT">{{t 'documents.typePassport'}}</option>
+              <option value="AGREEMENT">{{t 'documents.typeAgreement'}}</option>
+              <option value="PHOTO">{{t 'documents.typePhoto'}}</option>
+              <option value="OTHER">{{t 'documents.typeOther'}}</option>
+            </select>
+          </div>
+
+          {{> file-uploader uploaderId="empCreateDocs" fieldName="files" maxFiles=10}}
         </div>
 
         <div style="display: flex; gap: 1rem; justify-content: flex-end;">

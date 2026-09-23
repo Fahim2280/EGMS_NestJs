@@ -11,6 +11,9 @@ import {
   IEmployeeRepository,
 } from '@domain/index';
 
+import { parsePhoneNumbersInput } from '../../dtos/contact-phone.dto';
+import { parseDocumentsInput } from '../../dtos/attached-document.dto';
+
 @CommandHandler(CreateEmployeeCommand)
 export class CreateEmployeeHandler implements ICommandHandler<CreateEmployeeCommand> {
   constructor(
@@ -38,6 +41,10 @@ export class CreateEmployeeHandler implements ICommandHandler<CreateEmployeeComm
       throw new ConflictException(`Employee with NID '${dto.nidNumber}' already exists.`);
     }
 
+    const phones = parsePhoneNumbersInput(dto.phoneNumbersJson || dto.phoneNumbers, dto.phoneNumber);
+    const primaryPhone = phones.find((p) => p.isPrimary) || phones[0];
+    const phoneToUse = primaryPhone ? primaryPhone.number : dto.phoneNumber;
+
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(dto.password, salt);
 
@@ -48,12 +55,13 @@ export class CreateEmployeeHandler implements ICommandHandler<CreateEmployeeComm
       address: dto.address,
       email: dto.email,
       password: hashedPassword,
-      phoneNumber: dto.phoneNumber,
+      phoneNumber: phoneToUse,
+      phoneNumbers: phones,
+      documents: parseDocumentsInput(dto.documentsJson || dto.documents),
       role: 'GENERAL',
       nidNumber: dto.nidNumber,
       createdBy: `${company.id}|SUPER_ADMIN`,
     });
-
 
     await this.employeeRepo.save(employee);
     return employee;

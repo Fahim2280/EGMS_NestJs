@@ -15,7 +15,7 @@
     </div>
   {{/if}}
 
-  <form action="/customers/{{customer.id}}/guarantors/{{guarantor.id}}" method="POST">
+  <form action="/customers/{{customer.id}}/guarantors/{{guarantor.id}}" method="POST" enctype="multipart/form-data">
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
       <div class="form-group">
         <label class="form-label" for="name">{{t 'guarantors.name'}} *</label>
@@ -27,9 +27,8 @@
         <input type="text" id="relationship" name="relationship" class="form-input" value="{{guarantor.relationship}}" placeholder="e.g. Father, Brother, Relative, Friend">
       </div>
 
-      <div class="form-group">
-        <label class="form-label" for="mobileNumber">{{t 'guarantors.mobile'}} *</label>
-        <input type="tel" id="mobileNumber" name="mobileNumber" class="form-input" required value="{{guarantor.mobileNumber}}" placeholder="e.g. 01712345678">
+      <div class="form-group" style="grid-column: 1 / -1;">
+        {{> phone-repeater containerId="guarantorEditPhones" primaryFieldName="mobileNumber" jsonFieldName="phoneNumbersJson" initialPhones=(or guarantor.phoneNumbers guarantor.mobileNumber) required=true}}
       </div>
 
       <div class="form-group">
@@ -50,6 +49,31 @@
       <div class="form-group" style="grid-column: 1 / -1;">
         <label class="form-label" for="address">{{t 'guarantors.address'}} *</label>
         <textarea id="address" name="address" class="form-input" rows="2" required placeholder="Guarantor residential or business address...">{{guarantor.address}}</textarea>
+      </div>
+
+      <div class="form-group" style="grid-column: 1 / -1; margin-top: 0.5rem; padding-top: 1rem; border-top: 1px solid rgba(255, 255, 255, 0.08);">
+        <label class="form-label" style="font-weight: 700; color: #fff; font-size: 0.95rem; margin-bottom: 0.75rem;">
+          📁 {{t 'documents.title'}}
+        </label>
+
+        {{#if guarantor.documents.length}}
+          <div style="margin-bottom: 1rem;">
+            {{> document-list documents=guarantor.documents deleteUrlPrefix=(concat "/customers/" customer.id "/guarantors/" guarantor.id "/documents") canDelete=true}}
+          </div>
+        {{/if}}
+
+        <div style="margin-bottom: 1rem;">
+          <label class="form-label" for="gEditDocType">{{t 'documents.documentType'}}</label>
+          <select id="gEditDocType" name="documentType" class="form-input">
+            <option value="GENERAL">{{t 'documents.typeGeneral'}}</option>
+            <option value="NID">{{t 'documents.typeNid'}}</option>
+            <option value="PASSPORT">{{t 'documents.typePassport'}}</option>
+            <option value="PHOTO">{{t 'documents.typePhoto'}}</option>
+            <option value="OTHER">{{t 'documents.typeOther'}}</option>
+          </select>
+        </div>
+
+        {{> file-uploader uploaderId="guarantorEditDocs" fieldName="files" maxFiles=10 label=(t 'documents.uploadNew')}}
       </div>
     </div>
 

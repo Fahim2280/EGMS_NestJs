@@ -1,0 +1,174 @@
+{{!-- 
+  Reusable Document List Partial
+  Parameters:
+    - documents: Array<AttachedDocument>
+    - deleteUrlPrefix: string (e.g. "/customers/123/documents")
+    - canDelete: boolean
+    - emptyMessage: string (optional)
+--}}
+
+<style>
+  .doc-grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+  }
+  .doc-card-item {
+    background: rgba(15, 23, 42, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    padding: 0.85rem 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: all 0.2s ease;
+  }
+  .doc-card-item:hover {
+    border-color: rgba(56, 189, 248, 0.35);
+    background: rgba(15, 23, 42, 0.75);
+    transform: translateY(-1px);
+  }
+  .doc-card-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.65rem;
+    margin-bottom: 0.75rem;
+  }
+  .doc-card-icon {
+    font-size: 1.6rem;
+    flex-shrink: 0;
+    line-height: 1;
+  }
+  .doc-card-details {
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+  .doc-card-title {
+    color: #f1f5f9;
+    font-weight: 600;
+    font-size: 0.88rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 0.2rem;
+  }
+  .doc-card-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+    font-size: 0.75rem;
+    color: #94a3b8;
+  }
+  .doc-card-badge {
+    background: rgba(99, 102, 241, 0.15);
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    color: #a5b4fc;
+    font-size: 0.68rem;
+    font-weight: 600;
+    padding: 1px 5px;
+    border-radius: 4px;
+    text-transform: uppercase;
+  }
+  .doc-card-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    padding-top: 0.6rem;
+    margin-top: 0.4rem;
+  }
+  .doc-btn-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.76rem;
+    font-weight: 600;
+    padding: 0.28rem 0.65rem;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: all 0.2s;
+    cursor: pointer;
+    border: none;
+  }
+  .doc-btn-download {
+    background: rgba(56, 189, 248, 0.15);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    color: #38bdf8;
+  }
+  .doc-btn-download:hover {
+    background: rgba(56, 189, 248, 0.25);
+    color: #7dd3fc;
+  }
+  .doc-btn-preview {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #cbd5e1;
+  }
+  .doc-btn-preview:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+  }
+  .doc-btn-delete {
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #f87171;
+    margin-left: auto;
+  }
+  .doc-btn-delete:hover {
+    background: rgba(239, 68, 68, 0.25);
+    color: #ef4444;
+  }
+</style>
+
+{{#if documents.length}}
+  <div class="doc-grid-container">
+    {{#each documents}}
+      <div class="doc-card-item">
+        <div class="doc-card-header">
+          <div class="doc-card-icon">{{fileIcon this.originalName}}</div>
+          <div class="doc-card-details">
+            <div class="doc-card-title" title="{{this.originalName}}">{{this.originalName}}</div>
+            <div class="doc-card-meta">
+              {{#if this.tag}}
+                <span class="doc-card-badge">{{this.tag}}</span>
+              {{/if}}
+              <span>{{formatFileSize this.size}}</span>
+              {{#if this.uploadedAt}}
+                <span>&bull; {{tDate this.uploadedAt}}</span>
+              {{/if}}
+            </div>
+          </div>
+        </div>
+
+        <div class="doc-card-actions">
+          <a href="/files/download?path={{this.filePath}}&name={{this.originalName}}" class="doc-btn-action doc-btn-download" title="{{t 'documents.download'}}">
+            📥 {{t 'documents.download'}}
+          </a>
+          <a href="/files/preview?path={{this.filePath}}&name={{this.originalName}}" target="_blank" rel="noopener" class="doc-btn-action doc-btn-preview" title="{{t 'documents.preview'}}">
+            👁️ {{t 'documents.preview'}}
+          </a>
+          {{#if ../canDelete}}
+            {{#if ../deleteUrlPrefix}}
+              <form action="{{../deleteUrlPrefix}}/{{this.id}}/delete" method="POST" style="margin: 0; display: inline-flex;" onsubmit="return confirm('{{t 'documents.confirmDelete'}}');">
+                <button type="submit" class="doc-btn-action doc-btn-delete" title="{{t 'common.delete'}}">
+                  ✕
+                </button>
+              </form>
+            {{/if}}
+          {{/if}}
+        </div>
+      </div>
+    {{/each}}
+  </div>
+{{else}}
+  <div style="text-align: center; padding: 2rem 1rem; background: rgba(15, 23, 42, 0.3); border: 1px dashed rgba(255, 255, 255, 0.08); border-radius: 8px;">
+    <div style="font-size: 2rem; margin-bottom: 0.35rem;">📂</div>
+    <div style="color: #cbd5e1; font-size: 0.9rem; font-weight: 600;">
+      {{#if emptyMessage}}{{emptyMessage}}{{else}}{{t 'documents.noDocuments'}}{{/if}}
+    </div>
+    <div style="color: #64748b; font-size: 0.78rem; margin-top: 0.2rem;">
+      {{t 'documents.noDocumentsSub'}}
+    </div>
+  </div>
+{{/if}}

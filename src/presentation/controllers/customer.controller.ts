@@ -8,7 +8,11 @@ import {
   Req,
   Res,
   UseGuards,
+  UseInterceptors,
+  UploadedFiles,
 } from '@nestjs/common';
+import { FilesInterceptor } from '@nestjs/platform-express';
+import { FileService } from '@infrastructure/services/file.service';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { Request, Response } from 'express';
 import {
@@ -41,6 +45,7 @@ export class CustomerController {
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
     private readonly auditLogService: AuditLogService,
+    private readonly fileService: FileService,
   ) {}
 
   // --- VIEW: List customers ---
@@ -168,8 +173,10 @@ export class CustomerController {
   @Post()
   @UseGuards(PermissionsGuard)
   @RequirePermissions('canCreate')
+  @UseInterceptors(FilesInterceptor('files', 10, { limits: { fileSize: 25 * 1024 * 1024 } }))
   async handleCreate(
     @Body() dto: CreateCustomerDto,
+    @UploadedFiles() files: any[],
     @Req() req: Request,
     @Res() res: Response,
   ) {
@@ -194,6 +201,15 @@ export class CustomerController {
     }
 
     try {
+      if (files && files.length > 0) {
+        const uploadedDocs = await this.fileService.uploadFiles(
+          files,
+          'customers',
+          (dto as any).documentType || 'GENERAL',
+        );
+        dto.documents = uploadedDocs;
+      }
+
       await this.commandBus.execute(
         new CreateCustomerCommand(
           user.companyId,
@@ -368,9 +384,11 @@ export class CustomerController {
   @Post(':id/edit')
   @UseGuards(PermissionsGuard)
   @RequirePermissions('canEdit')
+  @UseInterceptors(FilesInterceptor('files', 10, { limits: { fileSize: 25 * 1024 * 1024 } }))
   async handleUpdate(
     @Param('id') id: string,
     @Body() dto: UpdateCustomerDto,
+    @UploadedFiles() files: any[],
     @Req() req: Request,
     @Res() res: Response,
   ) {
@@ -385,6 +403,16 @@ export class CustomerController {
 
       if (!isSuperAdmin && existing.garageId && !user.garageIds?.includes(existing.garageId)) {
         return res.redirect('/customers?error=You+do+not+have+permission+to+edit+this+customer');
+      }
+
+      if (files && files.length > 0) {
+        const uploadedDocs = await this.fileService.uploadFiles(
+          files,
+          'customers',
+          (dto as any).documentType || 'GENERAL',
+        );
+        const existingDocs = existing.documents || [];
+        dto.documents = [...existingDocs, ...uploadedDocs];
       }
 
       await this.commandBus.execute(
@@ -481,9 +509,11 @@ export class CustomerController {
   @Post(':id/guarantors')
   @UseGuards(PermissionsGuard)
   @RequirePermissions('canCreate')
+  @UseInterceptors(FilesInterceptor('files', 10, { limits: { fileSize: 25 * 1024 * 1024 } }))
   async handleCreateGuarantor(
     @Param('id') customerId: string,
     @Body() dto: CreateGuarantorDto,
+    @UploadedFiles() files: any[],
     @Req() req: Request,
     @Res() res: Response,
   ) {
@@ -497,6 +527,15 @@ export class CustomerController {
 
       if (!isSuperAdmin && customer.garageId && !user.garageIds?.includes(customer.garageId)) {
         return res.redirect(`/customers/${customerId}?error=You+do+not+have+permission+to+manage+this+customer`);
+      }
+
+      if (files && files.length > 0) {
+        const uploadedDocs = await this.fileService.uploadFiles(
+          files,
+          'guarantors',
+          (dto as any).documentType || 'GENERAL',
+        );
+        dto.documents = uploadedDocs;
       }
 
       await this.commandBus.execute(
@@ -563,10 +602,12 @@ export class CustomerController {
   @Post(':id/guarantors/:guarantorId')
   @UseGuards(PermissionsGuard)
   @RequirePermissions('canEdit')
+  @UseInterceptors(FilesInterceptor('files', 10, { limits: { fileSize: 25 * 1024 * 1024 } }))
   async handleUpdateGuarantor(
     @Param('id') customerId: string,
     @Param('guarantorId') guarantorId: string,
     @Body() dto: UpdateGuarantorDto,
+    @UploadedFiles() files: any[],
     @Req() req: Request,
     @Res() res: Response,
   ) {
@@ -580,6 +621,20 @@ export class CustomerController {
 
       if (!isSuperAdmin && customer.garageId && !user.garageIds?.includes(customer.garageId)) {
         return res.redirect(`/customers/${customerId}?error=You+do+not+have+permission+to+edit+this+guarantor`);
+      }
+
+      if (files && files.length > 0) {
+        const uploadedDocs = await this.fileService.uploadFiles(
+          files,
+          'guarantors',
+          (dto as any).documentType || 'GENERAL',
+        );
+        const guarantors = await this.queryBus.execute(
+          new GetGuarantorsByCustomerQuery(customerId, user.companyId),
+        );
+        const currentGuarantor = guarantors.find((g: any) => g.id === guarantorId);
+        const existingDocs = currentGuarantor?.documents || [];
+        dto.documents = [...existingDocs, ...uploadedDocs];
       }
 
       await this.commandBus.execute(

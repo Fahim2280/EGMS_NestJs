@@ -8,6 +8,7 @@ import { classes } from '@automapper/classes';
 // Services
 import { BillingCalculationService } from './services/billing-calculation.service';
 import { AuditLogService } from './services/audit-log.service';
+import { FileService } from '../infrastructure/services/file.service';
 
 // Command Handlers
 import { RegisterCompanyHandler } from './commands/handlers/register-company.handler';
@@ -127,10 +128,11 @@ const Profiles = [
   providers: [
     BillingCalculationService,
     AuditLogService,
+    FileService,
     ...CommandHandlers,
     ...QueryHandlers,
     ...Profiles,
   ],
-  exports: [CqrsModule, JwtModule, AutomapperModule, BillingCalculationService, AuditLogService],
+  exports: [CqrsModule, JwtModule, AutomapperModule, BillingCalculationService, AuditLogService, FileService],
 })
 export class ApplicationModule {}

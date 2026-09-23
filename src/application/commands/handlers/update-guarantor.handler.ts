@@ -7,6 +7,9 @@ import {
   IGuarantorRepository,
 } from '@domain/index';
 
+import { parsePhoneNumbersInput } from '../../dtos/contact-phone.dto';
+import { parseDocumentsInput } from '../../dtos/attached-document.dto';
+
 @CommandHandler(UpdateGuarantorCommand)
 export class UpdateGuarantorHandler
   implements ICommandHandler<UpdateGuarantorCommand>
@@ -41,16 +44,26 @@ export class UpdateGuarantorHandler
       );
     }
 
+    const phones = parsePhoneNumbersInput(dto.phoneNumbersJson || dto.phoneNumbers, dto.mobileNumber || guarantor.mobileNumber);
+    const primaryPhone = phones.find((p) => p.isPrimary) || phones[0];
+    const mobileToUse = primaryPhone ? primaryPhone.number : (dto.mobileNumber || guarantor.mobileNumber);
+
     guarantor.updateDetails(
       dto.name,
       dto.fatherName || '',
       dto.motherName || '',
       dto.address,
-      dto.mobileNumber,
+      mobileToUse,
       dto.nidNumber,
       dto.relationship || '',
       actorStamp,
+      phones,
     );
+
+    if (dto.documentsJson !== undefined || dto.documents !== undefined) {
+      const docs = parseDocumentsInput(dto.documentsJson || dto.documents);
+      guarantor.setDocuments(docs);
+    }
 
     await this.guarantorRepo.updateAsync(guarantor);
     return guarantor;

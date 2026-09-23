@@ -68,6 +68,8 @@ export class TypeOrmGuarantorRepository
       motherName: orm.motherName,
       address: orm.address,
       mobileNumber: orm.mobileNumber,
+      phoneNumbers: Array.isArray(orm.phoneNumbers) ? orm.phoneNumbers : undefined,
+      documents: Array.isArray(orm.documents) ? orm.documents : [],
       nidNumber: orm.nidNumber,
       relationship: orm.relationship,
       isActive: orm.isActive,
@@ -91,6 +93,8 @@ export class TypeOrmGuarantorRepository
     orm.motherName = domain.motherName;
     orm.address = domain.address;
     orm.mobileNumber = domain.mobileNumber;
+    orm.phoneNumbers = domain.phoneNumbers || null;
+    orm.documents = domain.documents || null;
     orm.nidNumber = domain.nidNumber;
     orm.relationship = domain.relationship;
     orm.isActive = domain.isActive;

@@ -37,14 +37,38 @@
 <!-- Profile Info Grid -->
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
   <div class="card" style="padding: 1.25rem;">
-    <div style="font-size: 0.8rem; text-transform: uppercase; color: var(--color-text-muted); letter-spacing: 0.05em; margin-bottom: 0.5rem;">Customer ID &amp; {{t 'customers.mobile'}}</div>
-    <div style="font-size: 1.1rem; font-weight: 700; color: var(--color-text-primary); margin-bottom: 0.25rem;">
+    <div style="font-size: 0.8rem; text-transform: uppercase; color: var(--color-text-muted); letter-spacing: 0.05em; margin-bottom: 0.5rem;">Customer ID &amp; {{t 'phones.title'}}</div>
+    <div style="font-size: 1.05rem; font-weight: 700; color: var(--color-text-primary); margin-bottom: 0.35rem; display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem;">
       {{#if customer.customerCode}}
-        <span style="color: #2dd4bf; margin-right: 0.35rem;">{{customer.customerCode}}</span> &bull; 
+        <span style="color: #2dd4bf; background: rgba(45, 212, 191, 0.1); padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.9rem;">{{customer.customerCode}}</span>
       {{/if}}
-      {{customer.mobileNumber}}
+      <a href="tel:{{customer.mobileNumber}}" style="color: #38bdf8; text-decoration: none; display: inline-flex; align-items: center; gap: 0.35rem;">
+        📞 {{customer.mobileNumber}}
+      </a>
+      <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399; font-size: 0.72rem; padding: 2px 6px; border-radius: 12px;">{{t 'phones.primary'}}</span>
     </div>
-    <div style="color: var(--color-text-muted); font-size: 0.85rem;">NID: <code style="color: var(--color-text-secondary);">{{customer.nidNumber}}</code></div>
+
+    {{#if customer.phoneNumbers}}
+      {{#if (gt customer.phoneNumbers.length 1)}}
+        <div style="display: flex; flex-direction: column; gap: 0.35rem; margin-top: 0.4rem; padding-top: 0.4rem; border-top: 1px solid rgba(255, 255, 255, 0.08);">
+          {{#each customer.phoneNumbers}}
+            {{#unless this.isPrimary}}
+              <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.82rem; background: rgba(255, 255, 255, 0.03); padding: 0.25rem 0.5rem; border-radius: 4px;">
+                <span style="display: flex; align-items: center; gap: 0.35rem;">
+                  <a href="tel:{{this.number}}" style="color: var(--color-text-secondary); text-decoration: none;">📞 {{this.number}}</a>
+                  <span style="font-size: 0.68rem; color: var(--color-text-muted); background: rgba(255, 255, 255, 0.08); padding: 1px 5px; border-radius: 10px;">{{this.type}}</span>
+                </span>
+                {{#if (eq this.type 'WHATSAPP')}}
+                  <a href="https://wa.me/88{{this.number}}" target="_blank" rel="noopener" style="color: #22c55e; font-size: 0.75rem; text-decoration: none; font-weight: 600;">WhatsApp 💬</a>
+                {{/if}}
+              </div>
+            {{/unless}}
+          {{/each}}
+        </div>
+      {{/if}}
+    {{/if}}
+
+    <div style="color: var(--color-text-muted); font-size: 0.85rem; margin-top: 0.5rem;">NID: <code style="color: var(--color-text-secondary);">{{customer.nidNumber}}</code></div>
   </div>
 
   <div class="card" style="padding: 1.25rem;">
@@ -85,6 +109,27 @@
 <div class="card" style="margin-bottom: 2rem; padding: 1.25rem;">
   <div style="font-size: 0.8rem; text-transform: uppercase; color: var(--color-text-muted); letter-spacing: 0.05em; margin-bottom: 0.25rem;">{{t 'customers.address'}}</div>
   <div style="font-size: 1rem; color: var(--color-text-primary);">{{customer.address}}</div>
+</div>
+
+<!-- Customer Documents & Attachments Section -->
+<div class="card" style="margin-bottom: 2rem;">
+  <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+    <div>
+      <h2 class="card-title" style="margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+        <span>📁</span> {{t 'documents.title'}} {{#if customer.documents.length}}({{bnNum customer.documents.length}}){{/if}}
+      </h2>
+      <p style="color: var(--color-text-muted); font-size: 0.85rem; margin: 0.25rem 0 0 0;">{{t 'documents.subtitle'}}</p>
+    </div>
+    {{#if (or isSuperAdmin currentUser.canEdit currentUser.canCreate)}}
+    <button type="button" class="btn btn-primary btn-sm" onclick="document.getElementById('uploadCustomerDocModal').style.display='flex'">
+      + {{t 'documents.upload'}}
+    </button>
+    {{/if}}
+  </div>
+
+  <div style="padding: 1.25rem;">
+    {{> document-list documents=customer.documents deleteUrlPrefix=(concat "/customers/" customer.id "/documents") canDelete=(or isSuperAdmin currentUser.canDelete)}}
+  </div>
 </div>
 
 <!-- Guarantors / জামিনদারবৃন্দ Section -->
@@ -135,8 +180,25 @@
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem; font-size: 0.85rem;">
               <div>
-                <div style="color: var(--color-text-muted); font-size: 0.75rem; text-transform: uppercase;">{{t 'guarantors.mobile'}}</div>
-                <div style="color: var(--color-text-secondary); font-weight: 600;">{{this.mobileNumber}}</div>
+                <div style="color: var(--color-text-muted); font-size: 0.75rem; text-transform: uppercase;">{{t 'phones.title'}}</div>
+                <div style="color: var(--color-text-secondary); font-weight: 600; display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap;">
+                  <a href="tel:{{this.mobileNumber}}" style="color: #38bdf8; text-decoration: none;">📞 {{this.mobileNumber}}</a>
+                  <span style="font-size: 0.65rem; color: #34d399; background: rgba(16, 185, 129, 0.15); padding: 1px 5px; border-radius: 8px;">{{t 'phones.primary'}}</span>
+                </div>
+                {{#if this.phoneNumbers}}
+                  {{#if (gt this.phoneNumbers.length 1)}}
+                    <div style="display: flex; flex-direction: column; gap: 0.2rem; margin-top: 0.35rem;">
+                      {{#each this.phoneNumbers}}
+                        {{#unless this.isPrimary}}
+                          <div style="font-size: 0.75rem; display: flex; align-items: center; gap: 0.3rem;">
+                            <a href="tel:{{this.number}}" style="color: var(--color-text-muted); text-decoration: none;">📞 {{this.number}}</a>
+                            <span style="font-size: 0.65rem; color: var(--color-text-muted); background: rgba(255, 255, 255, 0.08); padding: 1px 4px; border-radius: 4px;">{{this.type}}</span>
+                          </div>
+                        {{/unless}}
+                      {{/each}}
+                    </div>
+                  {{/if}}
+                {{/if}}
               </div>
               <div>
                 <div style="color: var(--color-text-muted); font-size: 0.75rem; text-transform: uppercase;">{{t 'guarantors.nid'}}</div>
@@ -159,6 +221,20 @@
             <div style="font-size: 0.85rem; border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 0.5rem;">
               <span style="color: var(--color-text-muted); font-size: 0.75rem; text-transform: uppercase;">{{t 'guarantors.address'}}:</span>
               <span style="color: var(--color-text-secondary);"> {{this.address}}</span>
+            </div>
+
+            <div style="margin-top: 0.85rem; padding-top: 0.85rem; border-top: 1px solid rgba(255, 255, 255, 0.08);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                <span style="color: var(--color-text-muted); font-size: 0.75rem; text-transform: uppercase; font-weight: 600;">
+                  📎 {{t 'documents.title'}} {{#if this.documents.length}}({{bnNum this.documents.length}}){{/if}}
+                </span>
+                {{#if (or ../isSuperAdmin ../currentUser.canEdit)}}
+                <button type="button" class="btn btn-secondary btn-sm" style="font-size: 0.72rem; padding: 2px 7px;" onclick="openGuarantorUploadModal('{{this.id}}', '{{this.name}}')">
+                  + {{t 'documents.upload'}}
+                </button>
+                {{/if}}
+              </div>
+              {{> document-list documents=this.documents deleteUrlPrefix=(concat "/customers/" ../customer.id "/guarantors/" this.id "/documents") canDelete=(or ../isSuperAdmin ../currentUser.canDelete)}}
             </div>
           </div>
         </div>
@@ -255,8 +331,19 @@
 </div>
 
 <!-- Add Guarantor Modal -->
+<style>
+  @media (max-width: 576px) {
+    #addGuarantorModal {
+      padding: 0.5rem !important;
+    }
+    #addGuarantorModal .guarantor-modal-card {
+      padding: 1.15rem 0.85rem !important;
+      max-height: 94vh !important;
+    }
+  }
+</style>
 <div id="addGuarantorModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center; padding: 1rem;">
-  <div class="card" style="max-width: 650px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 1.75rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);">
+  <div class="card guarantor-modal-card" style="max-width: 650px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 1.75rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; border-bottom: 1px solid var(--color-border); padding-bottom: 0.75rem;">
       <h3 style="margin: 0; font-size: 1.25rem; font-weight: 700; color: #fff;">+ {{t 'guarantors.add'}}</h3>
       <button type="button" onclick="document.getElementById('addGuarantorModal').style.display='none'" style="background: transparent; border: none; color: var(--color-text-muted); font-size: 1.5rem; cursor: pointer; line-height: 1;">&times;</button>
@@ -271,9 +358,8 @@
           <label class="form-label" for="gRelationship">{{t 'guarantors.relationship'}}</label>
           <input type="text" id="gRelationship" name="relationship" class="form-input" placeholder="e.g. Father, Brother, Relative, Friend">
         </div>
-        <div class="form-group">
-          <label class="form-label" for="gMobile">{{t 'guarantors.mobile'}} *</label>
-          <input type="tel" id="gMobile" name="mobileNumber" class="form-input" required placeholder="017XXXXXXXX">
+        <div class="form-group" style="grid-column: 1 / -1;">
+          {{> phone-repeater containerId="guarantorPhonesModal" primaryFieldName="mobileNumber" jsonFieldName="phoneNumbersJson" required=true}}
         </div>
         <div class="form-group">
           <label class="form-label" for="gNid">{{t 'guarantors.nid'}} *</label>
@@ -299,3 +385,91 @@
     </form>
   </div>
 </div>
+
+<!-- Upload Customer Document Modal -->
+<div id="uploadCustomerDocModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center; padding: 1rem;">
+  <div class="card" style="max-width: 580px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 1.75rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); border-top: 3px solid #38bdf8;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; border-bottom: 1px solid var(--color-border); padding-bottom: 0.75rem;">
+      <h3 style="margin: 0; font-size: 1.15rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 0.5rem;">
+        <span>📤</span> {{t 'documents.uploadNew'}}
+      </h3>
+      <button type="button" onclick="document.getElementById('uploadCustomerDocModal').style.display='none'" style="background: transparent; border: none; color: var(--color-text-muted); font-size: 1.5rem; cursor: pointer; line-height: 1;">&times;</button>
+    </div>
+    <form action="/customers/{{customer.id}}/documents" method="POST" enctype="multipart/form-data">
+      <div style="margin-bottom: 1rem;">
+        <label class="form-label" for="custDocType">{{t 'documents.documentType'}}</label>
+        <select id="custDocType" name="type" class="form-input">
+          <option value="GENERAL">{{t 'documents.typeGeneral'}}</option>
+          <option value="NID">{{t 'documents.typeNid'}}</option>
+          <option value="PASSPORT">{{t 'documents.typePassport'}}</option>
+          <option value="AGREEMENT">{{t 'documents.typeAgreement'}}</option>
+          <option value="ELECTRICITY_BILL">{{t 'documents.typeElectricityBill'}}</option>
+          <option value="TRADE_LICENSE">{{t 'documents.typeTradeLicense'}}</option>
+          <option value="PHOTO">{{t 'documents.typePhoto'}}</option>
+          <option value="SIGNATURE">{{t 'documents.typeSignature'}}</option>
+          <option value="OTHER">{{t 'documents.typeOther'}}</option>
+        </select>
+      </div>
+
+      {{> file-uploader uploaderId="custModalUploader" fieldName="files" maxFiles=10}}
+
+      <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.25rem;">
+        <button type="button" class="btn btn-secondary" onclick="document.getElementById('uploadCustomerDocModal').style.display='none'">{{t 'common.cancel'}}</button>
+        <button type="submit" class="btn btn-primary" style="background: #38bdf8; border-color: #38bdf8; color: #0f172a; font-weight: 700;">
+          {{t 'documents.upload'}}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Upload Guarantor Document Modal -->
+<div id="uploadGuarantorDocModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center; padding: 1rem;">
+  <div class="card" style="max-width: 580px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 1.75rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); border-top: 3px solid #818cf8;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; border-bottom: 1px solid var(--color-border); padding-bottom: 0.75rem;">
+      <h3 style="margin: 0; font-size: 1.15rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 0.5rem;">
+        <span>🛡️</span> {{t 'documents.uploadNew'}} &mdash; <span id="guarantorModalTargetName" style="color: #a5b4fc;"></span>
+      </h3>
+      <button type="button" onclick="document.getElementById('uploadGuarantorDocModal').style.display='none'" style="background: transparent; border: none; color: var(--color-text-muted); font-size: 1.5rem; cursor: pointer; line-height: 1;">&times;</button>
+    </div>
+    <form id="guarantorUploadForm" action="" method="POST" enctype="multipart/form-data">
+      <div style="margin-bottom: 1rem;">
+        <label class="form-label" for="gDocType">{{t 'documents.documentType'}}</label>
+        <select id="gDocType" name="type" class="form-input">
+          <option value="GENERAL">{{t 'documents.typeGeneral'}}</option>
+          <option value="NID">{{t 'documents.typeNid'}}</option>
+          <option value="PASSPORT">{{t 'documents.typePassport'}}</option>
+          <option value="PHOTO">{{t 'documents.typePhoto'}}</option>
+          <option value="SIGNATURE">{{t 'documents.typeSignature'}}</option>
+          <option value="OTHER">{{t 'documents.typeOther'}}</option>
+        </select>
+      </div>
+
+      {{> file-uploader uploaderId="guarantorModalUploader" fieldName="files" maxFiles=10}}
+
+      <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.25rem;">
+        <button type="button" class="btn btn-secondary" onclick="document.getElementById('uploadGuarantorDocModal').style.display='none'">{{t 'common.cancel'}}</button>
+        <button type="submit" class="btn btn-primary" style="background: #818cf8; border-color: #818cf8; color: #0f172a; font-weight: 700;">
+          {{t 'documents.upload'}}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function openGuarantorUploadModal(guarantorId, guarantorName) {
+    const form = document.getElementById('guarantorUploadForm');
+    const nameSpan = document.getElementById('guarantorModalTargetName');
+    if (form) {
+      form.action = '/customers/{{customer.id}}/guarantors/' + guarantorId + '/documents';
+    }
+    if (nameSpan) {
+      nameSpan.textContent = guarantorName || '';
+    }
+    const modal = document.getElementById('uploadGuarantorDocModal');
+    if (modal) {
+      modal.style.display = 'flex';
+    }
+  }
+</script>

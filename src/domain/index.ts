@@ -1,5 +1,7 @@
 // Common Base
 export * from './common/auditable.entity';
+export * from './common/contact-phone.interface';
+export * from './common/attached-document.interface';
 
 // Domain Entities
 export * from './entities/company.entity';

@@ -74,11 +74,16 @@ export class TypeOrmCustomerRepository
     mobile: string,
     excludeId?: string,
   ): Promise<Customer | null> {
+    const trimmed = mobile.trim();
+    const phonePattern = `%"number":"${trimmed}"%`;
     const qb = this.customerRepo
       .createQueryBuilder('c')
       .leftJoinAndSelect('c.garage', 'g')
       .where('c.companyId = :companyId', { companyId })
-      .andWhere('c.mobileNumber = :mobile', { mobile: mobile.trim() })
+      .andWhere('(c.mobileNumber = :mobile OR c.phoneNumbers LIKE :phonePattern)', {
+        mobile: trimmed,
+        phonePattern,
+      })
       .andWhere('c.isDeleted = :isDeleted', { isDeleted: false });
 
     if (excludeId) {
@@ -126,6 +131,8 @@ export class TypeOrmCustomerRepository
       motherName: orm.motherName,
       address: orm.address,
       mobileNumber: orm.mobileNumber,
+      phoneNumbers: Array.isArray(orm.phoneNumbers) ? orm.phoneNumbers : undefined,
+      documents: Array.isArray(orm.documents) ? orm.documents : [],
       nidNumber: orm.nidNumber,
       previousUnit: Number(orm.previousUnit),
       advanceMoney: Number(orm.advanceMoney),
@@ -153,6 +160,8 @@ export class TypeOrmCustomerRepository
     orm.motherName = domain.motherName;
     orm.address = domain.address;
     orm.mobileNumber = domain.mobileNumber;
+    orm.phoneNumbers = domain.phoneNumbers || null;
+    orm.documents = domain.documents || null;
     orm.nidNumber = domain.nidNumber;
     orm.previousUnit = domain.previousUnit;
     orm.advanceMoney = domain.advanceMoney;

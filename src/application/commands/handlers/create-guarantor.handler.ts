@@ -10,6 +10,9 @@ import {
   ICustomerRepository,
 } from '@domain/index';
 
+import { parsePhoneNumbersInput } from '../../dtos/contact-phone.dto';
+import { parseDocumentsInput } from '../../dtos/attached-document.dto';
+
 @CommandHandler(CreateGuarantorCommand)
 export class CreateGuarantorHandler
   implements ICommandHandler<CreateGuarantorCommand>
@@ -40,6 +43,10 @@ export class CreateGuarantorHandler
       );
     }
 
+    const phones = parsePhoneNumbersInput(dto.phoneNumbersJson || dto.phoneNumbers, dto.mobileNumber);
+    const primaryPhone = phones.find((p) => p.isPrimary) || phones[0];
+    const mobileToUse = primaryPhone ? primaryPhone.number : dto.mobileNumber;
+
     const guarantorId = uuidv4();
     const guarantor = Guarantor.create({
       id: guarantorId,
@@ -49,7 +56,9 @@ export class CreateGuarantorHandler
       fatherName: dto.fatherName || '',
       motherName: dto.motherName || '',
       address: dto.address,
-      mobileNumber: dto.mobileNumber,
+      mobileNumber: mobileToUse,
+      phoneNumbers: phones,
+      documents: parseDocumentsInput(dto.documentsJson || dto.documents),
       nidNumber: dto.nidNumber,
       relationship: dto.relationship || '',
       createdBy: actorStamp || 'SYSTEM',

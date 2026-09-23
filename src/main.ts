@@ -137,6 +137,27 @@ async function bootstrap() {
     }
     return false;
   });
+  hbs.registerHelper('subtract', (a: any, b: any) => Number(a) - Number(b));
+  hbs.registerHelper('concat', function (...args: any[]) {
+    const values = args.slice(0, -1);
+    return values.join('');
+  });
+  hbs.registerHelper('formatFileSize', function (bytes: any) {
+    const num = Number(bytes);
+    if (!num || num === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(num) / Math.log(k));
+    return `${parseFloat((num / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
+  });
+  hbs.registerHelper('fileIcon', function (mimeOrName: string) {
+    const str = String(mimeOrName || '').toLowerCase();
+    if (str.includes('pdf')) return '📕';
+    if (str.includes('image') || str.includes('jpg') || str.includes('jpeg') || str.includes('png') || str.includes('webp') || str.includes('heic')) return '🖼️';
+    if (str.includes('sheet') || str.includes('excel') || str.includes('xls') || str.includes('csv')) return '📊';
+    if (str.includes('word') || str.includes('doc')) return '📄';
+    return '📁';
+  });
 
   // Translation & Numeral formatting helpers
   hbs.registerHelper('t', function (key: string, options: any) {

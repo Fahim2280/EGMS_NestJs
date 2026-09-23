@@ -22,6 +22,8 @@ export class EmployeeProfile extends AutomapperProfile {
         forMember((d) => d.address, mapFrom((s) => s.address)),
         forMember((d) => d.email, mapFrom((s) => s.email)),
         forMember((d) => d.phoneNumber, mapFrom((s) => s.phoneNumber)),
+        forMember((d) => d.phoneNumbers, mapFrom((s) => s.phoneNumbers || [])),
+        forMember((d) => d.documents, mapFrom((s) => s.documents || [])),
         forMember((d) => d.role, mapFrom((s) => s.role)),
         forMember((d) => d.nidNumber, mapFrom((s) => s.nidNumber)),
         forMember((d) => d.isActive, mapFrom((s) => s.isActive)),

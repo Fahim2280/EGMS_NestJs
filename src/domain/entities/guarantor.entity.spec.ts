@@ -209,4 +209,40 @@ describe('Guarantor Entity', () => {
     expect(guarantor.isActive).toBe(false);
     expect(guarantor.deletedBy).toBe('comp-001|SUPER_ADMIN');
   });
+
+  it('should support multiple phone numbers and synchronize primary phone to mobileNumber', () => {
+    const guarantor = Guarantor.create({
+      id: 'guar-multi-01',
+      customerId: 'cust-001',
+      companyId: 'comp-001',
+      name: 'Multi Phone Guarantor',
+      address: 'Dhaka',
+      phoneNumbers: [
+        { number: '01711223344', type: 'PERSONAL', isPrimary: false },
+        { number: '01899887766', type: 'WHATSAPP', isPrimary: true },
+      ],
+      nidNumber: '111222333444',
+    });
+
+    expect(guarantor.phoneNumbers.length).toBe(2);
+    expect(guarantor.mobileNumber).toBe('01899887766');
+
+    guarantor.updateDetails(
+      'Updated Guarantor',
+      '',
+      '',
+      'Dhaka',
+      '',
+      '111222333444',
+      'Brother',
+      undefined,
+      [
+        { number: '01900000000', type: 'WORK', isPrimary: true },
+        { number: '01500000000', type: 'EMERGENCY', isPrimary: false },
+      ],
+    );
+
+    expect(guarantor.phoneNumbers.length).toBe(2);
+    expect(guarantor.mobileNumber).toBe('01900000000');
+  });
 });

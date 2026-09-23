@@ -24,7 +24,7 @@
 <div class="customer-create-grid" style="display: grid; grid-template-columns: 1.25fr 0.75fr; gap: 1.75rem; align-items: start; max-width: 1100px; margin: 0 auto;">
   <!-- Form Column -->
   <div class="card" style="padding: 1.75rem; border-top: 3px solid #6366f1; margin-bottom: 0;">
-    <form action="/customers" method="POST">
+    <form action="/customers" method="POST" enctype="multipart/form-data">
       <!-- Section 1: Facility & Identification -->
       <div style="margin-bottom: 1.75rem;">
         <div class="form-section-title" style="margin-bottom: 1.25rem;">
@@ -49,21 +49,14 @@
           <span class="form-hint">{{t 'customers.garageBranchHint'}}</span>
         </div>
 
-        <div class="form-grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
-          <div class="form-group" style="margin-bottom: 0;">
-            <label class="form-label" for="name">
-              <span>{{t 'customers.name'}} <span style="color: #f43f5e;">*</span></span>
-            </label>
-            <input type="text" id="name" name="name" class="form-input" required placeholder="e.g. Mohammad Rahim" value="{{formData.name}}">
-          </div>
-
-          <div class="form-group" style="margin-bottom: 0;">
-            <label class="form-label" for="mobileNumber">
-              <span>{{t 'customers.mobile'}} <span style="color: #f43f5e;">*</span></span>
-            </label>
-            <input type="tel" id="mobileNumber" name="mobileNumber" class="form-input" required placeholder="e.g. 01712345678" value="{{formData.mobileNumber}}">
-          </div>
+        <div class="form-group" style="margin-bottom: 1.25rem;">
+          <label class="form-label" for="name">
+            <span>{{t 'customers.name'}} <span style="color: #f43f5e;">*</span></span>
+          </label>
+          <input type="text" id="name" name="name" class="form-input" required placeholder="e.g. Mohammad Rahim" value="{{formData.name}}">
         </div>
+
+        {{> phone-repeater containerId="customerPhones" primaryFieldName="mobileNumber" jsonFieldName="phoneNumbersJson" initialPhones=(or formData.phoneNumbers formData.mobileNumber) required=true}}
 
         <div class="form-grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
           <div class="form-group" style="margin-bottom: 0;">
@@ -132,6 +125,32 @@
         </div>
       </div>
 
+      <!-- Section 3: Documents & Identity Attachments -->
+      <div style="margin-bottom: 1.5rem;">
+        <div class="form-section-title" style="margin-bottom: 1.25rem;">
+          <span class="section-icon-badge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+          </span>
+          {{t 'documents.title'}}
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1.25rem;">
+          <label class="form-label" for="docType">{{t 'documents.documentType'}}</label>
+          <select id="docType" name="documentType" class="form-input">
+            <option value="GENERAL">{{t 'documents.typeGeneral'}}</option>
+            <option value="NID">{{t 'documents.typeNid'}}</option>
+            <option value="PASSPORT">{{t 'documents.typePassport'}}</option>
+            <option value="AGREEMENT">{{t 'documents.typeAgreement'}}</option>
+            <option value="ELECTRICITY_BILL">{{t 'documents.typeElectricityBill'}}</option>
+            <option value="TRADE_LICENSE">{{t 'documents.typeTradeLicense'}}</option>
+            <option value="PHOTO">{{t 'documents.typePhoto'}}</option>
+            <option value="OTHER">{{t 'documents.typeOther'}}</option>
+          </select>
+        </div>
+
+        {{> file-uploader uploaderId="custCreateDocs" fieldName="files" maxFiles=10}}
+      </div>
+
       <div class="form-actions" style="margin-top: 2rem; display: flex; gap: 0.75rem; justify-content: flex-end; align-items: center;">
         <a href="/customers" class="btn btn-secondary" style="padding: 0.65rem 1.25rem;">{{t 'common.cancel'}}</a>
         <button type="submit" class="btn btn-primary" style="padding: 0.65rem 1.5rem; display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 700; box-shadow: 0 4px 16px rgba(99, 102, 241, 0.35);">
@@ -172,6 +191,14 @@
           <div>
             <strong style="color: #f1f5f9;">জামিনদারবৃন্দ {{#unless isBn}}<span style="font-size: 0.78rem; opacity: 0.8;">(Guarantors)</span>{{/unless}}:</strong>
             গ্রাহক নিবন্ধনের পর তার প্রোফাইল পেজ থেকে পিতা-মাতার নাম ও পরিচয়পত্রসহ একাধিক আইনগত জামিনদার সরাসরি যোগ করতে পারবেন।
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 0.75rem; align-items: flex-start;">
+          <div style="width: 24px; height: 24px; border-radius: 6px; background: rgba(56, 189, 248, 0.15); color: #38bdf8; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 0.8rem; font-weight: 700;">৪</div>
+          <div>
+            <strong style="color: #f1f5f9;">ডকুমেন্টস ও ফাইল {{#unless isBn}}<span style="font-size: 0.78rem; opacity: 0.8;">(File Upload)</span>{{/unless}}:</strong>
+            গ্রাহকের এনআইডি বা চুক্তিপত্র সরাসরি আপলোড করতে পারবেন। ৫ MB এর বেশি ছবি স্বয়ংক্রিয়ভাবে অপ্টিমাইজ/কম্প্রেস করা হবে।
           </div>
         </div>
       </div>

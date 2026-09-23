@@ -83,6 +83,8 @@ export class TypeOrmEmployeeRepository
       email: orm.email,
       password: orm.password,
       phoneNumber: orm.phoneNumber,
+      phoneNumbers: Array.isArray(orm.phoneNumbers) ? orm.phoneNumbers : undefined,
+      documents: Array.isArray(orm.documents) ? orm.documents : [],
       role: orm.role,
       nidNumber: orm.nidNumber,
       canCreate: orm.canCreate,
@@ -110,6 +112,8 @@ export class TypeOrmEmployeeRepository
     orm.email = domain.email;
     orm.password = domain.password;
     orm.phoneNumber = domain.phoneNumber;
+    orm.phoneNumbers = domain.phoneNumbers || null;
+    orm.documents = domain.documents || null;
     orm.role = domain.role;
     orm.nidNumber = domain.nidNumber;
     orm.canCreate = domain.canCreate;

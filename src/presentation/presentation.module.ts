@@ -8,6 +8,7 @@ import { CustomerController } from './controllers/customer.controller';
 import { ElectricBillController } from './controllers/electric-bill.controller';
 import { AuditLogController } from './controllers/audit-log.controller';
 import { ErrorController } from './controllers/error.controller';
+import { FileController } from './controllers/file.controller';
 
 @Module({
   imports: [ApplicationModule],
@@ -20,6 +21,7 @@ import { ErrorController } from './controllers/error.controller';
     ElectricBillController,
     AuditLogController,
     ErrorController,
+    FileController,
   ],
 })
 export class PresentationModule {}

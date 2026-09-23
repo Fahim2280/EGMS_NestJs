@@ -1,6 +1,9 @@
 import { IsNotEmpty, IsNumber, IsOptional, IsString, Min, MinLength } from 'class-validator';
 import { Type } from 'class-transformer';
 import { GuarantorResponseDto } from './guarantor.dto';
+import { ContactPhoneDto } from './contact-phone.dto';
+import { ContactPhone } from '../../domain/common/contact-phone.interface';
+import { AttachedDocument } from '../../domain/common/attached-document.interface';
 
 export class CreateCustomerDto {
   @IsString()
@@ -21,9 +24,22 @@ export class CreateCustomerDto {
   address: string;
 
   @IsString()
-  @IsNotEmpty({ message: 'Mobile number is required' })
-  @MinLength(6, { message: 'Mobile number must be at least 6 characters' })
-  mobileNumber: string;
+  @IsOptional()
+  mobileNumber?: string;
+
+  @IsOptional()
+  phoneNumbers?: ContactPhoneDto[];
+
+  @IsString()
+  @IsOptional()
+  phoneNumbersJson?: string;
+
+  @IsOptional()
+  documents?: AttachedDocument[];
+
+  @IsString()
+  @IsOptional()
+  documentsJson?: string;
 
   @IsString()
   @IsNotEmpty({ message: 'NID number is required' })
@@ -60,6 +76,8 @@ export class CustomerResponseDto {
   motherName: string;
   address: string;
   mobileNumber: string;
+  phoneNumbers?: ContactPhone[];
+  documents?: AttachedDocument[];
   nidNumber: string;
   previousUnit: number;
   advanceMoney: number;

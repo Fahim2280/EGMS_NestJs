@@ -13,6 +13,9 @@ import { BaseAuditableOrmEntity } from './base-auditable.orm-entity';
 import { CompanyOrmEntity } from './company.orm-entity';
 import { GarageOrmEntity } from './garage.orm-entity';
 
+import { ContactPhone } from '../../../../domain/common/contact-phone.interface';
+import { AttachedDocument } from '../../../../domain/common/attached-document.interface';
+
 @Entity('employees')
 export class EmployeeOrmEntity extends BaseAuditableOrmEntity {
   @AutoMap()
@@ -42,6 +45,12 @@ export class EmployeeOrmEntity extends BaseAuditableOrmEntity {
   @AutoMap()
   @Column({ length: 30 })
   phoneNumber: string;
+
+  @Column({ type: 'json', nullable: true })
+  phoneNumbers: ContactPhone[] | null;
+
+  @Column({ type: 'json', nullable: true })
+  documents: AttachedDocument[] | null;
 
   @AutoMap()
   @Column({ type: 'varchar', length: 20, default: 'GENERAL' })

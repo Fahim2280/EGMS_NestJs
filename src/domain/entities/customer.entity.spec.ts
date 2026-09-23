@@ -135,4 +135,47 @@ describe('Customer Entity', () => {
     expect(customer.isActive).toBe(false);
     expect(customer.deletedBy).toBe('comp-001|SUPER_ADMIN');
   });
+
+  it('should support multiple phone numbers and synchronize primary phone to mobileNumber', () => {
+    const customer = Customer.create({
+      id: 'cust-multi-phone',
+      companyId: 'comp-001',
+      name: 'Rahim',
+      fatherName: '',
+      motherName: '',
+      address: 'Dhaka',
+      phoneNumbers: [
+        { number: '01711223344', type: 'PERSONAL', isPrimary: false },
+        { number: '01899887766', type: 'WHATSAPP', isPrimary: true },
+        { number: '01911223344', type: 'EMERGENCY', isPrimary: false },
+      ],
+      nidNumber: '123456789',
+      previousUnit: 0,
+      advanceMoney: 0,
+    });
+
+    expect(customer.phoneNumbers.length).toBe(3);
+    expect(customer.mobileNumber).toBe('01899887766');
+
+    customer.updateDetails(
+      'Rahim Updated',
+      '',
+      '',
+      'Dhaka',
+      '',
+      '123456789',
+      0,
+      0,
+      undefined,
+      null,
+      undefined,
+      [
+        { number: '01700000000', type: 'PRIMARY', isPrimary: true },
+        { number: '01800000000', type: 'WORK', isPrimary: false },
+      ],
+    );
+
+    expect(customer.phoneNumbers.length).toBe(2);
+    expect(customer.mobileNumber).toBe('01700000000');
+  });
 });

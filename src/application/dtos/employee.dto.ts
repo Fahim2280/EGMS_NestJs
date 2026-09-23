@@ -1,5 +1,8 @@
 import { IsEmail, IsNotEmpty, IsOptional, IsString, MinLength } from 'class-validator';
 import { AutoMap } from '@automapper/classes';
+import { ContactPhoneDto } from './contact-phone.dto';
+import { ContactPhone } from '../../domain/common/contact-phone.interface';
+import { AttachedDocument } from '../../domain/common/attached-document.interface';
 
 export class CreateEmployeeDto {
   @IsString()
@@ -24,9 +27,22 @@ export class CreateEmployeeDto {
   password: string;
 
   @IsString()
-  @IsNotEmpty({ message: 'Phone number is required' })
-  @MinLength(6, { message: 'Phone number must be at least 6 characters' })
-  phoneNumber: string;
+  @IsOptional()
+  phoneNumber?: string;
+
+  @IsOptional()
+  phoneNumbers?: ContactPhoneDto[];
+
+  @IsString()
+  @IsOptional()
+  phoneNumbersJson?: string;
+
+  @IsOptional()
+  documents?: AttachedDocument[];
+
+  @IsString()
+  @IsOptional()
+  documentsJson?: string;
 
   @IsString()
   @IsNotEmpty({ message: 'NID Number is required' })
@@ -47,8 +63,21 @@ export class UpdateEmployeeDto {
 
   @IsString()
   @IsOptional()
-  @MinLength(6)
   phoneNumber?: string;
+
+  @IsOptional()
+  phoneNumbers?: ContactPhoneDto[];
+
+  @IsString()
+  @IsOptional()
+  phoneNumbersJson?: string;
+
+  @IsOptional()
+  documents?: AttachedDocument[];
+
+  @IsString()
+  @IsOptional()
+  documentsJson?: string;
 
   @IsString()
   @IsOptional()
@@ -74,6 +103,10 @@ export class EmployeeResponseDto {
 
   @AutoMap()
   phoneNumber: string;
+
+  phoneNumbers?: ContactPhone[];
+
+  documents?: AttachedDocument[];
 
   @AutoMap()
   role: string;

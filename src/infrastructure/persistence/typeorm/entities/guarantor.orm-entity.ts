@@ -11,6 +11,9 @@ import { BaseAuditableOrmEntity } from './base-auditable.orm-entity';
 import { CompanyOrmEntity } from './company.orm-entity';
 import { CustomerOrmEntity } from './customer.orm-entity';
 
+import { ContactPhone } from '../../../../domain/common/contact-phone.interface';
+import { AttachedDocument } from '../../../../domain/common/attached-document.interface';
+
 @Entity('guarantors')
 @Index(['companyId', 'customerId'])
 @Index(['companyId', 'nidNumber'])
@@ -42,6 +45,12 @@ export class GuarantorOrmEntity extends BaseAuditableOrmEntity {
   @AutoMap()
   @Column({ length: 30 })
   mobileNumber: string;
+
+  @Column({ type: 'json', nullable: true })
+  phoneNumbers: ContactPhone[] | null;
+
+  @Column({ type: 'json', nullable: true })
+  documents: AttachedDocument[] | null;
 
   @AutoMap()
   @Column({ length: 50 })

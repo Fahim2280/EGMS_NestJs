@@ -11,7 +11,7 @@ export class UpdateEmployeeHandler implements ICommandHandler<UpdateEmployeeComm
   ) {}
 
   async execute(command: UpdateEmployeeCommand): Promise<void> {
-    const { id, companyId, name, address, phoneNumber, nidNumber, updatedByStamp } = command;
+    const { id, companyId, name, address, phoneNumber, nidNumber, updatedByStamp, phoneNumbers, documents } = command;
 
     const employee = await this.employeeRepo.findById(id);
     if (!employee) {
@@ -21,7 +21,10 @@ export class UpdateEmployeeHandler implements ICommandHandler<UpdateEmployeeComm
       throw new ForbiddenException('You do not have permission to edit this employee.');
     }
 
-    employee.updateDetails(name, address, phoneNumber, nidNumber, updatedByStamp);
+    employee.updateDetails(name, address, phoneNumber, nidNumber, updatedByStamp, phoneNumbers);
+    if (documents !== undefined) {
+      employee.setDocuments(documents);
+    }
     await this.employeeRepo.save(employee);
   }
 }

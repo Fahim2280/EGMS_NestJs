@@ -109,4 +109,38 @@ describe('Employee Entity', () => {
     expect(emp.hasGarageAccess('gar-3')).toBe(false);
     expect(emp.hasGarageAccess(null)).toBe(false);
   });
+
+  it('should support multiple phone numbers and synchronize primary phone to phoneNumber', () => {
+    const emp = Employee.create({
+      id: 'emp-multi-01',
+      companyId: 'comp-101',
+      name: 'Multi Phone Employee',
+      address: 'Gotham',
+      email: 'multi@wayne.com',
+      password: 'password',
+      phoneNumbers: [
+        { number: '01711223344', type: 'PERSONAL', isPrimary: false },
+        { number: '01899887766', type: 'WORK', isPrimary: true },
+      ],
+      nidNumber: 'NID-9988776655',
+    });
+
+    expect(emp.phoneNumbers.length).toBe(2);
+    expect(emp.phoneNumber).toBe('01899887766');
+
+    emp.updateDetails(
+      'Updated Employee',
+      'New Address, Gotham',
+      '',
+      'NID-9988776655',
+      undefined,
+      [
+        { number: '01900000000', type: 'PRIMARY', isPrimary: true },
+        { number: '01600000000', type: 'PERSONAL', isPrimary: false },
+      ],
+    );
+
+    expect(emp.phoneNumbers.length).toBe(2);
+    expect(emp.phoneNumber).toBe('01900000000');
+  });
 });

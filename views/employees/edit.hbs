@@ -21,7 +21,7 @@
         <div class="alert alert-danger" style="margin-bottom:1.5rem;">{{error}}</div>
       {{/if}}
 
-      <form method="POST" action="/employees/{{employee.id}}/edit">
+      <form method="POST" action="/employees/{{employee.id}}/edit" enctype="multipart/form-data">
         <div class="form-group">
           <label class="form-label">{{#if isBn}}পুরো নাম{{else}}Full Name{{/if}} <span class="required">*</span></label>
           <input type="text" name="name" class="form-control" value="{{employee.name}}" required minlength="2" placeholder="{{#if isBn}}পুরো নাম{{else}}Full name{{/if}}">
@@ -33,20 +33,42 @@
           <p class="form-help">{{t 'employees.emailNotice'}}</p>
         </div>
 
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
-          <div class="form-group">
-            <label class="form-label">{{t 'employees.phone'}} <span class="required">*</span></label>
-            <input type="text" name="phoneNumber" class="form-control" value="{{employee.phoneNumber}}" required placeholder="01XXXXXXXXX">
-          </div>
-          <div class="form-group">
-            <label class="form-label">{{t 'employees.nid'}} <span class="required">*</span></label>
-            <input type="text" name="nidNumber" class="form-control" value="{{employee.nidNumber}}" required placeholder="{{#if isBn}}জাতীয় পরিচয়পত্র নম্বর{{else}}National ID Number{{/if}}">
-          </div>
+        <div class="form-group">
+          <label class="form-label">{{t 'employees.nid'}} <span class="required">*</span></label>
+          <input type="text" name="nidNumber" class="form-control" value="{{employee.nidNumber}}" required placeholder="{{#if isBn}}জাতীয় পরিচয়পত্র নম্বর{{else}}National ID Number{{/if}}">
         </div>
+
+        {{> phone-repeater containerId="employeeEditPhones" primaryFieldName="phoneNumber" jsonFieldName="phoneNumbersJson" initialPhones=(or employee.phoneNumbers employee.phoneNumber) required=true}}
 
         <div class="form-group">
           <label class="form-label">{{#if isBn}}ঠিকানা{{else}}Address{{/if}} <span class="required">*</span></label>
           <textarea name="address" class="form-control" rows="3" required placeholder="{{#if isBn}}পুরো ঠিকানা{{else}}Full address{{/if}}">{{employee.address}}</textarea>
+        </div>
+
+        <div class="form-group" style="margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid rgba(255, 255, 255, 0.08);">
+          <label class="form-label" style="font-weight: 700; color: #fff; font-size: 0.95rem; margin-bottom: 0.75rem;">
+            📁 {{t 'documents.title'}}
+          </label>
+
+          {{#if employee.documents.length}}
+            <div style="margin-bottom: 1.25rem;">
+              {{> document-list documents=employee.documents deleteUrlPrefix=(concat "/employees/" employee.id "/documents") canDelete=true}}
+            </div>
+          {{/if}}
+
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label class="form-label" for="empEditDocType">{{t 'documents.documentType'}}</label>
+            <select id="empEditDocType" name="documentType" class="form-control" style="width: 100%; padding: 0.7rem; border-radius: var(--radius-md); background: rgba(15, 23, 42, 0.8); border: 1px solid var(--color-border); color: #fff;">
+              <option value="GENERAL">{{t 'documents.typeGeneral'}}</option>
+              <option value="NID">{{t 'documents.typeNid'}}</option>
+              <option value="PASSPORT">{{t 'documents.typePassport'}}</option>
+              <option value="AGREEMENT">{{t 'documents.typeAgreement'}}</option>
+              <option value="PHOTO">{{t 'documents.typePhoto'}}</option>
+              <option value="OTHER">{{t 'documents.typeOther'}}</option>
+            </select>
+          </div>
+
+          {{> file-uploader uploaderId="empEditDocs" fieldName="files" maxFiles=10 label=(t 'documents.uploadNew')}}
         </div>
 
         <div style="display:flex;gap:1rem;justify-content:flex-end;margin-top:1.5rem;">

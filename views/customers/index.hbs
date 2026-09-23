@@ -100,7 +100,18 @@
                   <span class="badge" style="background: rgba(148, 163, 184, 0.1); color: #94a3b8;">{{t 'common.na'}}</span>
                 {{/if}}
               </td>
-              <td>{{this.mobileNumber}}</td>
+              <td>
+                <div style="display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap;">
+                  <span>{{this.mobileNumber}}</span>
+                  {{#if this.phoneNumbers}}
+                    {{#if (gt this.phoneNumbers.length 1)}}
+                      <span class="badge" title="{{#each this.phoneNumbers}}{{this.number}} ({{this.type}})&#10;{{/each}}" style="background: rgba(99, 102, 241, 0.15); color: #818cf8; font-size: 0.7rem; padding: 1px 6px; border-radius: 10px; cursor: help;">
+                        +{{bnNum (subtract this.phoneNumbers.length 1)}}
+                      </span>
+                    {{/if}}
+                  {{/if}}
+                </div>
+              </td>
               <td><code>{{this.nidNumber}}</code></td>
               <td><strong>{{bnNum this.previousUnit}}</strong> {{t 'common.units'}}</td>
               <td><span style="color: #10b981; font-weight: 600;">৳{{bnNum this.advanceMoney}}</span></td>

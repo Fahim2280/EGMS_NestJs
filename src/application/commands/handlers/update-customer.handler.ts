@@ -9,6 +9,9 @@ import {
   IGarageRepository,
 } from '@domain/index';
 
+import { parsePhoneNumbersInput } from '../../dtos/contact-phone.dto';
+import { parseDocumentsInput } from '../../dtos/attached-document.dto';
+
 @CommandHandler(UpdateCustomerCommand)
 export class UpdateCustomerHandler implements ICommandHandler<UpdateCustomerCommand> {
   constructor(
@@ -38,9 +41,16 @@ export class UpdateCustomerHandler implements ICommandHandler<UpdateCustomerComm
       throw new ConflictException(`Another customer with NID '${dto.nidNumber}' already exists.`);
     }
 
-    const existingMobile = await this.customerRepo.findByMobile(companyId, dto.mobileNumber, id);
-    if (existingMobile) {
-      throw new ConflictException(`Another customer with mobile '${dto.mobileNumber}' already exists.`);
+    // Parse phone numbers and check uniqueness within company
+    const phones = parsePhoneNumbersInput(dto.phoneNumbersJson || dto.phoneNumbers, dto.mobileNumber || customer.mobileNumber);
+    const primaryPhone = phones.find((p) => p.isPrimary) || phones[0];
+    const mobileToUse = primaryPhone ? primaryPhone.number : (dto.mobileNumber || customer.mobileNumber);
+
+    for (const ph of phones) {
+      const existingMobile = await this.customerRepo.findByMobile(companyId, ph.number, id);
+      if (existingMobile) {
+        throw new ConflictException(`Another customer with phone '${ph.number}' already exists.`);
+      }
     }
 
     // Check unique customerCode (excluding self, only among active records)
@@ -56,14 +66,20 @@ export class UpdateCustomerHandler implements ICommandHandler<UpdateCustomerComm
       dto.fatherName || '',
       dto.motherName || '',
       dto.address,
-      dto.mobileNumber,
+      mobileToUse,
       dto.nidNumber,
       dto.previousUnit,
       dto.advanceMoney,
       dto.garageId,
       dto.customerCode?.trim() || null,
       actorStamp || `${companyId}|SUPER_ADMIN`,
+      phones,
     );
+
+    if (dto.documentsJson !== undefined || dto.documents !== undefined) {
+      const docs = parseDocumentsInput(dto.documentsJson || dto.documents);
+      customer.setDocuments(docs);
+    }
 
     await this.customerRepo.updateAsync(customer);
     return customer;

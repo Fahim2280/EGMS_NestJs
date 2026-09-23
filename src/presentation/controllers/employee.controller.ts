@@ -7,7 +7,11 @@ import {
   Req,
   Res,
   UseGuards,
+  UseInterceptors,
+  UploadedFiles,
 } from '@nestjs/common';
+import { FilesInterceptor } from '@nestjs/platform-express';
+import { FileService } from '@infrastructure/services/file.service';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { Request, Response } from 'express';
 import { CreateEmployeeDto } from '@application/dtos/employee.dto';
@@ -22,6 +26,7 @@ import { JwtAuthGuard } from '@infrastructure/auth/jwt-auth.guard';
 import { RolesGuard } from '@infrastructure/auth/roles.guard';
 import { Roles } from '@infrastructure/auth/roles.decorator';
 import { AuditLogService } from '@application/services/audit-log.service';
+import { parsePhoneNumbersInput } from '@application/dtos/contact-phone.dto';
 
 @Controller('employees')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -31,6 +36,7 @@ export class EmployeeController {
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
     private readonly auditLogService: AuditLogService,
+    private readonly fileService: FileService,
   ) {}
 
   @Get()
@@ -60,13 +66,24 @@ export class EmployeeController {
   }
 
   @Post()
+  @UseInterceptors(FilesInterceptor('files', 10, { limits: { fileSize: 25 * 1024 * 1024 } }))
   async handleCreate(
     @Req() req: Request,
     @Body() dto: CreateEmployeeDto,
+    @UploadedFiles() files: any[],
     @Res() res: Response,
   ) {
     const user = (req as any).user;
     try {
+      if (files && files.length > 0) {
+        const uploadedDocs = await this.fileService.uploadFiles(
+          files,
+          'employees',
+          (dto as any).documentType || 'GENERAL',
+        );
+        dto.documents = uploadedDocs;
+      }
+
       await this.commandBus.execute(
         new CreateEmployeeCommand(user.companyId, dto),
       );
@@ -257,23 +274,45 @@ export class EmployeeController {
   }
 
   @Post(':id/edit')
+  @UseInterceptors(FilesInterceptor('files', 10, { limits: { fileSize: 25 * 1024 * 1024 } }))
   async handleEdit(
     @Param('id') id: string,
     @Body() body: any,
+    @UploadedFiles() files: any[],
     @Req() req: Request,
     @Res() res: Response,
   ) {
     const user = (req as any).user;
     try {
+      const phones = parsePhoneNumbersInput(body.phoneNumbersJson || body.phoneNumbers, body.phoneNumber);
+      const primaryPhone = phones.find((p) => p.isPrimary) || phones[0];
+      const phoneToUse = primaryPhone ? primaryPhone.number : body.phoneNumber;
+
+      let documentsToSet = undefined;
+      if (files && files.length > 0) {
+        const existingEmployee = await this.queryBus.execute(
+          new GetEmployeeByIdQuery(id, user.companyId),
+        );
+        const uploadedDocs = await this.fileService.uploadFiles(
+          files,
+          'employees',
+          body.documentType || 'GENERAL',
+        );
+        const existingDocs = existingEmployee?.documents || [];
+        documentsToSet = [...existingDocs, ...uploadedDocs];
+      }
+
       await this.commandBus.execute(
         new UpdateEmployeeCommand(
           id,
           user.companyId,
           body.name,
           body.address,
-          body.phoneNumber,
+          phoneToUse,
           body.nidNumber,
           `${user.companyId}|SUPER_ADMIN`,
+          phones,
+          documentsToSet,
         ),
       );
 

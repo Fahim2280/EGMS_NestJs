@@ -10,6 +10,9 @@ import {
   IGarageRepository,
 } from '@domain/index';
 
+import { parsePhoneNumbersInput } from '../../dtos/contact-phone.dto';
+import { parseDocumentsInput } from '../../dtos/attached-document.dto';
+
 @CommandHandler(CreateCustomerCommand)
 export class CreateCustomerHandler implements ICommandHandler<CreateCustomerCommand> {
   constructor(
@@ -36,10 +39,16 @@ export class CreateCustomerHandler implements ICommandHandler<CreateCustomerComm
       throw new ConflictException(`A customer with NID '${dto.nidNumber}' already exists.`);
     }
 
-    // Check unique Mobile within company
-    const existingMobile = await this.customerRepo.findByMobile(companyId, dto.mobileNumber);
-    if (existingMobile) {
-      throw new ConflictException(`A customer with mobile number '${dto.mobileNumber}' already exists.`);
+    // Parse phone numbers and check uniqueness within company
+    const phones = parsePhoneNumbersInput(dto.phoneNumbersJson || dto.phoneNumbers, dto.mobileNumber);
+    const primaryPhone = phones.find((p) => p.isPrimary) || phones[0];
+    const mobileToUse = primaryPhone ? primaryPhone.number : dto.mobileNumber;
+
+    for (const ph of phones) {
+      const existingMobile = await this.customerRepo.findByMobile(companyId, ph.number);
+      if (existingMobile) {
+        throw new ConflictException(`A customer with phone number '${ph.number}' already exists.`);
+      }
     }
 
     // Check unique customerCode within company (only among active/non-deleted records)
@@ -62,7 +71,9 @@ export class CreateCustomerHandler implements ICommandHandler<CreateCustomerComm
       fatherName: dto.fatherName || '',
       motherName: dto.motherName || '',
       address: dto.address,
-      mobileNumber: dto.mobileNumber,
+      mobileNumber: mobileToUse,
+      phoneNumbers: phones,
+      documents: parseDocumentsInput(dto.documentsJson || dto.documents),
       nidNumber: dto.nidNumber,
       previousUnit: dto.previousUnit,
       advanceMoney: dto.advanceMoney,

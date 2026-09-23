@@ -117,7 +117,18 @@
                   </div>
                 </td>
                 <td style="padding: 1rem; color: var(--color-text-secondary);">{{this.email}}</td>
-                <td style="padding: 1rem; color: var(--color-text-secondary);">{{this.phoneNumber}}</td>
+                <td style="padding: 1rem; color: var(--color-text-secondary);">
+                  <div style="display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap;">
+                    <span>{{this.phoneNumber}}</span>
+                    {{#if this.phoneNumbers}}
+                      {{#if (gt this.phoneNumbers.length 1)}}
+                        <span class="badge" title="{{#each this.phoneNumbers}}{{this.number}} ({{this.type}})&#10;{{/each}}" style="background: rgba(99, 102, 241, 0.15); color: #818cf8; font-size: 0.7rem; padding: 1px 6px; border-radius: 10px; cursor: help;">
+                          +{{bnNum (subtract this.phoneNumbers.length 1)}}
+                        </span>
+                      {{/if}}
+                    {{/if}}
+                  </div>
+                </td>
                 <td style="padding: 1rem;">{{{roleBadge this.role}}}</td>
                 <td style="padding: 1rem;">
                   {{#if this.isActive}}

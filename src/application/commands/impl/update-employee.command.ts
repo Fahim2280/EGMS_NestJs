@@ -1,3 +1,6 @@
+import { ContactPhone } from '../../../domain/common/contact-phone.interface';
+import { AttachedDocument } from '../../../domain/common/attached-document.interface';
+
 export class UpdateEmployeeCommand {
   constructor(
     public readonly id: string,
@@ -7,5 +10,7 @@ export class UpdateEmployeeCommand {
     public readonly phoneNumber: string,
     public readonly nidNumber: string,
     public readonly updatedByStamp: string,
+    public readonly phoneNumbers?: ContactPhone[],
+    public readonly documents?: AttachedDocument[],
   ) {}
 }

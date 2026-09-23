@@ -29,6 +29,8 @@ export class GetGuarantorsByCustomerHandler
         motherName: g.motherName,
         address: g.address,
         mobileNumber: g.mobileNumber,
+        phoneNumbers: g.phoneNumbers,
+        documents: g.documents || [],
         nidNumber: g.nidNumber,
         relationship: g.relationship,
         createdDate: g.createdDate,
