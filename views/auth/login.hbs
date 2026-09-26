@@ -17,8 +17,8 @@
   <div class="auth-card-pane">
     <div class="auth-card-inner">
       <div style="margin-bottom: 2rem;">
-        <h1 style="font-size: 1.75rem; font-weight: 800; color: #f1f5f9; margin-bottom: 0.4rem;">{{t 'auth.welcomeBack'}}</h1>
-        <p style="color: #64748b; font-size: 0.9rem;">{{t 'auth.signInSubtitle'}}</p>
+        <h1 style="font-size: 1.75rem; font-weight: 800; color: var(--color-text-primary); margin-bottom: 0.4rem;">{{t 'auth.welcomeBack'}}</h1>
+        <p style="color: var(--color-text-muted); font-size: 0.9rem;">{{t 'auth.signInSubtitle'}}</p>
       </div>
 
       {{#if successMessage}}
@@ -31,7 +31,7 @@
 
       <form action="/login" method="POST" id="loginForm">
         <div class="form-group" style="margin-bottom: 1.25rem;">
-          <label class="form-label" for="loginEmail" style="display:block;margin-bottom:0.4rem;font-size:0.875rem;font-weight:600;color:#94a3b8;">{{t 'auth.emailAddress'}}</label>
+          <label class="form-label" for="loginEmail" style="display:block;margin-bottom:0.4rem;font-size:0.875rem;font-weight:600;color:var(--color-text-muted);">{{t 'auth.emailAddress'}}</label>
           <input
             type="email"
             id="loginEmail"
@@ -40,24 +40,36 @@
             required
             placeholder="admin@apexauto.com"
             value="{{email}}"
-            style="width:100%;padding:0.75rem 1rem;border-radius:10px;background:rgba(15,23,42,0.8);border:1px solid rgba(99,102,241,0.2);color:#f1f5f9;font-size:0.95rem;"
+            style="width:100%;padding:0.75rem 1rem;border-radius:10px;font-size:0.95rem;"
           />
         </div>
 
         <div class="form-group" style="margin-bottom: 1.75rem;">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem;">
-            <label class="form-label" for="loginPassword" style="font-size:0.875rem;font-weight:600;color:#94a3b8;margin:0;">{{t 'auth.password'}}</label>
-            <a href="/forgot-password" style="font-size:0.8rem;color:#818cf8;text-decoration:none;font-weight:500;transition:color 0.15s;" onmouseover="this.style.color='#a5b4fc'" onmouseout="this.style.color='#818cf8'">{{t 'auth.forgotPassword'}}</a>
+            <label class="form-label" for="loginPassword" style="font-size:0.875rem;font-weight:600;color:var(--color-text-muted);margin:0;">{{t 'auth.password'}}</label>
+            <a href="/forgot-password" style="font-size:0.8rem;color:var(--color-primary);text-decoration:none;font-weight:600;transition:color 0.15s;">{{t 'auth.forgotPassword'}}</a>
           </div>
-          <input
-            type="password"
-            id="loginPassword"
-            name="password"
-            class="form-control"
-            required
-            placeholder="••••••••"
-            style="width:100%;padding:0.75rem 1rem;border-radius:10px;background:rgba(15,23,42,0.8);border:1px solid rgba(99,102,241,0.2);color:#f1f5f9;font-size:0.95rem;"
-          />
+          <div class="password-input-wrapper">
+            <input
+              type="password"
+              id="loginPassword"
+              name="password"
+              class="form-control"
+              required
+              placeholder="••••••••"
+              style="width:100%;padding:0.75rem 2.75rem 0.75rem 1rem;border-radius:10px;font-size:0.95rem;"
+            />
+            <button type="button" class="password-toggle-btn" aria-label="Toggle password visibility" tabindex="-1">
+              <svg class="eye-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+              <svg class="eye-off-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                <line x1="1" y1="1" x2="23" y2="23"></line>
+              </svg>
+            </button>
+          </div>
         </div>
 
         <button type="submit" class="btn btn-primary" style="width:100%;padding:0.875rem;font-weight:700;font-size:0.95rem;border-radius:10px;" id="loginSubmitBtn">

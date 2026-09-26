@@ -20,6 +20,10 @@ export class RegisterCompanyDto {
   password: string;
 
   @IsString()
+  @IsOptional()
+  confirmPassword?: string;
+
+  @IsString()
   @IsNotEmpty({ message: 'Phone number is required' })
   @MinLength(6, { message: 'Phone number must be at least 6 characters' })
   phoneNumber: string;

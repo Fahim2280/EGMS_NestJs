@@ -7,6 +7,8 @@ import { JwtAuthGuard } from './jwt-auth.guard';
 import { RolesGuard } from './roles.guard';
 import { PermissionsGuard } from './permissions.guard';
 
+import { AuthRateLimiterGuard } from './auth-rate-limiter.guard';
+
 @Global()
 @Module({
   imports: [
@@ -25,7 +27,15 @@ import { PermissionsGuard } from './permissions.guard';
       }),
     }),
   ],
-  providers: [JwtStrategy, JwtAuthGuard, RolesGuard, PermissionsGuard],
-  exports: [JwtModule, PassportModule, JwtStrategy, JwtAuthGuard, RolesGuard, PermissionsGuard],
+  providers: [JwtStrategy, JwtAuthGuard, RolesGuard, PermissionsGuard, AuthRateLimiterGuard],
+  exports: [
+    JwtModule,
+    PassportModule,
+    JwtStrategy,
+    JwtAuthGuard,
+    RolesGuard,
+    PermissionsGuard,
+    AuthRateLimiterGuard,
+  ],
 })
 export class AuthModule {}

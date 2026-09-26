@@ -14,6 +14,62 @@ export function translate(key: string, lang: 'en' | 'bn' = 'en', fallback?: stri
   return fallback !== undefined ? fallback : key;
 }
 
+const KNOWN_MESSAGE_MAP: Record<string, string> = {
+  'customer registered successfully': 'msg.customerCreated',
+  'customer profile updated successfully': 'msg.customerUpdated',
+  'customer updated successfully': 'msg.customerUpdated',
+  'customer removed successfully': 'msg.customerDeleted',
+  'customer deleted successfully': 'msg.customerDeleted',
+  'guarantor added successfully': 'msg.guarantorAdded',
+  'guarantor updated successfully': 'msg.guarantorUpdated',
+  'guarantor removed successfully': 'msg.guarantorDeleted',
+  'garage registered successfully': 'msg.garageCreated',
+  'garage updated successfully': 'msg.garageUpdated',
+  'garage deleted successfully': 'msg.garageDeleted',
+  'employee added successfully': 'msg.employeeCreated',
+  'employee registered successfully': 'msg.employeeCreated',
+  'employee updated successfully': 'msg.employeeUpdated',
+  'employee removed': 'msg.employeeDeleted',
+  'employee deleted successfully': 'msg.employeeDeleted',
+  'permissions updated successfully': 'msg.permissionsUpdated',
+  'permissions updated': 'msg.permissionsUpdated',
+  'electric bill generated successfully': 'msg.billCreated',
+  'electric bill updated successfully': 'msg.billUpdated',
+  'electric bill deleted successfully': 'msg.billDeleted',
+  'documents uploaded successfully': 'msg.documentsUploaded',
+  'document deleted successfully': 'msg.documentDeleted',
+  'document removed successfully': 'msg.documentDeleted',
+  'invalid credentials': 'msg.loginInvalid',
+  'signed in successfully': 'msg.loginSuccess',
+  'logged out successfully': 'msg.logoutSuccess',
+  'you do not have permission to view this bill': 'msg.permissionDenied',
+  'you do not have permission to delete this bill': 'msg.permissionDenied',
+  'you do not have permission to generate bills for customers in this garage.': 'msg.permissionDenied',
+};
+
+export function resolveMessage(msgOrKey: string, lang: 'en' | 'bn' = 'en'): string {
+  if (!msgOrKey || typeof msgOrKey !== 'string') return '';
+  const clean = msgOrKey.trim().replace(/\+/g, ' ');
+  if (!clean) return '';
+
+  // Check if direct translation key exists
+  if (translations[lang] && translations[lang][clean]) {
+    return translations[lang][clean];
+  }
+  if (translations.en && translations.en[clean]) {
+    return translate(clean, lang);
+  }
+
+  // Check known map
+  const normalized = clean.toLowerCase();
+  const mappedKey = KNOWN_MESSAGE_MAP[normalized];
+  if (mappedKey) {
+    return translate(mappedKey, lang);
+  }
+
+  return clean;
+}
+
 export function toBengaliDigits(input: any): string {
   if (input === null || input === undefined) return '';
   const str = String(input);

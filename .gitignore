@@ -18,9 +18,18 @@ lerna-debug.log*
 .env.development
 .env.test
 .env.production
-.env.example
+.env.local
 
+# File uploads and persistent storage (prevent leaking customer KYC documents)
+/storage/
+/public/uploads/
+!/public/uploads/.gitkeep
 
 # temp directory
 .temp
 .tmp
+
+# SSL Certificates
+/certs/*.key
+/certs/*.crt
+/certs/*.pem

@@ -33,13 +33,13 @@
     <div class="lang-switcher">
       {{#if isBn}}
         <a href="/lang/en" class="lang-switch-btn" id="langSwitchBtn" title="Switch to English" data-lang="en">
-          <span style="font-weight: 700; color: var(--color-primary-light); margin-right: 2px;">বাং</span>
-          <span style="opacity: 0.6; font-size: 0.75rem;">| EN</span>
+          <span class="lang-code-active">বাং</span>
+          <span class="lang-code-inactive">| EN</span>
         </a>
       {{else}}
         <a href="/lang/bn" class="lang-switch-btn" id="langSwitchBtn" title="বাংলায় পরিবর্তন করুন" data-lang="bn">
-          <span style="font-weight: 700; color: var(--color-primary-light); margin-right: 2px;">EN</span>
-          <span style="opacity: 0.6; font-size: 0.75rem;">| বাং</span>
+          <span class="lang-code-active">EN</span>
+          <span class="lang-code-inactive">| বাং</span>
         </a>
       {{/if}}
     </div>

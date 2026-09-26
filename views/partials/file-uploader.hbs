@@ -25,6 +25,51 @@
     border-color: #38bdf8;
     background: rgba(56, 189, 248, 0.08);
   }
+  .file-uploader-title {
+    color: #38bdf8;
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-bottom: 0.2rem;
+    transition: color 0.2s;
+  }
+  .file-uploader-subtitle {
+    color: #94a3b8;
+    font-size: 0.78rem;
+    transition: color 0.2s;
+  }
+  [data-theme="light"] .file-uploader-box {
+    background: #f8fafc;
+    border: 2px dashed #cbd5e1;
+  }
+  [data-theme="light"] .file-uploader-box:hover,
+  [data-theme="light"] .file-uploader-box.dragover {
+    border-color: #4f46e5;
+    background: #eef2ff;
+  }
+  [data-theme="light"] .file-uploader-title {
+    color: #4f46e5 !important;
+    font-weight: 700 !important;
+  }
+  [data-theme="light"] .file-uploader-subtitle {
+    color: #475569 !important;
+    font-weight: 500 !important;
+  }
+  [data-theme="light"] .file-preview-item {
+    background: #ffffff !important;
+    border-color: #e2e8f0 !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+  }
+  [data-theme="light"] .file-preview-name {
+    color: #0f172a !important;
+  }
+  [data-theme="light"] .file-preview-size {
+    color: #64748b !important;
+  }
+  [data-theme="light"] .file-preview-tag {
+    background: #f1f5f9 !important;
+    border-color: #cbd5e1 !important;
+    color: #0f172a !important;
+  }
   .file-preview-list {
     display: flex;
     flex-direction: column;
@@ -109,10 +154,10 @@
     />
     <div style="pointer-events: none;">
       <div style="font-size: 2rem; margin-bottom: 0.35rem;">☁️</div>
-      <div style="color: #38bdf8; font-weight: 600; font-size: 0.9rem; margin-bottom: 0.2rem;">
+      <div class="file-uploader-title">
         {{t 'documents.clickOrDrag'}}
       </div>
-      <div style="color: #94a3b8; font-size: 0.78rem;">
+      <div class="file-uploader-subtitle">
         PDF, JPG, PNG, WEBP, DOCX, XLSX (Max 5 MB &bull; {{t 'documents.autoCompress'}})
       </div>
     </div>
@@ -141,13 +186,21 @@
     }, false);
   });
 
-  ['dragleave', 'drop'].forEach(function(evt) {
-    dropBox.addEventListener(evt, function(e) {
-      e.preventDefault();
-      e.stopPropagation();
-      dropBox.classList.remove('dragover');
-    }, false);
-  });
+  dropBox.addEventListener('dragleave', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    dropBox.classList.remove('dragover');
+  }, false);
+
+  dropBox.addEventListener('drop', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    dropBox.classList.remove('dragover');
+    if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      fileInput.files = e.dataTransfer.files;
+      renderPreviews();
+    }
+  }, false);
 
   fileInput.addEventListener('change', function() {
     renderPreviews();

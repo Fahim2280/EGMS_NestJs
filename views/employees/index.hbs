@@ -92,7 +92,7 @@
       <div class="table-responsive">
         <table class="data-table table-dense" style="width: 100%; border-collapse: collapse;">
           <thead>
-            <tr style="background: rgba(15, 23, 42, 0.8); border-bottom: 1px solid var(--color-border); text-align: left;">
+            <tr style="border-bottom: 1px solid var(--color-border); text-align: left;">
               <th style="padding: 0.75rem 0.85rem;">{{t 'employees.name'}}</th>
               <th style="padding: 0.75rem 0.85rem;">{{t 'employees.email'}}</th>
               <th style="padding: 0.75rem 0.85rem;">{{t 'employees.phone'}}</th>
@@ -104,7 +104,7 @@
           </thead>
           <tbody>
             {{#each employees}}
-              <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05); transition: background 0.15s;">
+              <tr style="border-bottom: 1px solid var(--color-border); transition: background 0.15s;">
                 <td style="padding: 1rem; font-weight: 600;">
                   <div style="display: flex; align-items: center; gap: 0.75rem;">
                     <div class="user-avatar" style="width: 34px; height: 34px; font-size: 0.85rem; background: rgba(99, 102, 241, 0.2); color: #818cf8; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700;">

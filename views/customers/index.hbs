@@ -132,7 +132,7 @@
                   </a>
                   {{/if}}
                   {{#if (or ../isSuperAdmin ../currentUser.canDelete)}}
-                  <form action="/customers/{{this.id}}/delete" method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this customer?');">
+                  <form action="/customers/{{this.id}}/delete" method="POST" style="display: inline;" onsubmit="return confirm('{{t 'customers.confirmDelete'}}');">
                     <button type="submit" class="btn btn-danger btn-icon-action" title="{{t 'common.delete'}}" aria-label="{{t 'common.delete'}}">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
                     </button>
@@ -149,10 +149,61 @@
     <div style="text-align: center; padding: 4rem 1rem;">
       <div style="font-size: 3rem; margin-bottom: 1rem;">👥</div>
       <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">{{t 'customers.noCustomers'}}</h3>
-      <p style="color: var(--color-text-muted); margin-bottom: 1.5rem;">You have not registered any customers in this garage system yet.</p>
+      <p style="color: var(--color-text-muted); margin-bottom: 1.5rem;">{{t 'customers.noCustomersSub'}}</p>
       {{#if (or isSuperAdmin currentUser.canCreate)}}
       <a href="/customers/new" class="btn btn-primary">{{t 'customers.addCustomer'}}</a>
       {{/if}}
     </div>
   {{/if}}
 </div>
+
+<!-- Pagination Controls -->
+{{#if pagination.totalPages}}
+  {{#if (gt pagination.totalPages 1)}}
+  <div class="pagination-bar" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; padding: 0.75rem 0; margin-top: 0.5rem;"
+       data-page="{{pagination.page}}"
+       data-total-pages="{{pagination.totalPages}}"
+       data-total-count="{{pagination.totalCount}}"
+       data-has-next="{{pagination.hasNext}}"
+       data-has-prev="{{pagination.hasPrev}}"
+       data-from="{{fromDate}}"
+       data-to="{{toDate}}"
+       data-garage="{{selectedGarageId}}"
+       data-search="{{search}}"
+       data-preset="{{preset}}"
+       id="customersPagination">
+    <div style="font-size: 0.85rem; color: var(--color-text-muted);">
+      {{#if isBn}}পৃষ্ঠা {{bnNum pagination.page}} / {{bnNum pagination.totalPages}} · মোট {{bnNum pagination.totalCount}} জন গ্রাহক
+      {{else}}Page {{pagination.page}} of {{pagination.totalPages}} · {{pagination.totalCount}} customers{{/if}}
+    </div>
+    <div id="customersPaginationBtns" style="display: flex; gap: 0.4rem; flex-wrap: wrap;"></div>
+  </div>
+  <script>
+    (function() {
+      const bar = document.getElementById('customersPagination');
+      if (!bar) return;
+      const d = bar.dataset;
+      const page = parseInt(d.page, 10);
+      const params = new URLSearchParams({
+        fromDate: d.from || '',
+        toDate: d.to || '',
+        garageId: d.garage || '',
+        search: d.search || '',
+        preset: d.preset || '',
+      });
+      const btns = document.getElementById('customersPaginationBtns');
+      if (d.hasPrev === 'true') {
+        params.set('page', page - 1);
+        btns.insertAdjacentHTML('beforeend',
+          '<a href="?' + params.toString() + '" class="btn btn-secondary btn-sm">&larr; Prev</a>');
+      }
+      if (d.hasNext === 'true') {
+        params.set('page', page + 1);
+        btns.insertAdjacentHTML('beforeend',
+          '<a href="?' + params.toString() + '" class="btn btn-secondary btn-sm">Next &rarr;</a>');
+      }
+    })();
+  </script>
+  {{/if}}
+{{/if}}
+

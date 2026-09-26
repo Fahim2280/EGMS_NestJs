@@ -24,8 +24,8 @@
 <div class="bill-create-grid" style="display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 1.75rem; align-items: start;">
   <!-- Bill Creation Form -->
   <div class="card" style="padding: 1.75rem; border-top: 3px solid #10b981; margin-bottom: 0;">
-    <div style="display: flex; align-items: center; justify-content: space-between; padding-bottom: 1rem; margin-bottom: 1.5rem; border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
-      <h2 style="font-size: 1.15rem; font-weight: 700; color: #ffffff; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+    <div style="display: flex; align-items: center; justify-content: space-between; padding-bottom: 1rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--color-border);">
+      <h2 style="font-size: 1.15rem; font-weight: 700; color: var(--color-text-primary); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
         {{t 'bills.billDetails'}}
       </h2>
@@ -143,36 +143,36 @@
 
   <!-- Live Automatic Calculation Preview Card -->
   <div class="bill-create-preview" style="position: sticky; top: 84px;">
-    <div class="card" style="padding: 1.75rem; border-top: 3px solid #38bdf8; background: radial-gradient(circle at top right, rgba(56, 189, 248, 0.08), transparent 60%), rgba(30, 41, 59, 0.85); box-shadow: 0 12px 36px rgba(0, 0, 0, 0.35);">
+    <div class="card" style="padding: 1.75rem; border-top: 3px solid #38bdf8; box-shadow: var(--shadow-md);">
       <!-- Header -->
-      <div style="display: flex; align-items: center; justify-content: space-between; padding-bottom: 1rem; margin-bottom: 1.25rem; border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
+      <div style="display: flex; align-items: center; justify-content: space-between; padding-bottom: 1rem; margin-bottom: 1.25rem; border-bottom: 1px solid var(--color-border);">
         <div>
-          <h3 style="font-size: 1.1rem; font-weight: 700; color: #ffffff; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+          <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--color-text-primary); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
             <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #10b981; box-shadow: 0 0 10px #10b981;"></span>
             {{t 'bills.livePreview'}}
           </h3>
           <span style="font-size: 0.72rem; color: var(--color-text-dim);">{{t 'bills.realtimeBreakdown'}}</span>
         </div>
-        <span class="badge" id="previewRateBadge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); font-size: 0.75rem; font-weight: 700;">
+        <span class="badge" id="previewRateBadge" style="background: rgba(56, 189, 248, 0.15); color: #0284c7; border: 1px solid rgba(56, 189, 248, 0.3); font-size: 0.75rem; font-weight: 700;">
           {{t 'bills.ratePerUnitLabel'}} {{t 'common.currency'}}{{bnNum defaultUnitRate}}/{{t 'common.units'}}
         </span>
       </div>
 
       <!-- Customer Name Pill -->
-      <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: space-between;">
+      <div style="background: var(--color-bg-subtle); border: 1px solid var(--color-border); border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: space-between;">
         <span style="font-size: 0.8rem; color: var(--color-text-muted);">{{t 'bills.customer'}}</span>
-        <strong id="previewCustomerName" style="color: #f8fafc; font-size: 0.92rem;">{{t 'bills.chooseCustomer'}}</strong>
+        <strong id="previewCustomerName" style="color: var(--color-text-primary); font-size: 0.92rem;">{{t 'bills.chooseCustomer'}}</strong>
       </div>
 
       <!-- Meter Reading Bar -->
-      <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(56, 189, 248, 0.2); border-radius: 8px; padding: 0.85rem 1rem; margin-bottom: 1.25rem;">
+      <div style="background: var(--color-bg-subtle); border: 1px solid var(--color-border); border-radius: 8px; padding: 0.85rem 1rem; margin-bottom: 1.25rem;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
-          <span style="font-size: 0.76rem; font-weight: 600; text-transform: uppercase; color: #94a3b8;">{{t 'bills.meterReadings'}}</span>
-          <span style="font-size: 0.76rem; color: #38bdf8; font-weight: 700;" id="previewConsumedUnits">{{bnNum '0.00'}} {{t 'common.units'}}</span>
+          <span style="font-size: 0.76rem; font-weight: 600; text-transform: uppercase; color: var(--color-text-muted);">{{t 'bills.meterReadings'}}</span>
+          <span style="font-size: 0.76rem; color: #0284c7; font-weight: 700;" id="previewConsumedUnits">{{bnNum '0.00'}} {{t 'common.units'}}</span>
         </div>
-        <div style="display: flex; align-items: center; justify-content: space-between; font-family: monospace; font-size: 1rem; font-weight: 700; color: #ffffff;">
-          <span id="previewPrevUnit" style="color: #94a3b8;">{{bnNum '0.00'}}</span>
-          <span style="color: #38bdf8; font-size: 1.15rem;">&rarr;</span>
+        <div style="display: flex; align-items: center; justify-content: space-between; font-family: monospace; font-size: 1rem; font-weight: 700; color: var(--color-text-primary);">
+          <span id="previewPrevUnit" style="color: var(--color-text-muted);">{{bnNum '0.00'}}</span>
+          <span style="color: #0284c7; font-size: 1.15rem;">&rarr;</span>
           <span id="previewCurrUnit" style="color: #38bdf8;">{{bnNum '0.00'}}</span>
         </div>
       </div>
@@ -242,19 +242,23 @@
       if (!id) {
         previousUnit = 0;
         previousDues = 0;
-        displayPreviousUnit.value = '0.00';
+        if (displayPreviousUnit) displayPreviousUnit.value = '0.00';
+        const custNameEl = document.getElementById('previewCustomerName');
+        if (custNameEl) custNameEl.textContent = '{{t "bills.chooseCustomer"}}';
         recalc();
         return;
       }
       try {
         const res = await fetch(`/bills/api/customer-summary/${id}`);
+        if (!res.ok) return;
         const json = await res.json();
         if (json.success) {
           previousUnit = Number(json.data.lastMeterReading) || 0;
           previousDues = Number(json.data.previousDues) || 0;
-          customerName = json.data.customerName;
-          displayPreviousUnit.value = previousUnit.toFixed(2);
-          document.getElementById('previewCustomerName').textContent = customerName;
+          customerName = json.data.customerName || '';
+          if (displayPreviousUnit) displayPreviousUnit.value = previousUnit.toFixed(2);
+          const custNameEl = document.getElementById('previewCustomerName');
+          if (custNameEl) custNameEl.textContent = customerName;
           recalc();
         }
       } catch (err) {
@@ -270,10 +274,10 @@
     }
 
     function recalc() {
-      const currentUnit = Number(currentUnitInput.value) || 0;
-      const rent = Number(rentBillInput.value) || 0;
-      const loan = Number(loanInput.value) || 0;
-      const clearMoney = Number(clearMoneyInput.value) || 0;
+      const currentUnit = Number(currentUnitInput ? currentUnitInput.value : 0) || 0;
+      const rent = Number(rentBillInput ? rentBillInput.value : 0) || 0;
+      const loan = Number(loanInput ? loanInput.value : 0) || 0;
+      const clearMoney = Number(clearMoneyInput ? clearMoneyInput.value : 0) || 0;
       const rate = Number(unitRateInput ? unitRateInput.value : 15) || 15;
 
       const consumed = Math.max(0, currentUnit - previousUnit);
@@ -288,36 +292,51 @@
         previewElectricLabel.innerHTML = (isBn ? 'বিদ্যুৎ বিল (' : 'Electric Bill (') + toBn(consumed.toFixed(1)) + (isBn ? ' ইউ &times; ৳' : 'u &times; ৳') + toBn(rate.toFixed(2)) + '):';
       }
 
-      document.getElementById('previewPrevUnit').textContent = toBn(previousUnit.toFixed(2));
-      document.getElementById('previewCurrUnit').textContent = toBn(currentUnit.toFixed(2));
-      document.getElementById('previewConsumedUnits').textContent = toBn(consumed.toFixed(2)) + (isBn ? ' ইউনিট' : ' Units');
-      document.getElementById('previewElectricBill').textContent = '৳' + toBn(electric.toFixed(2));
-      document.getElementById('previewPrevDues').textContent = '৳' + toBn(previousDues.toFixed(2));
-      document.getElementById('previewRentLoan').textContent = '৳' + toBn((rent + loan).toFixed(2));
-      document.getElementById('previewTotalBill').textContent = '৳' + toBn(total.toFixed(2));
-      document.getElementById('previewPaidAmount').textContent = '৳' + toBn(clearMoney.toFixed(2));
-      
+      const prevUnitEl = document.getElementById('previewPrevUnit');
+      const currUnitEl = document.getElementById('previewCurrUnit');
+      const consumedEl = document.getElementById('previewConsumedUnits');
+      const elecBillEl = document.getElementById('previewElectricBill');
+      const prevDuesEl = document.getElementById('previewPrevDues');
+      const rentLoanEl = document.getElementById('previewRentLoan');
+      const totalBillEl = document.getElementById('previewTotalBill');
+      const paidAmountEl = document.getElementById('previewPaidAmount');
       const duesEl = document.getElementById('previewPresentDues');
-      duesEl.textContent = '৳' + toBn(presentDues.toFixed(2));
-      if (presentDues <= 0) {
-        duesEl.style.color = '#34d399';
-        duesEl.parentElement.style.background = 'rgba(16, 185, 129, 0.1)';
-        duesEl.parentElement.style.borderColor = 'rgba(16, 185, 129, 0.25)';
-      } else {
-        duesEl.style.color = '#ef4444';
-        duesEl.parentElement.style.background = 'rgba(239, 68, 68, 0.1)';
-        duesEl.parentElement.style.borderColor = 'rgba(239, 68, 68, 0.25)';
+
+      if (prevUnitEl) prevUnitEl.textContent = toBn(previousUnit.toFixed(2));
+      if (currUnitEl) currUnitEl.textContent = toBn(currentUnit.toFixed(2));
+      if (consumedEl) consumedEl.textContent = toBn(consumed.toFixed(2)) + (isBn ? ' ইউনিট' : ' Units');
+      if (elecBillEl) elecBillEl.textContent = '৳' + toBn(electric.toFixed(2));
+      if (prevDuesEl) prevDuesEl.textContent = '৳' + toBn(previousDues.toFixed(2));
+      if (rentLoanEl) rentLoanEl.textContent = '৳' + toBn((rent + loan).toFixed(2));
+      if (totalBillEl) totalBillEl.textContent = '৳' + toBn(total.toFixed(2));
+      if (paidAmountEl) paidAmountEl.textContent = '৳' + toBn(clearMoney.toFixed(2));
+      
+      if (duesEl) {
+        duesEl.textContent = '৳' + toBn(presentDues.toFixed(2));
+        if (presentDues <= 0) {
+          duesEl.style.color = '#34d399';
+          if (duesEl.parentElement) {
+            duesEl.parentElement.style.background = 'rgba(16, 185, 129, 0.1)';
+            duesEl.parentElement.style.borderColor = 'rgba(16, 185, 129, 0.25)';
+          }
+        } else {
+          duesEl.style.color = '#ef4444';
+          if (duesEl.parentElement) {
+            duesEl.parentElement.style.background = 'rgba(239, 68, 68, 0.1)';
+            duesEl.parentElement.style.borderColor = 'rgba(239, 68, 68, 0.25)';
+          }
+        }
       }
     }
 
-    customerSelect.addEventListener('change', () => fetchCustomerSummary(customerSelect.value));
-    currentUnitInput.addEventListener('input', recalc);
+    if (customerSelect) customerSelect.addEventListener('change', () => fetchCustomerSummary(customerSelect.value));
+    if (currentUnitInput) currentUnitInput.addEventListener('input', recalc);
     if (unitRateInput) unitRateInput.addEventListener('input', recalc);
-    rentBillInput.addEventListener('input', recalc);
-    loanInput.addEventListener('input', recalc);
-    clearMoneyInput.addEventListener('input', recalc);
+    if (rentBillInput) rentBillInput.addEventListener('input', recalc);
+    if (loanInput) loanInput.addEventListener('input', recalc);
+    if (clearMoneyInput) clearMoneyInput.addEventListener('input', recalc);
 
-    if (customerSelect.value) {
+    if (customerSelect && customerSelect.value) {
       fetchCustomerSummary(customerSelect.value);
     }
   });

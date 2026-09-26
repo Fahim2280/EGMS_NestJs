@@ -11,7 +11,9 @@ export class FileService {
   private readonly maxFileSize = 5 * 1024 * 1024; // 5 MB
 
   constructor() {
-    this.baseUploadPath = resolve(process.cwd(), 'public', 'uploads');
+    this.baseUploadPath = process.env.UPLOAD_DIR
+      ? resolve(process.cwd(), process.env.UPLOAD_DIR)
+      : resolve(process.cwd(), 'storage', 'uploads');
     this.ensureDirectory(this.baseUploadPath);
   }
 
@@ -158,14 +160,37 @@ export class FileService {
    * Safely resolves a relative path to physical path preventing path traversal
    */
   getPhysicalPath(relativePath: string): string {
-    const cleaned = relativePath.replace(/^[\/\\]+/, '').replace(/^public[\/\\]+/, '');
-    const absolute = resolve(process.cwd(), 'public', cleaned);
-    // Security check: Must reside within public directory
-    const publicRoot = resolve(process.cwd(), 'public');
-    if (!absolute.startsWith(publicRoot)) {
+    const cleaned = relativePath
+      .replace(/^[\/\\]+/, '')
+      .replace(/^storage[\/\\]+/, '')
+      .replace(/^public[\/\\]+/, '');
+
+    // Prevent path traversal
+    if (cleaned.includes('..')) {
       throw new Error('Access denied: Invalid path traversal detected.');
     }
-    return absolute;
+
+    const strippedUploads = cleaned.replace(/^uploads[\/\\]+/, '');
+    const primaryPath = resolve(this.baseUploadPath, strippedUploads);
+    const storageRoot = resolve(this.baseUploadPath);
+
+    // If file exists in secure storage root
+    if (existsSync(primaryPath) && primaryPath.startsWith(storageRoot)) {
+      return primaryPath;
+    }
+
+    // Fallback: check legacy public/uploads location for backward compatibility
+    const legacyPath = resolve(process.cwd(), 'public', cleaned);
+    const legacyRoot = resolve(process.cwd(), 'public');
+    if (existsSync(legacyPath) && legacyPath.startsWith(legacyRoot)) {
+      return legacyPath;
+    }
+
+    // Default to primary secure storage path
+    if (!primaryPath.startsWith(storageRoot)) {
+      throw new Error('Access denied: Invalid path traversal detected.');
+    }
+    return primaryPath;
   }
 
   /**

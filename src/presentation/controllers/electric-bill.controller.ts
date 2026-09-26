@@ -245,7 +245,7 @@ export class ElectricBillController {
         req,
       });
 
-      return res.redirect('/bills');
+      return res.redirect('/bills?success=msg.billCreated');
     } catch (err: any) {
       const [customers, company] = await Promise.all([
         this.queryBus.execute(new GetCustomersByCompanyQuery(user.companyId, allowedGarageIds)),
@@ -400,7 +400,7 @@ export class ElectricBillController {
         req,
       });
 
-      return res.redirect(`/bills/${id}`);
+      return res.redirect(`/bills/${id}?success=msg.billUpdated`);
     } catch (err: any) {
       const bill = await this.queryBus.execute(
         new GetElectricBillByIdQuery(id, user.companyId),
@@ -442,7 +442,7 @@ export class ElectricBillController {
           new GetCustomerByIdQuery(existing.customerId, user.companyId),
         );
         if (customer?.garageId && !user.garageIds?.includes(customer.garageId)) {
-          return res.redirect('/bills?error=You+do+not+have+permission+to+delete+this+bill');
+          return res.redirect('/bills?error=msg.permissionDenied');
         }
       }
 
@@ -465,11 +465,11 @@ export class ElectricBillController {
         details: `Deleted electric bill #${id}`,
         req,
       });
-    } catch {
-      // ignore
-    }
 
-    return res.redirect('/bills');
+      return res.redirect('/bills?success=msg.billDeleted');
+    } catch {
+      return res.redirect('/bills?error=msg.genericError');
+    }
   }
 
   @Post('generate-monthly')
@@ -514,7 +514,7 @@ export class ElectricBillController {
       req,
     });
 
-    return res.redirect('/bills');
+    return res.redirect('/bills?success=msg.billsBatchGenerated');
   }
 
   // --- AJAX Endpoints for Real-Time UI Calculations ---

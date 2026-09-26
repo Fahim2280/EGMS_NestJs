@@ -51,7 +51,13 @@ import { DatabaseSeederService } from './typeorm/database-seeder.service';
           PasswordResetTokenOrmEntity,
           AuditLogOrmEntity,
         ],
-        synchronize: true,
+        synchronize:
+          config.get<string>('NODE_ENV') !== 'production' &&
+          config.get<string>('DB_SYNCHRONIZE', 'true') === 'true',
+        logging: config.get<string>('DB_LOGGING', 'false') === 'true',
+        extra: {
+          connectionLimit: Number(config.get<number>('DB_CONNECTION_LIMIT', 10)),
+        },
       }),
       inject: [ConfigService],
     }),

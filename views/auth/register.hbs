@@ -1,19 +1,19 @@
-<div style="max-width: 600px; margin: 2rem auto; padding: 0 1rem;">
-  <div class="card" style="box-shadow: var(--shadow-lg); border-color: rgba(59, 130, 246, 0.3);">
-    <div class="card-header" style="text-align: center; flex-direction: column; gap: 0.5rem; padding: 2rem 1.5rem 1rem;">
+<div class="auth-register-container">
+  <div class="card auth-register-card">
+    <div class="card-header auth-register-header" style="text-align: center; flex-direction: column; gap: 0.5rem; padding: 2rem 1.5rem 1rem;">
       <div class="brand-icon" style="width: 52px; height: 52px; margin: 0 auto; background: linear-gradient(135deg, #10b981, #3b82f6); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center;">
         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5">
           <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
           <circle cx="12" cy="7" r="4"/>
         </svg>
       </div>
-      <h1 style="font-size: 1.6rem; font-weight: 800; color: #ffffff;">{{t 'auth.registerTitle'}}</h1>
+      <h1 style="font-size: 1.6rem; font-weight: 800; color: var(--color-text-primary);">{{t 'auth.registerTitle'}}</h1>
       <p style="font-size: 0.85rem; color: var(--color-text-muted);">
         {{#if isBn}}সুপার অ্যাডমিন সুবিধাসহ নতুন কোম্পানি অ্যাকাউন্ট ও প্রাথমিক গ্যারেজ সুবিধা তৈরি করে{{else}}{{t 'auth.registerSubtitle'}}{{/if}}
       </p>
     </div>
 
-    <div class="card-body" style="padding: 1.5rem 2rem 2rem;">
+    <div class="card-body auth-register-body">
       {{#if error}}
         <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: var(--radius-md); padding: 0.75rem 1rem; margin-bottom: 1.25rem; font-size: 0.85rem; color: #f87171;">
           {{error}}
@@ -21,7 +21,7 @@
       {{/if}}
 
       <form action="/register" method="POST">
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+        <div class="form-row-2col">
           <div class="form-group">
             <label class="form-label" for="regName" style="display: block; margin-bottom: 0.35rem; font-size: 0.85rem; font-weight: 600;">{{t 'auth.ownerName'}} *</label>
             <input
@@ -32,7 +32,7 @@
               required
               placeholder="e.g. Alexander Vance"
               value="{{formData.name}}"
-              style="width: 100%; padding: 0.7rem; border-radius: var(--radius-md); background: rgba(15, 23, 42, 0.8); border: 1px solid var(--color-border); color: #fff;"
+              style="width: 100%; padding: 0.7rem; border-radius: var(--radius-md);"
             />
           </div>
 
@@ -46,12 +46,12 @@
               required
               placeholder="e.g. Apex Auto Solutions Ltd."
               value="{{formData.companyName}}"
-              style="width: 100%; padding: 0.7rem; border-radius: var(--radius-md); background: rgba(15, 23, 42, 0.8); border: 1px solid var(--color-border); color: #fff;"
+              style="width: 100%; padding: 0.7rem; border-radius: var(--radius-md);"
             />
           </div>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+        <div class="form-row-2col">
           <div class="form-group">
             <label class="form-label" for="regEmail" style="display: block; margin-bottom: 0.35rem; font-size: 0.85rem; font-weight: 600;">{{t 'auth.businessEmail'}} *</label>
             <input
@@ -62,26 +62,10 @@
               required
               placeholder="admin@company.com"
               value="{{formData.email}}"
-              style="width: 100%; padding: 0.7rem; border-radius: var(--radius-md); background: rgba(15, 23, 42, 0.8); border: 1px solid var(--color-border); color: #fff;"
+              style="width: 100%; padding: 0.7rem; border-radius: var(--radius-md);"
             />
           </div>
 
-          <div class="form-group">
-            <label class="form-label" for="regPassword" style="display: block; margin-bottom: 0.35rem; font-size: 0.85rem; font-weight: 600;">{{t 'auth.password'}} *</label>
-            <input
-              type="password"
-              id="regPassword"
-              name="password"
-              class="form-control"
-              required
-              minlength="6"
-              placeholder="Min 6 characters"
-              style="width: 100%; padding: 0.7rem; border-radius: var(--radius-md); background: rgba(15, 23, 42, 0.8); border: 1px solid var(--color-border); color: #fff;"
-            />
-          </div>
-        </div>
-
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
           <div class="form-group">
             <label class="form-label" for="regPhone" style="display: block; margin-bottom: 0.35rem; font-size: 0.85rem; font-weight: 600;">{{t 'auth.phone'}} *</label>
             <input
@@ -92,34 +76,89 @@
               required
               placeholder="+1-555-0199"
               value="{{formData.phoneNumber}}"
-              style="width: 100%; padding: 0.7rem; border-radius: var(--radius-md); background: rgba(15, 23, 42, 0.8); border: 1px solid var(--color-border); color: #fff;"
-            />
-          </div>
-
-          <div class="form-group">
-            <label class="form-label" for="regAddress" style="display: block; margin-bottom: 0.35rem; font-size: 0.85rem; font-weight: 600;">{{t 'employees.address'}} *</label>
-            <input
-              type="text"
-              id="regAddress"
-              name="address"
-              class="form-control"
-              required
-              placeholder="Suite 400, Industrial District"
-              value="{{formData.address}}"
-              style="width: 100%; padding: 0.7rem; border-radius: var(--radius-md); background: rgba(15, 23, 42, 0.8); border: 1px solid var(--color-border); color: #fff;"
+              style="width: 100%; padding: 0.7rem; border-radius: var(--radius-md);"
             />
           </div>
         </div>
 
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label class="form-label" for="regAddress" style="display: block; margin-bottom: 0.35rem; font-size: 0.85rem; font-weight: 600;">{{t 'auth.address'}} *</label>
+          <input
+            type="text"
+            id="regAddress"
+            name="address"
+            class="form-control"
+            required
+            placeholder="Suite 400, Industrial District"
+            value="{{formData.address}}"
+            style="width: 100%; padding: 0.7rem; border-radius: var(--radius-md);"
+          />
+        </div>
+
+        <div class="form-row-2col">
+          <div class="form-group">
+            <label class="form-label" for="regPassword" style="display: block; margin-bottom: 0.35rem; font-size: 0.85rem; font-weight: 600;">{{t 'auth.password'}} *</label>
+            <div class="password-input-wrapper">
+              <input
+                type="password"
+                id="regPassword"
+                name="password"
+                class="form-control"
+                required
+                minlength="6"
+                placeholder="{{#if isBn}}কমপক্ষে ৬ অক্ষর{{else}}Min 6 characters{{/if}}"
+                style="width: 100%; padding: 0.7rem 2.75rem 0.7rem 0.7rem; border-radius: var(--radius-md);"
+              />
+              <button type="button" class="password-toggle-btn" aria-label="Toggle password visibility" tabindex="-1">
+                <svg class="eye-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+                <svg class="eye-off-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
+                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                  <line x1="1" y1="1" x2="23" y2="23"></line>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="regConfirmPassword" style="display: block; margin-bottom: 0.35rem; font-size: 0.85rem; font-weight: 600;">{{t 'auth.confirmPassword'}} *</label>
+            <div class="password-input-wrapper">
+              <input
+                type="password"
+                id="regConfirmPassword"
+                name="confirmPassword"
+                class="form-control"
+                required
+                minlength="6"
+                placeholder="{{#if isBn}}পাসওয়ার্ড পুনরায় লিখুন{{else}}Re-enter password{{/if}}"
+                style="width: 100%; padding: 0.7rem 2.75rem 0.7rem 0.7rem; border-radius: var(--radius-md);"
+              />
+              <button type="button" class="password-toggle-btn" aria-label="Toggle confirm password visibility" tabindex="-1">
+                <svg class="eye-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+                <svg class="eye-off-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
+                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                  <line x1="1" y1="1" x2="23" y2="23"></line>
+                </svg>
+              </button>
+            </div>
+            <div id="passwordMatchMsg" style="font-size: 0.75rem; margin-top: 0.35rem; display: none;"></div>
+          </div>
+        </div>
+
         <!-- Optional Initial Garage Section -->
-        <div style="background: rgba(15, 23, 42, 0.5); border: 1px dashed var(--color-border); border-radius: var(--radius-md); padding: 1rem 1.25rem; margin-top: 1.25rem; margin-bottom: 1.5rem;">
+        <div class="garage-optional-card">
           <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem;">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2">
               <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
             </svg>
-            <span style="font-size: 0.9rem; font-weight: 600; color: #fff;">{{#if isBn}}প্রাথমিক গ্যারেজ (ঐচ্ছিক){{else}}Initial Garage Facility (Optional){{/if}}</span>
+            <span style="font-size: 0.9rem; font-weight: 600; color: var(--color-text-primary);">{{#if isBn}}প্রাথমিক গ্যারেজ (ঐচ্ছিক){{else}}Initial Garage Facility (Optional){{/if}}</span>
           </div>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div class="form-row-2col" style="margin-bottom: 0;">
             <div class="form-group">
               <label class="form-label" for="initGarageName" style="display: block; margin-bottom: 0.3rem; font-size: 0.8rem; color: var(--color-text-muted);">{{t 'garages.name'}}</label>
               <input
@@ -129,7 +168,7 @@
                 class="form-control"
                 placeholder="e.g. Central Workshop Bay"
                 value="{{formData.initialGarageName}}"
-                style="width: 100%; padding: 0.65rem; border-radius: var(--radius-md); background: rgba(15, 23, 42, 0.8); border: 1px solid var(--color-border); color: #fff;"
+                style="width: 100%; padding: 0.65rem; border-radius: var(--radius-md);"
               />
             </div>
             <div class="form-group">
@@ -141,13 +180,13 @@
                 class="form-control"
                 placeholder="e.g. Bay 12, West Industrial District"
                 value="{{formData.initialGarageAddress}}"
-                style="width: 100%; padding: 0.65rem; border-radius: var(--radius-md); background: rgba(15, 23, 42, 0.8); border: 1px solid var(--color-border); color: #fff;"
+                style="width: 100%; padding: 0.65rem; border-radius: var(--radius-md);"
               />
             </div>
           </div>
         </div>
 
-        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.85rem; font-weight: 700; font-size: 1rem;">
+        <button type="submit" class="btn btn-primary auth-submit-btn">
           {{t 'auth.registerBtn'}}
         </button>
       </form>
@@ -158,3 +197,51 @@
     </div>
   </div>
 </div>
+
+<script>
+  (function() {
+    const regForm = document.querySelector('form[action="/register"]');
+    const pwdInput = document.getElementById('regPassword');
+    const confirmPwdInput = document.getElementById('regConfirmPassword');
+    const matchMsg = document.getElementById('passwordMatchMsg');
+
+    if (!regForm || !pwdInput || !confirmPwdInput || !matchMsg) return;
+
+    function checkPasswordMatch() {
+      if (!confirmPwdInput.value) {
+        matchMsg.style.display = 'none';
+        confirmPwdInput.setCustomValidity('');
+        confirmPwdInput.style.borderColor = '';
+        return true;
+      }
+      if (pwdInput.value !== confirmPwdInput.value) {
+        matchMsg.style.display = 'block';
+        matchMsg.style.color = '#ef4444';
+        matchMsg.innerHTML = '⚠️ {{t "auth.passwordMismatch"}}';
+        confirmPwdInput.setCustomValidity('{{t "auth.passwordMismatch"}}');
+        confirmPwdInput.style.borderColor = '#ef4444';
+        return false;
+      } else {
+        matchMsg.style.display = 'block';
+        matchMsg.style.color = '#10b981';
+        matchMsg.innerHTML = '✓ {{t "auth.passwordsMatch"}}';
+        confirmPwdInput.setCustomValidity('');
+        confirmPwdInput.style.borderColor = '#10b981';
+        return true;
+      }
+    }
+
+    pwdInput.addEventListener('input', function() {
+      if (confirmPwdInput.value) checkPasswordMatch();
+    });
+    confirmPwdInput.addEventListener('input', checkPasswordMatch);
+
+    regForm.addEventListener('submit', function(e) {
+      if (!checkPasswordMatch()) {
+        e.preventDefault();
+        confirmPwdInput.focus();
+      }
+    });
+  })();
+</script>
+

@@ -119,6 +119,69 @@
     background: rgba(239, 68, 68, 0.25);
     color: #ef4444;
   }
+
+  /* Light Theme Overrides */
+  [data-theme="light"] .doc-card-item {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  }
+  [data-theme="light"] .doc-card-item:hover {
+    border-color: #cbd5e1;
+    background: #f8fafc;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.06);
+  }
+  [data-theme="light"] .doc-card-title {
+    color: #0f172a;
+  }
+  [data-theme="light"] .doc-card-meta {
+    color: #64748b;
+  }
+  [data-theme="light"] .doc-card-badge {
+    background: #e0e7ff;
+    border-color: #c7d2fe;
+    color: #4338ca;
+  }
+  [data-theme="light"] .doc-card-actions {
+    border-top: 1px solid #f1f5f9;
+  }
+  [data-theme="light"] .doc-btn-download {
+    background: #e0f2fe;
+    border-color: #bae6fd;
+    color: #0369a1;
+  }
+  [data-theme="light"] .doc-btn-download:hover {
+    background: #bae6fd;
+    color: #0284c7;
+  }
+  [data-theme="light"] .doc-btn-preview {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+    color: #334155;
+  }
+  [data-theme="light"] .doc-btn-preview:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+  }
+  [data-theme="light"] .doc-btn-delete {
+    background: #fee2e2;
+    border-color: #fecaca;
+    color: #dc2626;
+  }
+  [data-theme="light"] .doc-btn-delete:hover {
+    background: #fecaca;
+    color: #b91c1c;
+  }
+  [data-theme="light"] .doc-empty-box {
+    background: #f8fafc !important;
+    border-color: #cbd5e1 !important;
+  }
+  [data-theme="light"] .doc-empty-title {
+    color: #1e293b !important;
+  }
+  [data-theme="light"] .doc-empty-sub {
+    color: #64748b !important;
+  }
 </style>
 
 {{#if documents.length}}
@@ -162,12 +225,12 @@
     {{/each}}
   </div>
 {{else}}
-  <div style="text-align: center; padding: 2rem 1rem; background: rgba(15, 23, 42, 0.3); border: 1px dashed rgba(255, 255, 255, 0.08); border-radius: 8px;">
+  <div class="doc-empty-box" style="text-align: center; padding: 2rem 1rem; background: rgba(15, 23, 42, 0.3); border: 1px dashed rgba(255, 255, 255, 0.08); border-radius: 8px;">
     <div style="font-size: 2rem; margin-bottom: 0.35rem;">📂</div>
-    <div style="color: #cbd5e1; font-size: 0.9rem; font-weight: 600;">
+    <div class="doc-empty-title" style="color: #cbd5e1; font-size: 0.9rem; font-weight: 600;">
       {{#if emptyMessage}}{{emptyMessage}}{{else}}{{t 'documents.noDocuments'}}{{/if}}
     </div>
-    <div style="color: #64748b; font-size: 0.78rem; margin-top: 0.2rem;">
+    <div class="doc-empty-sub" style="color: #64748b; font-size: 0.78rem; margin-top: 0.2rem;">
       {{t 'documents.noDocumentsSub'}}
     </div>
   </div>

@@ -9,6 +9,7 @@ import * as cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 import {
   translate,
+  resolveMessage,
   formatNumberWithLang,
   formatDateWithLang,
   formatTimeWithLang,
@@ -17,7 +18,79 @@ import { CurrentUserInterceptor } from './infrastructure/auth/current-user.inter
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+  // Determine root directory robustly (supports running from repo root or src/)
+  const candidateDirs = [
+    process.cwd(),
+    join(process.cwd(), '..'),
+    join(__dirname, '..'),
+    join(__dirname, '../..'),
+  ];
+  const rootDir =
+    candidateDirs.find((dir) => existsSync(join(dir, 'views'))) || process.cwd();
+
+  // HTTPS SSL Configuration
+  const defaultKeyPath = join(rootDir, 'certs', 'server.key');
+  const defaultCertPath = join(rootDir, 'certs', 'server.crt');
+  const keyPath = process.env.SSL_KEY_PATH || defaultKeyPath;
+  const certPath = process.env.SSL_CERT_PATH || defaultCertPath;
+
+  const wantsHttps =
+    process.env.HTTPS !== 'false' &&
+    (process.env.HTTPS === 'true' ||
+      process.env.ENABLE_HTTPS === 'true' ||
+      (existsSync(keyPath) && existsSync(certPath)));
+
+  let httpsOptions: { key: Buffer; cert: Buffer } | undefined;
+  if (wantsHttps) {
+    if (existsSync(keyPath) && existsSync(certPath)) {
+      httpsOptions = {
+        key: readFileSync(keyPath),
+        cert: readFileSync(certPath),
+      };
+      logger.log(`🔒 HTTPS mode active with certificate from ${certPath}`);
+    } else {
+      logger.warn(`⚠️ HTTPS requested but certificate files not found at ${keyPath} and ${certPath}`);
+    }
+  }
+
+  const app = await NestFactory.create<NestExpressApplication>(
+    AppModule,
+    httpsOptions ? { httpsOptions } : {},
+  );
+
+  // Enable graceful shutdown hooks for container lifecycle (SIGTERM, SIGINT)
+  app.enableShutdownHooks();
+
+  // Trust reverse proxy (Nginx, Caddy, Cloudflare, AWS ALB) for correct req.ip and req.secure
+  app.set('trust proxy', 1);
+
+  // Disable X-Powered-By header to prevent fingerprinting
+  app.disable('x-powered-by');
+
+  // OWASP Production Security Headers
+  app.use((req: any, res: any, next: any) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+
+    if (req.secure || req.headers['x-forwarded-proto'] === 'https' || wantsHttps) {
+      res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+    }
+    next();
+  });
+
+  // Health check endpoint for uptime monitors, Docker HEALTHCHECK, and load balancers
+  app.use('/health', (req: any, res: any) => {
+    return res.status(200).json({
+      status: 'ok',
+      uptime: Math.floor(process.uptime()),
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'development',
+    });
+  });
 
   // Parse HTTP cookies
   app.use(cookieParser());
@@ -42,6 +115,72 @@ async function bootstrap() {
     res.locals.theme = theme;
     res.locals.isLight = theme === 'light';
     res.locals.isDark = theme === 'dark';
+
+    // Parse notification / feedback messages from query or cookie
+    const qSuccess = req.query?.success;
+    const qError = req.query?.error;
+    const qInfo = req.query?.info || req.query?.message;
+
+    let flashType: 'success' | 'error' | 'info' | null = null;
+    let rawMsg: string | null = null;
+
+    if (qSuccess) {
+      flashType = 'success';
+      rawMsg = String(qSuccess);
+    } else if (qError) {
+      flashType = 'error';
+      rawMsg = String(qError);
+    } else if (qInfo) {
+      flashType = 'info';
+      rawMsg = String(qInfo);
+    } else if (req.cookies?.flash_msg) {
+      flashType = req.cookies?.flash_type || 'success';
+      rawMsg = String(req.cookies.flash_msg);
+      res.clearCookie('flash_msg');
+      res.clearCookie('flash_type');
+    }
+
+    if (flashType && rawMsg) {
+      const localizedMsg = resolveMessage(rawMsg, lang);
+      res.locals.flash = {
+        type: flashType,
+        message: localizedMsg,
+        isSuccess: flashType === 'success',
+        isError: flashType === 'error',
+        isInfo: flashType === 'info',
+      };
+      res.locals.toast = {
+        type: flashType,
+        message: localizedMsg,
+      };
+      if (flashType === 'success') {
+        res.locals.successMessage = localizedMsg;
+      } else if (flashType === 'error') {
+        res.locals.error = localizedMsg;
+      }
+    }
+
+    // Wrap res.render to auto-translate any controller-passed error or success messages
+    const originalRender = res.render.bind(res);
+    res.render = function (view: string, options?: any, callback?: any) {
+      const opts = options || {};
+      if (opts.error) {
+        opts.error = resolveMessage(opts.error, lang);
+      }
+      if (opts.successMessage) {
+        opts.successMessage = resolveMessage(opts.successMessage, lang);
+      }
+      if (opts.success) {
+        opts.success = resolveMessage(opts.success, lang);
+      }
+      if (!opts.flash && res.locals.flash) {
+        opts.flash = res.locals.flash;
+      }
+      if (!opts.toast && res.locals.toast) {
+        opts.toast = res.locals.toast;
+      }
+      return originalRender(view, opts, callback);
+    };
 
     const token =
       req.cookies?.jwt_token ||
@@ -75,16 +214,6 @@ async function bootstrap() {
     }
     next();
   });
-
-  // Determine root directory robustly (supports running from repo root or src/)
-  const candidateDirs = [
-    process.cwd(),
-    join(process.cwd(), '..'),
-    join(__dirname, '..'),
-    join(__dirname, '../..'),
-  ];
-  const rootDir =
-    candidateDirs.find((dir) => existsSync(join(dir, 'views'))) || process.cwd();
 
   const viewsPath = join(rootDir, 'views');
   const partialsPath = join(rootDir, 'views', 'partials');
@@ -165,6 +294,11 @@ async function bootstrap() {
     return translate(key, lang);
   });
 
+  hbs.registerHelper('resolveMsg', function (msg: string, options: any) {
+    const lang = options?.data?.root?.lang || 'en';
+    return resolveMessage(msg, lang);
+  });
+
   hbs.registerHelper('bnNum', function (val: any, options: any) {
     const lang = options?.data?.root?.lang || 'en';
     return formatNumberWithLang(val, lang);
@@ -225,13 +359,14 @@ async function bootstrap() {
 
   const port = process.env.PORT || 3000;
   await app.listen(port);
+  const protocol = httpsOptions ? 'https' : 'http';
   logger.log(`=============================================================`);
-  logger.log(`🚀 Company, Garage & Employee Management Portal running at http://localhost:${port}`);
-  logger.log(`📊 Dashboard:     http://localhost:${port}/`);
-  logger.log(`🏢 Garages:       http://localhost:${port}/garages`);
-  logger.log(`👥 Employees:     http://localhost:${port}/employees`);
-  logger.log(`🔐 Login:         http://localhost:${port}/login`);
-  logger.log(`📝 Register:      http://localhost:${port}/register`);
+  logger.log(`🚀 Company, Garage & Employee Management Portal running at ${protocol}://localhost:${port}`);
+  logger.log(`📊 Dashboard:     ${protocol}://localhost:${port}/`);
+  logger.log(`🏢 Garages:       ${protocol}://localhost:${port}/garages`);
+  logger.log(`👥 Employees:     ${protocol}://localhost:${port}/employees`);
+  logger.log(`🔐 Login:         ${protocol}://localhost:${port}/login`);
+  logger.log(`📝 Register:      ${protocol}://localhost:${port}/register`);
   logger.log(`=============================================================`);
 }
 

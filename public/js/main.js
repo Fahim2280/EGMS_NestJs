@@ -103,15 +103,29 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // -------------------------------------------------------
-  // 3. Auto-dismiss ALL Toast Notifications
+  // 3. Auto-dismiss & Tap-to-dismiss Toast Notifications
   // -------------------------------------------------------
   document.querySelectorAll('.toast').forEach((toast, i) => {
+    // Tap or click anywhere on toast to dismiss
+    toast.addEventListener('click', (e) => {
+      if (e.target.tagName !== 'BUTTON' && !e.target.closest('button')) {
+        toast.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+        toast.style.opacity = '0';
+        toast.style.transform = window.innerWidth <= 768 ? 'translateY(-20px)' : 'translateX(30px)';
+        setTimeout(() => { if (toast && toast.parentNode) toast.remove(); }, 250);
+      }
+    });
+
     setTimeout(() => {
-      toast.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
-      toast.style.opacity = '0';
-      toast.style.transform = 'translateX(30px)';
-      setTimeout(() => toast.remove(), 400);
-    }, 4000 + i * 500);
+      if (toast && toast.parentNode) {
+        toast.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+        toast.style.opacity = '0';
+        toast.style.transform = window.innerWidth <= 768 ? 'translateY(-20px)' : 'translateX(30px)';
+        setTimeout(() => {
+          if (toast && toast.parentNode) toast.remove();
+        }, 400);
+      }
+    }, 4500 + i * 500);
   });
 
   // -------------------------------------------------------
@@ -120,29 +134,72 @@ document.addEventListener('DOMContentLoaded', () => {
   const urlParams = new URLSearchParams(window.location.search);
   const successMsg = urlParams.get('success');
   const errorMsg = urlParams.get('error');
+  const infoMsg = urlParams.get('info') || urlParams.get('message');
 
-  if (successMsg || errorMsg) {
-    const banner = document.createElement('div');
-    banner.className = `page-flash ${successMsg ? 'success' : 'error'}`;
-    banner.innerHTML = `${successMsg ? '✅' : '⚠️'} <span>${decodeURIComponent(successMsg || errorMsg).replace(/\+/g, ' ')}</span>`;
-    const mainContent = document.querySelector('.main-content .container');
-    if (mainContent) {
-      mainContent.insertBefore(banner, mainContent.firstChild);
-      setTimeout(() => {
-        banner.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-        banner.style.opacity = '0';
-        banner.style.transform = 'translateY(-8px)';
-        setTimeout(() => banner.remove(), 500);
-      }, 4000);
+  const safeDecode = (val) => {
+    if (!val) return '';
+    try {
+      return decodeURIComponent(val.replace(/\+/g, ' '));
+    } catch (e) {
+      return val.replace(/\+/g, ' ');
     }
-    // Remove query params from URL without reload
-    const cleanUrl = window.location.pathname + (urlParams.size > 2 ? '?' + urlParams.toString() : '');
+  };
+
+  if (successMsg || errorMsg || infoMsg) {
+    const rawVal = successMsg || errorMsg || infoMsg;
+    const isSuccess = Boolean(successMsg);
+    const isError = Boolean(errorMsg);
+    const banner = document.createElement('div');
+    banner.className = `page-flash ${isSuccess ? 'success' : isError ? 'error' : 'info'}`;
+    const icon = isSuccess ? '✅' : isError ? '⚠️' : 'ℹ️';
+    const cleanText = safeDecode(rawVal);
+    banner.innerHTML = `${icon} <span style="flex:1;">${cleanText}</span><button type="button" class="alert-banner-close" onclick="this.closest('.page-flash').remove()">&times;</button>`;
+    
+    // Check if an in-page banner already exists from server-side render
+    const existingServerBanner = document.getElementById('inPageAlertBanner');
+    if (!existingServerBanner) {
+      const mainContent =
+        document.querySelector('.main-content .app-container') ||
+        document.querySelector('.main-content .container') ||
+        document.querySelector('.app-container') ||
+        document.querySelector('.container') ||
+        document.querySelector('.main-content');
+      if (mainContent) {
+        mainContent.insertBefore(banner, mainContent.firstChild);
+        setTimeout(() => {
+          if (banner && banner.parentNode) {
+            banner.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+            banner.style.opacity = '0';
+            banner.style.transform = 'translateY(-8px)';
+            setTimeout(() => {
+              if (banner && banner.parentNode) banner.remove();
+            }, 500);
+          }
+        }, 4500);
+      }
+    }
+
+    // Clean only message parameters without clearing other filters
+    urlParams.delete('success');
+    urlParams.delete('error');
+    urlParams.delete('info');
+    urlParams.delete('message');
+    const qs = urlParams.toString();
+    const cleanUrl = window.location.pathname + (qs ? '?' + qs : '') + window.location.hash;
     history.replaceState(null, '', cleanUrl);
   }
 
   // -------------------------------------------------------
   // 5. Animated Number Count-up for Stat Cards
   // -------------------------------------------------------
+  const currentLang = document.documentElement.getAttribute('lang') || 'en';
+  const bnDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+  const toBn = (num) => String(num).replace(/[0-9]/g, (d) => bnDigits[d]);
+  const parseNum = (str) => {
+    const bnMap = { '০':'0', '১':'1', '২':'2', '৩':'3', '৪':'4', '৫':'5', '৬':'6', '৭':'7', '৮':'8', '৯':'9' };
+    return String(str || '').replace(/[০-৯]/g, (d) => bnMap[d]).replace(/[^0-9.]/g, '');
+  };
+
   const countUp = (el, target, duration = 1000) => {
     const isFloat = target % 1 !== 0;
     const decimals = isFloat ? String(target).split('.')[1]?.length || 0 : 0;
@@ -150,23 +207,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const step = (ts) => {
       if (!start) start = ts;
       const progress = Math.min((ts - start) / duration, 1);
-      // Ease out cubic
       const ease = 1 - Math.pow(1 - progress, 3);
       const current = ease * target;
-      el.textContent = decimals > 0
+      const formatted = decimals > 0
         ? current.toFixed(decimals)
         : Math.floor(current).toLocaleString();
+      el.textContent = currentLang === 'bn' ? toBn(formatted) : formatted;
       if (progress < 1) requestAnimationFrame(step);
     };
     requestAnimationFrame(step);
   };
 
-  // Observe stat values entering viewport
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
         const el = entry.target;
-        const raw = el.dataset.value || el.textContent.replace(/[^0-9.]/g, '');
+        const raw = el.dataset.value || parseNum(el.textContent);
         const num = parseFloat(raw);
         if (!isNaN(num) && num > 0) {
           countUp(el, num, 900);
@@ -177,9 +233,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }, { threshold: 0.2 });
 
   document.querySelectorAll('.stat-value[data-value], .stat-value').forEach(el => {
-    // Store original value so count-up can parse it
     if (!el.dataset.value) {
-      el.dataset.value = el.textContent.replace(/[^0-9.]/g, '');
+      el.dataset.value = parseNum(el.textContent);
     }
     observer.observe(el);
   });
@@ -402,9 +457,6 @@ document.addEventListener('DOMContentLoaded', () => {
             select.selectedIndex = idx;
             select.value = opt.value;
             trigger.classList.remove('is-invalid');
-            if (typeof select.onchange === 'function') {
-              try { select.onchange(); } catch (err) { console.error(err); }
-            }
             select.dispatchEvent(new Event('change', { bubbles: true }));
             renderOptions();
             closeDropdown();
@@ -620,4 +672,44 @@ window.toggleFilterDrawer = function toggleFilterDrawer(formId) {
   form.classList.toggle('dfb-open');
   if (toggle) toggle.classList.toggle('open');
 };
+
+// =======================================================
+// Password Visibility Toggle
+// =======================================================
+function initPasswordToggles() {
+  document.querySelectorAll('.password-toggle-btn').forEach(btn => {
+    if (btn.dataset.pwdInit) return;
+    btn.dataset.pwdInit = 'true';
+
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      const wrapper = this.closest('.password-input-wrapper');
+      if (!wrapper) return;
+      const input = wrapper.querySelector('input');
+      if (!input) return;
+
+      const eyeIcon = this.querySelector('.eye-icon');
+      const eyeOffIcon = this.querySelector('.eye-off-icon');
+
+      if (input.type === 'password') {
+        input.type = 'text';
+        this.setAttribute('aria-label', 'Hide password');
+        if (eyeIcon) eyeIcon.style.display = 'none';
+        if (eyeOffIcon) eyeOffIcon.style.display = 'block';
+      } else {
+        input.type = 'password';
+        this.setAttribute('aria-label', 'Show password');
+        if (eyeIcon) eyeIcon.style.display = 'block';
+        if (eyeOffIcon) eyeOffIcon.style.display = 'none';
+      }
+      input.focus();
+    });
+  });
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initPasswordToggles);
+} else {
+  initPasswordToggles();
+}
 

@@ -2,25 +2,43 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
 
+import * as dotenv from 'dotenv';
+
 @Injectable()
 export class EmailService {
   private readonly logger = new Logger(EmailService.name);
-  private transporter: nodemailer.Transporter;
 
-  constructor(private readonly config: ConfigService) {
-    this.transporter = nodemailer.createTransport({
-      host: this.config.get<string>('SMTP_HOST', 'smtp.gmail.com'),
-      port: this.config.get<number>('SMTP_PORT', 587),
-      secure: this.config.get<string>('SMTP_SECURE', 'false') === 'true',
-      auth: {
-        user: this.config.get<string>('SMTP_USER', ''),
-        pass: this.config.get<string>('SMTP_PASS', ''),
-      },
+  constructor(private readonly config: ConfigService) {}
+
+  private getTransporter(): nodemailer.Transporter {
+    // Reload from .env if variables aren't loaded in older running process
+    if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+      dotenv.config();
+    }
+
+    const rawUser = this.config.get<string>('SMTP_USER') || process.env.SMTP_USER || '';
+    const rawPass = this.config.get<string>('SMTP_PASS') || process.env.SMTP_PASS || '';
+
+    const user = rawUser.trim().replace(/^["']|["']$/g, '');
+    const pass = rawPass.trim().replace(/^["']|["']$/g, '').replace(/\s+/g, '');
+
+    const host = this.config.get<string>('SMTP_HOST') || process.env.SMTP_HOST || 'smtp.gmail.com';
+    const port = Number(this.config.get<number>('SMTP_PORT') || process.env.SMTP_PORT || 587);
+    const secure = (this.config.get<string>('SMTP_SECURE') || process.env.SMTP_SECURE || 'false') === 'true';
+
+    return nodemailer.createTransport({
+      host,
+      port,
+      secure,
+      auth: user && pass ? { user, pass } : undefined,
     });
   }
 
   async sendPasswordResetEmail(to: string, resetLink: string): Promise<void> {
-    const fromAddress = this.config.get<string>('SMTP_FROM', 'EGMS Portal <noreply@egms.app>');
+    const fromAddress =
+      this.config.get<string>('SMTP_FROM') ||
+      process.env.SMTP_FROM ||
+      'EGMS Portal <noreply@egms.app>';
 
     const html = `
 <!DOCTYPE html>
@@ -87,7 +105,8 @@ export class EmailService {
 </html>`;
 
     try {
-      await this.transporter.sendMail({
+      const transporter = this.getTransporter();
+      await transporter.sendMail({
         from: fromAddress,
         to,
         subject: '🔐 Reset Your EGMS Password',
@@ -102,8 +121,14 @@ export class EmailService {
   }
 
   async sendWelcomeEmail(to: string, companyName: string): Promise<void> {
-    const fromAddress = this.config.get<string>('SMTP_FROM', 'EGMS Portal <noreply@egms.app>');
-    const appUrl = this.config.get<string>('APP_URL', 'http://localhost:3000');
+    const fromAddress =
+      this.config.get<string>('SMTP_FROM') ||
+      process.env.SMTP_FROM ||
+      'EGMS Portal <noreply@egms.app>';
+    const appUrl =
+      this.config.get<string>('APP_URL') ||
+      process.env.APP_URL ||
+      'https://localhost:3000';
 
     const html = `
 <!DOCTYPE html>
@@ -168,7 +193,8 @@ export class EmailService {
 </html>`;
 
     try {
-      await this.transporter.sendMail({
+      const transporter = this.getTransporter();
+      await transporter.sendMail({
         from: fromAddress,
         to,
         subject: '🎉 Welcome to EGMS Portal!',

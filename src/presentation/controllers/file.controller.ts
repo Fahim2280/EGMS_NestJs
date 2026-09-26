@@ -180,7 +180,7 @@ export class FileController {
         });
       }
 
-      return res.redirect(`/customers/${customerId}?success=Documents+uploaded+successfully`);
+      return res.redirect(`/customers/${customerId}?success=msg.documentsUploaded`);
     } catch (err: any) {
       return res.redirect(`/customers/${customerId}?error=${encodeURIComponent(err.message || 'Failed to upload documents')}`);
     }
@@ -219,7 +219,7 @@ export class FileController {
         });
       }
 
-      return res.redirect(`/customers/${customerId}?success=Document+removed+successfully`);
+      return res.redirect(`/customers/${customerId}?success=msg.documentDeleted`);
     } catch (err: any) {
       return res.redirect(`/customers/${customerId}?error=${encodeURIComponent(err.message || 'Failed to remove document')}`);
     }
@@ -270,7 +270,7 @@ export class FileController {
         });
       }
 
-      return res.redirect(`/employees/${employeeId}?success=Documents+uploaded+successfully`);
+      return res.redirect(`/employees/${employeeId}?success=msg.documentsUploaded`);
     } catch (err: any) {
       return res.redirect(`/employees/${employeeId}?error=${encodeURIComponent(err.message || 'Failed to upload documents')}`);
     }
@@ -309,7 +309,7 @@ export class FileController {
         });
       }
 
-      return res.redirect(`/employees/${employeeId}?success=Document+removed+successfully`);
+      return res.redirect(`/employees/${employeeId}?success=msg.documentDeleted`);
     } catch (err: any) {
       return res.redirect(`/employees/${employeeId}?error=${encodeURIComponent(err.message || 'Failed to remove document')}`);
     }
@@ -348,7 +348,7 @@ export class FileController {
         await this.guarantorRepo.updateAsync(guarantor);
       }
 
-      return res.redirect(`/customers/${customerId}?success=Guarantor+documents+uploaded+successfully`);
+      return res.redirect(`/customers/${customerId}?success=msg.documentsUploaded`);
     } catch (err: any) {
       return res.redirect(`/customers/${customerId}?error=${encodeURIComponent(err.message || 'Failed to upload guarantor documents')}`);
     }
@@ -375,7 +375,7 @@ export class FileController {
         await this.guarantorRepo.updateAsync(guarantor);
       }
 
-      return res.redirect(`/customers/${customerId}?success=Guarantor+document+removed`);
+      return res.redirect(`/customers/${customerId}?success=msg.documentDeleted`);
     } catch (err: any) {
       return res.redirect(`/customers/${customerId}?error=${encodeURIComponent(err.message || 'Failed to remove guarantor document')}`);
     }

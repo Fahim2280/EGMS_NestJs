@@ -1,0 +1,42 @@
+{{!-- Reusable Feedback Alert Banner Partial --}}
+{{#if flash}}
+  <div class="alert-banner alert-{{flash.type}}" id="inPageAlertBanner">
+    {{#if flash.isSuccess}}
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink: 0;">
+        <polyline points="20 6 9 17 4 12"/>
+      </svg>
+    {{else if flash.isError}}
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink: 0;">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="12"/>
+        <line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+    {{else}}
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink: 0;">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="16" x2="12" y2="12"/>
+        <line x1="12" y1="8" x2="12.01" y2="8"/>
+      </svg>
+    {{/if}}
+    <span style="flex: 1;">{{flash.message}}</span>
+    <button type="button" class="alert-banner-close" onclick="this.closest('.alert-banner').remove()" aria-label="Close">&times;</button>
+  </div>
+{{else if successMessage}}
+  <div class="alert-banner alert-success" id="inPageAlertBanner">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink: 0;">
+      <polyline points="20 6 9 17 4 12"/>
+    </svg>
+    <span style="flex: 1;">{{successMessage}}</span>
+    <button type="button" class="alert-banner-close" onclick="this.closest('.alert-banner').remove()" aria-label="Close">&times;</button>
+  </div>
+{{else if error}}
+  <div class="alert-banner alert-danger" id="inPageAlertBanner">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink: 0;">
+      <circle cx="12" cy="12" r="10"/>
+      <line x1="12" y1="8" x2="12" y2="12"/>
+      <line x1="12" y1="16" x2="12.01" y2="16"/>
+    </svg>
+    <span style="flex: 1;">{{error}}</span>
+    <button type="button" class="alert-banner-close" onclick="this.closest('.alert-banner').remove()" aria-label="Close">&times;</button>
+  </div>
+{{/if}}

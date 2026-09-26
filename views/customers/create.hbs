@@ -163,42 +163,42 @@
 
   <!-- Guidelines & Tips Sidebar -->
   <div class="customer-create-sidebar" style="position: sticky; top: 84px;">
-    <div class="card" style="padding: 1.5rem; border-top: 3px solid #38bdf8; background: radial-gradient(circle at top right, rgba(56, 189, 248, 0.08), transparent 70%), rgba(30, 41, 59, 0.85);">
-      <h3 style="font-size: 1rem; font-weight: 700; color: #ffffff; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+    <div class="card registration-guide-card">
+      <h3 class="guide-title">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
         {{#if isBn}}নিবন্ধন সংক্রান্ত নির্দেশিকা{{else}}নিবন্ধন সংক্রান্ত নির্দেশিকা (Registration Notes){{/if}}
       </h3>
 
-      <div style="display: flex; flex-direction: column; gap: 1rem; font-size: 0.84rem; color: #94a3b8; line-height: 1.6;">
-        <div style="display: flex; gap: 0.75rem; align-items: flex-start;">
-          <div style="width: 24px; height: 24px; border-radius: 6px; background: rgba(56, 189, 248, 0.15); color: #38bdf8; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 0.8rem; font-weight: 700;">১</div>
+      <div class="guide-list">
+        <div class="guide-item">
+          <div class="guide-step-badge step-1">১</div>
           <div>
-            <strong style="color: #f1f5f9;">গ্যারেজ অ্যাক্সেস নিয়ন্ত্রণ {{#unless isBn}}<span style="font-size: 0.78rem; opacity: 0.8;">(Garage Access)</span>{{/unless}}:</strong>
-            নির্বাচিত গ্যারেজের অনুমোদিত কর্মীরাই কেবল এই গ্রাহকের বিল পরিচালনা করতে পারবেন।
+            <strong class="guide-strong">গ্যারেজ অ্যাক্সেস নিয়ন্ত্রণ {{#unless isBn}}<span style="font-size: 0.78rem; opacity: 0.8;">(Garage Access)</span>{{/unless}}:</strong>
+            <span class="guide-text">নির্বাচিত গ্যারেজের অনুমোদিত কর্মীরাই কেবল এই গ্রাহকের বিল পরিচালনা করতে পারবেন।</span>
           </div>
         </div>
 
-        <div style="display: flex; gap: 0.75rem; align-items: flex-start;">
-          <div style="width: 24px; height: 24px; border-radius: 6px; background: rgba(16, 185, 129, 0.15); color: #34d399; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 0.8rem; font-weight: 700;">২</div>
+        <div class="guide-item">
+          <div class="guide-step-badge step-2">২</div>
           <div>
-            <strong style="color: #f1f5f9;">প্রাথমিক মিটারিং {{#unless isBn}}<span style="font-size: 0.78rem; opacity: 0.8;">(Baseline Metering)</span>{{/unless}}:</strong>
-            প্রাথমিক ইউনিট হলো গ্রাহকের মিটার শুরুর রিডিং, যা প্রথম মাসের বিদ্যুৎ বিল হিসাব করার প্রারম্ভিক পয়েন্ট হিসেবে ব্যবহৃত হবে।
+            <strong class="guide-strong">প্রাথমিক মিটারিং {{#unless isBn}}<span style="font-size: 0.78rem; opacity: 0.8;">(Baseline Metering)</span>{{/unless}}:</strong>
+            <span class="guide-text">প্রাথমিক ইউনিট হলো গ্রাহকের মিটার শুরুর রিডিং, যা প্রথম মাসের বিদ্যুৎ বিল হিসাব করার প্রারম্ভিক পয়েন্ট হিসেবে ব্যবহৃত হবে।</span>
           </div>
         </div>
 
-        <div style="display: flex; gap: 0.75rem; align-items: flex-start;">
-          <div style="width: 24px; height: 24px; border-radius: 6px; background: rgba(168, 85, 247, 0.15); color: #c084fc; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 0.8rem; font-weight: 700;">৩</div>
+        <div class="guide-item">
+          <div class="guide-step-badge step-3">৩</div>
           <div>
-            <strong style="color: #f1f5f9;">জামিনদারবৃন্দ {{#unless isBn}}<span style="font-size: 0.78rem; opacity: 0.8;">(Guarantors)</span>{{/unless}}:</strong>
-            গ্রাহক নিবন্ধনের পর তার প্রোফাইল পেজ থেকে পিতা-মাতার নাম ও পরিচয়পত্রসহ একাধিক আইনগত জামিনদার সরাসরি যোগ করতে পারবেন।
+            <strong class="guide-strong">জামিনদারবৃন্দ {{#unless isBn}}<span style="font-size: 0.78rem; opacity: 0.8;">(Guarantors)</span>{{/unless}}:</strong>
+            <span class="guide-text">গ্রাহক নিবন্ধনের পর তার প্রোফাইল পেজ থেকে পিতা-মাতার নাম ও পরিচয়পত্রসহ একাধিক আইনগত জামিনদার সরাসরি যোগ করতে পারবেন।</span>
           </div>
         </div>
 
-        <div style="display: flex; gap: 0.75rem; align-items: flex-start;">
-          <div style="width: 24px; height: 24px; border-radius: 6px; background: rgba(56, 189, 248, 0.15); color: #38bdf8; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 0.8rem; font-weight: 700;">৪</div>
+        <div class="guide-item">
+          <div class="guide-step-badge step-4">৪</div>
           <div>
-            <strong style="color: #f1f5f9;">ডকুমেন্টস ও ফাইল {{#unless isBn}}<span style="font-size: 0.78rem; opacity: 0.8;">(File Upload)</span>{{/unless}}:</strong>
-            গ্রাহকের এনআইডি বা চুক্তিপত্র সরাসরি আপলোড করতে পারবেন। ৫ MB এর বেশি ছবি স্বয়ংক্রিয়ভাবে অপ্টিমাইজ/কম্প্রেস করা হবে।
+            <strong class="guide-strong">ডকুমেন্টস ও ফাইল {{#unless isBn}}<span style="font-size: 0.78rem; opacity: 0.8;">(File Upload)</span>{{/unless}}:</strong>
+            <span class="guide-text">গ্রাহকের এনআইডি বা চুক্তিপত্র সরাসরি আপলোড করতে পারবেন। ৫ MB এর বেশি ছবি স্বয়ংক্রিয়ভাবে অপ্টিমাইজ/কম্প্রেস করা হবে।</span>
           </div>
         </div>
       </div>

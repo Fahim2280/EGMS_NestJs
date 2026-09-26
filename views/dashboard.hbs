@@ -1,10 +1,121 @@
+<style>
+  .dashboard-header {
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95));
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow-md);
+  }
+  .dashboard-company-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0;
+  }
+  .dash-sub-card {
+    background: rgba(15, 23, 42, 0.5);
+    padding: 0.75rem;
+    border-radius: 6px;
+    border: 1px solid var(--color-border);
+  }
+  .dash-sub-card-title {
+    color: #f8fafc;
+  }
+  .dash-sub-card-subtitle {
+    font-size: 0.8rem;
+    color: #94a3b8;
+  }
+  .dash-card-heading {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #f8fafc;
+    margin: 0;
+  }
+
+  /* Light Theme Dashboard Overrides */
+  [data-theme="light"] .dashboard-header {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04) !important;
+  }
+  [data-theme="light"] .dashboard-company-title {
+    color: #0f172a !important;
+  }
+  [data-theme="light"] .dashboard-header p {
+    color: #64748b !important;
+  }
+  [data-theme="light"] .dashboard-header p strong {
+    color: #0f172a !important;
+  }
+  [data-theme="light"] .stat-card {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+  }
+  [data-theme="light"] .stat-card:hover {
+    transform: translateY(-3px) !important;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04) !important;
+    border-color: #cbd5e1 !important;
+  }
+  [data-theme="light"] .stat-card .stat-label {
+    color: #475569 !important;
+    font-weight: 600 !important;
+  }
+  [data-theme="light"] .stat-card .stat-footer {
+    border-top: 1px solid #f1f5f9 !important;
+  }
+  [data-theme="light"] .dash-sub-card {
+    background: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+  }
+  [data-theme="light"] .dash-sub-card-title {
+    color: #0f172a !important;
+    font-weight: 600 !important;
+  }
+  [data-theme="light"] .dash-sub-card-subtitle {
+    color: #64748b !important;
+  }
+  [data-theme="light"] .dash-card-heading {
+    color: #0f172a !important;
+  }
+  .dash-audit-btn {
+    background: #4f46e5 !important;
+    border: 1px solid #4f46e5 !important;
+    color: #ffffff !important;
+    font-weight: 600 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.4rem !important;
+    padding: 0.65rem 1rem !important;
+    border-radius: var(--radius-md) !important;
+  }
+  .dash-audit-btn:hover {
+    background: #4338ca !important;
+    border-color: #4338ca !important;
+    color: #ffffff !important;
+  }
+  [data-theme="light"] .dash-audit-btn {
+    background: #4f46e5 !important;
+    border-color: #4f46e5 !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25) !important;
+  }
+  [data-theme="light"] .dash-audit-btn:hover {
+    background: #4338ca !important;
+    border-color: #4338ca !important;
+    color: #ffffff !important;
+  }
+</style>
+
 <div style="padding-top: 1rem; padding-bottom: 2rem;">
   <!-- Dashboard Hero Header -->
-  <div class="dashboard-header" style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95)); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: var(--shadow-md);">
+  <div class="dashboard-header">
     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
       <div>
         <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.35rem; flex-wrap: wrap;">
-          <h1 style="font-size: 1.75rem; font-weight: 700; color: #fff; margin: 0;">{{company.companyName}}</h1>
+          <h1 class="dashboard-company-title">{{company.companyName}}</h1>
           {{{roleBadge user.role}}}
         </div>
         <p style="color: var(--color-text-muted); margin: 0; font-size: 0.9rem;">
@@ -49,7 +160,7 @@
   <!-- Financial KPI Metrics (Matching ASP.NET Core EGMS) -->
   <div class="kpi-grid-4" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.25rem; margin-bottom: 2rem;">
     <!-- Total Advance Money -->
-    <div class="stat-card" style="border-top: 3px solid #10b981; background: radial-gradient(circle at top right, rgba(16, 185, 129, 0.1), transparent 60%), rgba(30, 41, 59, 0.75);">
+    <div class="stat-card" style="border-top: 3px solid #10b981;">
       <div class="stat-card-header">
         <span class="stat-label">{{t 'dashboard.totalAdvance'}}</span>
         <div class="stat-icon" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">
@@ -66,7 +177,7 @@
     </div>
 
     <!-- Total Present Dues -->
-    <div class="stat-card" style="border-top: 3px solid #ef4444; background: radial-gradient(circle at top right, rgba(239, 68, 68, 0.1), transparent 60%), rgba(30, 41, 59, 0.75);">
+    <div class="stat-card" style="border-top: 3px solid #ef4444;">
       <div class="stat-card-header">
         <span class="stat-label">{{t 'dashboard.totalDues'}}</span>
         <div class="stat-icon" style="background: rgba(239, 68, 68, 0.15); color: #ef4444;">
@@ -84,7 +195,7 @@
     </div>
 
     <!-- Net Balance -->
-    <div class="stat-card" style="border-top: 3px solid {{#if (ne balance 0)}}#38bdf8{{else}}#94a3b8{{/if}}; background: radial-gradient(circle at top right, rgba(56, 189, 248, 0.1), transparent 60%), rgba(30, 41, 59, 0.75);">
+    <div class="stat-card" style="border-top: 3px solid {{#if (ne balance 0)}}#38bdf8{{else}}#94a3b8{{/if}};">
       <div class="stat-card-header">
         <span class="stat-label">{{t 'dashboard.netBalance'}}</span>
         <div class="stat-icon" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8;">
@@ -100,7 +211,7 @@
     </div>
 
     <!-- Total Customers Breakdown -->
-    <div class="stat-card" style="border-top: 3px solid #8b5cf6; background: radial-gradient(circle at top right, rgba(139, 92, 246, 0.1), transparent 60%), rgba(30, 41, 59, 0.75);">
+    <div class="stat-card" style="border-top: 3px solid #8b5cf6;">
       <div class="stat-card-header">
         <span class="stat-label">{{t 'dashboard.activeSubscribers'}}</span>
         <div class="stat-icon" style="background: rgba(139, 92, 246, 0.15); color: #8b5cf6;">
@@ -110,10 +221,10 @@
           </svg>
         </div>
       </div>
-      <div class="stat-value" style="color: #f8fafc;">{{bnNum customerCount}}</div>
+      <div class="stat-value">{{bnNum customerCount}}</div>
       <div class="stat-footer">
         <span style="color: #10b981; font-weight: 600;">{{bnNum customersWithBills}} {{t 'dashboard.billedSubscribers'}}</span> &bull; 
-        <span style="color: #94a3b8;">{{bnNum customersWithoutBills}} {{t 'dashboard.unbilledSubscribers'}}</span>
+        <span style="color: var(--color-text-muted);">{{bnNum customersWithoutBills}} {{t 'dashboard.unbilledSubscribers'}}</span>
       </div>
     </div>
   </div>
@@ -202,7 +313,7 @@
     <!-- Garages Quick Card -->
     <div class="card" style="padding: 1.5rem;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-        <h3 style="font-size: 1.1rem; font-weight: 600; color: #f8fafc; margin: 0;">Garages ({{garages.length}})</h3>
+        <h3 class="dash-card-heading">Garages ({{garages.length}})</h3>
         {{#if (or isSuperAdmin hasAssignedGarages)}}
         <a href="/garages" class="btn btn-secondary btn-sm">{{#if isSuperAdmin}}Manage{{else}}View{{/if}}</a>
         {{/if}}
@@ -210,21 +321,21 @@
       {{#if garages.length}}
         <div style="display: flex; flex-direction: column; gap: 0.75rem;">
           {{#each garages}}
-            <div style="background: rgba(15, 23, 42, 0.5); padding: 0.75rem; border-radius: 6px; border: 1px solid var(--color-border);">
-              <strong style="color: #f8fafc;">{{this.garageName}}</strong>
-              <div style="font-size: 0.8rem; color: #94a3b8;">{{this.address}}</div>
+            <div class="dash-sub-card">
+              <strong class="dash-sub-card-title">{{this.garageName}}</strong>
+              <div class="dash-sub-card-subtitle">{{this.address}}</div>
             </div>
           {{/each}}
         </div>
       {{else}}
-        <p style="color: #94a3b8; font-size: 0.85rem;">No garage facilities registered.</p>
+        <p style="color: var(--color-text-muted); font-size: 0.85rem;">No garage facilities registered.</p>
       {{/if}}
     </div>
 
     <!-- Employees Quick Card -->
     <div class="card" style="padding: 1.5rem;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-        <h3 style="font-size: 1.1rem; font-weight: 600; color: #f8fafc; margin: 0;">Staff &amp; Technicians ({{employees.length}})</h3>
+        <h3 class="dash-card-heading">Staff &amp; Technicians ({{employees.length}})</h3>
         {{#if isSuperAdmin}}
         <a href="/employees" class="btn btn-secondary btn-sm">Manage</a>
         {{/if}}
@@ -232,17 +343,17 @@
       {{#if employees.length}}
         <div style="display: flex; flex-direction: column; gap: 0.75rem;">
           {{#each employees}}
-            <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(15, 23, 42, 0.5); padding: 0.75rem; border-radius: 6px; border: 1px solid var(--color-border);">
+            <div class="dash-sub-card" style="display: flex; justify-content: space-between; align-items: center;">
               <div>
-                <strong style="color: #f8fafc;">{{this.name}}</strong>
-                <div style="font-size: 0.8rem; color: #94a3b8;">{{this.phoneNumber}}</div>
+                <strong class="dash-sub-card-title">{{this.name}}</strong>
+                <div class="dash-sub-card-subtitle">{{this.phoneNumber}}</div>
               </div>
               {{{roleBadge this.role}}}
             </div>
           {{/each}}
         </div>
       {{else}}
-        <p style="color: #94a3b8; font-size: 0.85rem;">No employees registered.</p>
+        <p style="color: var(--color-text-muted); font-size: 0.85rem;">No employees registered.</p>
       {{/if}}
     </div>
 
@@ -250,14 +361,14 @@
     <!-- Audit & Security Quick Card -->
     <div class="card" style="padding: 1.5rem;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-        <h3 style="font-size: 1.1rem; font-weight: 600; color: #f8fafc; margin: 0;">🛡️ {{t 'nav.auditLogs'}}</h3>
+        <h3 class="dash-card-heading">🛡️ {{t 'nav.auditLogs'}}</h3>
         <a href="/audit-logs" class="btn btn-secondary btn-sm">{{t 'common.view'}}</a>
       </div>
-      <p style="color: #94a3b8; font-size: 0.85rem; margin-bottom: 1.25rem;">
+      <p style="color: var(--color-text-muted); font-size: 0.85rem; margin-bottom: 1.25rem;">
         Monitor real-time system activities, user authentications, data updates, and security logs.
       </p>
-      <a href="/audit-logs" class="btn btn-primary btn-sm" style="width: 100%; justify-content: center; background: rgba(99, 102, 241, 0.2); border: 1px solid rgba(99, 102, 241, 0.4); color: #818cf8; text-decoration: none;">
-        📜 {{t 'audit.viewLogs'}} &rarr;
+      <a href="/audit-logs" class="btn btn-primary dash-audit-btn" style="width: 100%; text-decoration: none;">
+        <span>📜</span> <span>{{t 'audit.viewLogs'}} &rarr;</span>
       </a>
     </div>
     {{/if}}

@@ -1,0 +1,49 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: egms_app
+    restart: always
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_USERNAME=egms_user
+      - DB_PASSWORD=${DB_PASSWORD:-PandaKnightStrongProdPass2026!}
+      - DB_DATABASE=egms_db
+      - DB_SYNCHRONIZE=false
+      - ALLOW_SEED=false
+      - JWT_SECRET=${JWT_SECRET:-please_change_this_to_a_random_32_char_secret}
+      - JWT_EXPIRES_IN=7d
+      - HTTPS=false
+      - UPLOAD_DIR=storage/uploads
+    ports:
+      - "3000:3000"
+    volumes:
+      - egms_storage:/app/storage
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: mysql:8.0
+    container_name: egms_mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-RootSecurePass2026!}
+      MYSQL_DATABASE: egms_db
+      MYSQL_USER: egms_user
+      MYSQL_PASSWORD: ${DB_PASSWORD:-PandaKnightStrongProdPass2026!}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  mysql_data:
+  egms_storage:

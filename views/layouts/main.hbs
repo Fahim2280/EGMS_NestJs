@@ -19,7 +19,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/style.css?v=2.8">
+  <link rel="stylesheet" href="/css/style.css?v=3.4">
 </head>
 <body class="{{#if currentUser}}has-sidebar{{else}}has-standalone{{/if}}">
   {{#if currentUser}}
@@ -32,6 +32,7 @@
 
         <main class="main-content">
           <div class="container-fluid app-container">
+            {{> alerts}}
             {{{body}}}
           </div>
         </main>
@@ -48,6 +49,7 @@
 
       <main class="main-content">
         <div class="container">
+          {{> alerts}}
           {{{body}}}
         </div>
       </main>
@@ -57,16 +59,31 @@
   {{/if}}
 
   {{#if toast}}
-    <div class="toast-container">
+    <div class="toast-container" id="globalToastContainer">
       <div class="toast toast-{{toast.type}}">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" color="#10b981">
-          <polyline points="20 6 9 17 4 12"/>
-        </svg>
-        <div>{{toast.message}}</div>
+        {{#if (eq toast.type 'success')}}
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" color="#10b981" style="flex-shrink:0;">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+        {{else if (eq toast.type 'error')}}
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" color="#ef4444" style="flex-shrink:0;">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+        {{else}}
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" color="#38bdf8" style="flex-shrink:0;">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="16" x2="12" y2="12"/>
+            <line x1="12" y1="8" x2="12.01" y2="8"/>
+          </svg>
+        {{/if}}
+        <div style="flex:1;">{{toast.message}}</div>
+        <button type="button" class="toast-close" onclick="this.closest('.toast').remove()" aria-label="Close">&times;</button>
       </div>
     </div>
   {{/if}}
 
-  <script src="/js/main.js?v=2.7"></script>
+  <script src="/js/main.js?v=2.8"></script>
 </body>
 </html>

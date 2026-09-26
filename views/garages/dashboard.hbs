@@ -122,20 +122,11 @@
 </div>
 
 <script>
-  // Fix the form action to use the correct garage ID (server-rendered via data attr)
+  // Ensure the form action uses the correct garage ID
   (function() {
     const form = document.getElementById('garageDashFilter');
-    if (form) {
-      const gid = form.dataset.garageId;
-      form.action = '/garages/' + gid;
-      // Also fix preset pill setDatePreset to use correct URL
-      const origSet = window.setDatePreset;
-      window.setDatePreset = function(preset, fId) {
-        if (fId === 'garageDashFilter' && form) {
-          form.action = '/garages/' + gid;
-        }
-        origSet(preset, fId);
-      };
+    if (form && form.dataset.garageId) {
+      form.action = '/garages/' + form.dataset.garageId;
     }
   })();
 </script>

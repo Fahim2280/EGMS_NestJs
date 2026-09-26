@@ -309,7 +309,7 @@
   <!-- KPI Metrics Grid -->
   <div class="audit-kpi-grid">
     <!-- Total Events -->
-    <div class="stat-card" style="border-top: 3px solid #6366f1; background: radial-gradient(circle at top right, rgba(99, 102, 241, 0.12), transparent 60%), rgba(30, 41, 59, 0.75);">
+    <div class="stat-card" style="border-top: 3px solid #6366f1;">
       <div class="stat-card-header">
         <span class="stat-label">{{t 'audit.totalActivities'}}</span>
         <div class="stat-icon" style="background: rgba(99, 102, 241, 0.15); color: #818cf8;">
@@ -318,14 +318,14 @@
           </svg>
         </div>
       </div>
-      <div class="stat-value" style="color: #818cf8;">{{bnNum stats.totalCount}}</div>
+      <div class="stat-value" style="color: #6366f1;">{{bnNum stats.totalCount}}</div>
       <div class="stat-footer">
         <span style="color: var(--color-text-muted); font-size: 0.8rem;">{{t 'audit.allTimeAudit'}}</span>
       </div>
     </div>
 
     <!-- Today's Events -->
-    <div class="stat-card" style="border-top: 3px solid #10b981; background: radial-gradient(circle at top right, rgba(16, 185, 129, 0.12), transparent 60%), rgba(30, 41, 59, 0.75);">
+    <div class="stat-card" style="border-top: 3px solid #10b981;">
       <div class="stat-card-header">
         <span class="stat-label">{{t 'audit.todayActivities'}}</span>
         <div class="stat-icon" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">
@@ -342,7 +342,7 @@
     </div>
 
     <!-- Auth & Access Events -->
-    <div class="stat-card" style="border-top: 3px solid #c084fc; background: radial-gradient(circle at top right, rgba(192, 132, 252, 0.12), transparent 60%), rgba(30, 41, 59, 0.75);">
+    <div class="stat-card" style="border-top: 3px solid #c084fc;">
       <div class="stat-card-header">
         <span class="stat-label">{{t 'audit.authSecurity'}}</span>
         <div class="stat-icon" style="background: rgba(192, 132, 252, 0.15); color: #c084fc;">
@@ -359,7 +359,7 @@
     </div>
 
     <!-- Critical Operations -->
-    <div class="stat-card" style="border-top: 3px solid #f43f5e; background: radial-gradient(circle at top right, rgba(244, 63, 94, 0.12), transparent 60%), rgba(30, 41, 59, 0.75);">
+    <div class="stat-card" style="border-top: 3px solid #f43f5e;">
       <div class="stat-card-header">
         <span class="stat-label">{{t 'audit.criticalActions'}}</span>
         <div class="stat-icon" style="background: rgba(244, 63, 94, 0.15); color: #f43f5e;">

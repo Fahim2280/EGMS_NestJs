@@ -216,6 +216,80 @@
     color: #ef4444;
   }
 
+  /* Light Theme Overrides */
+  [data-theme="light"] .phone-repeater-header .form-label {
+    color: #1e293b;
+  }
+  [data-theme="light"] .phone-repeater-header .btn-add-phone {
+    background: #ecfdf5;
+    border-color: #a7f3d0;
+    color: #059669;
+  }
+  [data-theme="light"] .phone-repeater-header .btn-add-phone:hover {
+    background: #d1fae5;
+    border-color: #6ee7b7;
+    color: #047857;
+  }
+  [data-theme="light"] .phone-row-item {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  }
+  [data-theme="light"] .phone-row-item:hover {
+    border-color: #94a3b8;
+  }
+  [data-theme="light"] .phone-row-item:focus-within {
+    border-color: #4f46e5;
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+  }
+  [data-theme="light"] .phone-input-col .input-phone-num {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    color: #0f172a;
+  }
+  [data-theme="light"] .phone-input-col .input-phone-num::placeholder {
+    color: #94a3b8;
+  }
+  [data-theme="light"] .phone-input-col .input-phone-num:focus {
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+  }
+  [data-theme="light"] .phone-type-col .select-phone-type {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    color: #0f172a;
+  }
+  [data-theme="light"] .phone-type-col .select-phone-type option {
+    background: #ffffff;
+    color: #0f172a;
+  }
+  [data-theme="light"] .primary-toggle-label {
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #cbd5e1;
+  }
+  [data-theme="light"] .primary-toggle-label:hover {
+    background: #e2e8f0;
+    color: #1e293b;
+  }
+  [data-theme="light"] .primary-toggle-label.is-primary {
+    background: #dcfce7;
+    color: #15803d;
+    border-color: #86efac;
+    font-weight: 700;
+  }
+  [data-theme="light"] .phone-action-col .btn-remove-row {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #dc2626;
+  }
+  [data-theme="light"] .phone-action-col .btn-remove-row:hover:not(:disabled) {
+    background: #fee2e2;
+    border-color: #fca5a5;
+    color: #b91c1c;
+  }
+
   /* Responsive Stacking: kicks in on screens <= 560px OR narrow containers (like modals) <= 520px */
   @container (max-width: 520px) {
     .phone-row-item {

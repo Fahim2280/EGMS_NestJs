@@ -34,6 +34,14 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
 
   async seed(): Promise<void> {
     try {
+      const isProd = process.env.NODE_ENV === 'production';
+      const allowSeed = process.env.ALLOW_SEED === 'true';
+
+      if (isProd && !allowSeed) {
+        this.logger.log('🔒 Production mode: Skipping automatic demo database seeding (ALLOW_SEED=false).');
+        return;
+      }
+
       const companyCount = await this.companyRepo.count();
       if (companyCount > 0) {
         // Seed customers and bills if missing

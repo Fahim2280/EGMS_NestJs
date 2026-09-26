@@ -100,7 +100,7 @@ export class EmployeeController {
         req,
       });
 
-      return res.redirect('/employees?success=Employee+added+successfully');
+      return res.redirect('/employees?success=msg.employeeCreated');
     } catch (err: any) {
       return res.render('employees/create', {
         title: 'Add New Employee - EGMS Portal',
@@ -218,7 +218,7 @@ export class EmployeeController {
       });
 
       return res.redirect(
-        '/employees/permissions?success=Permissions+and+role+updated+successfully',
+        '/employees/permissions?success=msg.permissionsUpdated',
       );
     } catch (err: any) {
       return res.redirect(
@@ -329,7 +329,7 @@ export class EmployeeController {
         req,
       });
 
-      return res.redirect(`/employees/${id}?success=Employee+updated`);
+      return res.redirect(`/employees/${id}?success=msg.employeeUpdated`);
     } catch (err: any) {
       const employee = await this.queryBus.execute(
         new GetEmployeeByIdQuery(id, user.companyId),
@@ -368,9 +368,9 @@ export class EmployeeController {
         req,
       });
 
-      return res.redirect('/employees?success=Employee+removed');
+      return res.redirect('/employees?success=msg.employeeDeleted');
     } catch {
-      return res.redirect('/employees');
+      return res.redirect('/employees?error=msg.genericError');
     }
   }
 }

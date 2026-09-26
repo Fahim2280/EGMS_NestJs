@@ -22,6 +22,7 @@ import { JwtAuthGuard } from '@infrastructure/auth/jwt-auth.guard';
 import { RolesGuard } from '@infrastructure/auth/roles.guard';
 import { Roles } from '@infrastructure/auth/roles.decorator';
 import { AuditLogService } from '@application/services/audit-log.service';
+import { AuthRateLimiterGuard } from '@infrastructure/auth/auth-rate-limiter.guard';
 
 @Controller()
 export class AuthController {
@@ -43,10 +44,12 @@ export class AuthController {
     return res.render('auth/login', {
       title: 'Sign In - Garage Portal',
       successMessage: message,
+      activeNav: 'login',
     });
   }
 
   @Post('login')
+  @UseGuards(AuthRateLimiterGuard)
   async handleLogin(
     @Body() dto: LoginDto,
     @Req() req: Request,
@@ -58,7 +61,7 @@ export class AuthController {
 
       res.cookie('jwt_token', token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
+        secure: (req as any).secure || process.env.HTTPS === 'true' || process.env.NODE_ENV === 'production',
         maxAge: 7 * 24 * 60 * 60 * 1000,
         sameSite: 'lax',
       });
@@ -80,6 +83,7 @@ export class AuthController {
         title: 'Sign In - Garage Portal',
         error: err.message || 'Invalid credentials',
         email: dto.email,
+        activeNav: 'login',
       });
     }
   }
@@ -91,11 +95,27 @@ export class AuthController {
     }
     return res.render('auth/register', {
       title: 'Register Company - Garage Portal',
+      activeNav: 'register',
     });
   }
 
   @Post('register')
-  async handleRegister(@Body() dto: RegisterCompanyDto, @Res() res: Response) {
+  @UseGuards(AuthRateLimiterGuard)
+  async handleRegister(
+    @Body() dto: RegisterCompanyDto,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    if (dto.confirmPassword !== undefined && dto.confirmPassword !== dto.password) {
+      const isBn = (req as any).lang === 'bn';
+      return res.render('auth/register', {
+        title: 'Register Company - Garage Portal',
+        error: isBn ? 'পাসওয়ার্ড দুটি মেলেনি' : 'Passwords do not match',
+        formData: dto,
+        activeNav: 'register',
+      });
+    }
+
     try {
       await this.commandBus.execute(new RegisterCompanyCommand(dto));
       const loginResult = await this.commandBus.execute(
@@ -105,7 +125,7 @@ export class AuthController {
 
       res.cookie('jwt_token', token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
+        secure: (req as any).secure || process.env.HTTPS === 'true' || process.env.NODE_ENV === 'production',
         maxAge: 7 * 24 * 60 * 60 * 1000,
         sameSite: 'lax',
       });
@@ -116,6 +136,7 @@ export class AuthController {
         title: 'Register Company - Garage Portal',
         error: err.message || 'Registration failed',
         formData: dto,
+        activeNav: 'register',
       });
     }
   }
@@ -128,6 +149,7 @@ export class AuthController {
   }
 
   @Post('forgot-password')
+  @UseGuards(AuthRateLimiterGuard)
   async handleForgotPassword(
     @Body('email') email: string,
     @Res() res: Response,
@@ -169,6 +191,7 @@ export class AuthController {
   }
 
   @Post('reset-password')
+  @UseGuards(AuthRateLimiterGuard)
   async handleResetPassword(
     @Body('token') token: string,
     @Body('email') email: string,
@@ -179,7 +202,7 @@ export class AuthController {
       await this.commandBus.execute(
         new ResetPasswordCommand(email, token, password),
       );
-      return res.redirect('/login?message=Password+has+been+reset+successfully.+Please+sign+in.');
+      return res.redirect('/login?message=msg.passwordResetSuccess');
     } catch (err: any) {
       return res.render('auth/reset-password', {
         title: 'Reset Password - Garage Portal',
@@ -244,7 +267,7 @@ export class AuthController {
         req,
       });
 
-      return res.redirect('/profile/edit?success=Profile+updated+successfully');
+      return res.redirect('/profile/edit?success=msg.companyUpdated');
     } catch (err: any) {
       const company = await this.queryBus.execute(
         new GetCompanyByIdQuery(user.companyId),
@@ -275,6 +298,6 @@ export class AuthController {
       });
     }
     res.clearCookie('jwt_token');
-    return res.redirect('/login');
+    return res.redirect('/login?message=msg.logoutSuccess');
   }
 }

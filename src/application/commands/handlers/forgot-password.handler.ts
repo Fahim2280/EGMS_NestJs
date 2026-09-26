@@ -50,7 +50,10 @@ export class ForgotPasswordHandler implements ICommandHandler<ForgotPasswordComm
 
     await this.tokenRepo.save(resetToken);
 
-    const appUrl = this.configService.get<string>('APP_URL', 'http://localhost:3000');
+    const appUrl =
+      this.configService.get<string>('APP_URL') ||
+      process.env.APP_URL ||
+      'https://localhost:3000';
     const resetLink = `${appUrl}/reset-password?token=${token}&email=${encodeURIComponent(normalizedEmail)}`;
 
     // Send real password reset email

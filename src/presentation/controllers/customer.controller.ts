@@ -230,7 +230,7 @@ export class CustomerController {
         req,
       });
 
-      return res.redirect('/customers?success=Customer+registered+successfully');
+      return res.redirect('/customers?success=msg.customerCreated');
     } catch (err: any) {
       const garages = await this.queryBus.execute(
         new GetGaragesByCompanyQuery(user.companyId, allowedGarageIds),
@@ -437,7 +437,7 @@ export class CustomerController {
         req,
       });
 
-      return res.redirect(`/customers/${id}?success=Customer+updated`);
+      return res.redirect(`/customers/${id}?success=msg.customerUpdated`);
     } catch (err: any) {
       const garages = await this.queryBus.execute(
         new GetGaragesByCompanyQuery(user.companyId, allowedGarageIds),
@@ -495,10 +495,10 @@ export class CustomerController {
         details: `Deleted customer record ${existing?.name || id}`,
         req,
       });
+      return res.redirect('/customers?success=msg.customerDeleted');
     } catch {
-      // silently continue
+      return res.redirect('/customers?error=msg.customerDeleteFailed');
     }
-    return res.redirect('/customers?success=Customer+removed');
   }
 
   // ==========================================
@@ -547,7 +547,7 @@ export class CustomerController {
         ),
       );
 
-      return res.redirect(`/customers/${customerId}?success=Guarantor+added+successfully`);
+      return res.redirect(`/customers/${customerId}?success=msg.guarantorAdded`);
     } catch (err: any) {
       return res.redirect(
         `/customers/${customerId}?error=${encodeURIComponent(err.message || 'Failed to add guarantor')}`,
@@ -647,7 +647,7 @@ export class CustomerController {
         ),
       );
 
-      return res.redirect(`/customers/${customerId}?success=Guarantor+updated+successfully`);
+      return res.redirect(`/customers/${customerId}?success=msg.guarantorUpdated`);
     } catch (err: any) {
       return res.render('customers/edit-guarantor', {
         title: `Edit Guarantor - EGMS Portal`,
@@ -692,7 +692,7 @@ export class CustomerController {
         ),
       );
 
-      return res.redirect(`/customers/${customerId}?success=Guarantor+removed+successfully`);
+      return res.redirect(`/customers/${customerId}?success=msg.guarantorDeleted`);
     } catch (err: any) {
       return res.redirect(
         `/customers/${customerId}?error=${encodeURIComponent(err.message || 'Failed to delete guarantor')}`,

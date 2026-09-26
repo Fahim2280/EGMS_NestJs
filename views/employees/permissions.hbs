@@ -1,3 +1,179 @@
+<style>
+  .perm-page-title {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--color-text, #fff);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+  .perm-editor-box {
+    margin-top: 1.25rem;
+    padding: 1.25rem;
+    border-top: 1px dashed rgba(255, 255, 255, 0.15);
+    background: rgba(15, 23, 42, 0.7);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .perm-section-title {
+    font-size: 0.9rem;
+    color: var(--color-text, #fff);
+    margin: 0 0 0.75rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .perm-select {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+    background: rgba(15, 23, 42, 0.9);
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    color: #fff;
+    border-radius: 6px;
+  }
+  .perm-action-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    cursor: pointer;
+    color: #e2e8f0;
+    font-size: 0.85rem;
+  }
+  .perm-garage-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    border-radius: 6px;
+    background: rgba(30, 41, 59, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .perm-garage-name {
+    color: #f8fafc;
+    font-size: 0.85rem;
+    display: block;
+  }
+  .perm-garage-address {
+    color: var(--color-text-muted);
+    font-size: 0.75rem;
+  }
+  .perm-editor-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 1rem;
+  }
+  .perm-matrix-card {
+    padding: 1.5rem;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+  }
+  .perm-matrix-card h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #fff;
+    margin: 0;
+  }
+  .perm-matrix-table th {
+    padding: 0.75rem 1rem;
+    color: #94a3b8;
+    font-weight: 600;
+  }
+  .perm-matrix-table td {
+    padding: 0.75rem 1rem;
+    color: #e2e8f0;
+    font-weight: 500;
+  }
+
+  /* Light Theme Specifics */
+  [data-theme="light"] .perm-page-title {
+    color: #0f172a !important;
+  }
+  [data-theme="light"] .perm-editor-box {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-top: 1px dashed #cbd5e1 !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04) !important;
+  }
+  [data-theme="light"] .perm-section-title {
+    color: #0f172a !important;
+    font-weight: 700 !important;
+  }
+  [data-theme="light"] .perm-select {
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    color: #0f172a !important;
+  }
+  [data-theme="light"] .perm-select option {
+    background: #ffffff !important;
+    color: #0f172a !important;
+  }
+  [data-theme="light"] .perm-action-item {
+    color: #0f172a !important;
+    font-weight: 500 !important;
+  }
+  [data-theme="light"] .perm-action-item strong {
+    color: #0f172a !important;
+  }
+  [data-theme="light"] .perm-action-item span {
+    color: #334155 !important;
+  }
+  [data-theme="light"] .perm-garage-card {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03) !important;
+  }
+  [data-theme="light"] .perm-garage-card:hover {
+    border-color: #4f46e5 !important;
+    background: #f8fafc !important;
+  }
+  [data-theme="light"] .perm-garage-name {
+    color: #0f172a !important;
+    font-weight: 700 !important;
+  }
+  [data-theme="light"] .perm-garage-address {
+    color: #475569 !important;
+  }
+  [data-theme="light"] .perm-editor-actions {
+    border-top: 1px solid #e2e8f0 !important;
+  }
+  [data-theme="light"] .perm-matrix-card {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+  }
+  [data-theme="light"] .perm-matrix-card h3 {
+    color: #0f172a !important;
+  }
+  [data-theme="light"] .perm-matrix-card p {
+    color: #475569 !important;
+  }
+  [data-theme="light"] .perm-matrix-table th {
+    background: #f8fafc !important;
+    color: #334155 !important;
+    border-bottom: 2px solid #e2e8f0 !important;
+  }
+  [data-theme="light"] .perm-matrix-table tr {
+    border-bottom: 1px solid #f1f5f9 !important;
+  }
+  [data-theme="light"] .perm-matrix-table td {
+    color: #0f172a !important;
+  }
+  [data-theme="light"] .perm-matrix-table code {
+    background: #f1f5f9 !important;
+    color: #4f46e5 !important;
+    border: 1px solid #e2e8f0 !important;
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+  }
+</style>
+
 <div style="padding-top: 1rem; padding-bottom: 2rem;">
   <!-- Page Header -->
   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
@@ -6,7 +182,7 @@
         <span class="badge badge-admin" style="font-size: 0.75rem;">{{t 'permissions.securityBadge'}}</span>
         <span style="color: var(--color-text-muted); font-size: 0.85rem;">/ {{#if isBn}}পরিচালনা পোর্টাল{{else}}Management Portal{{/if}}</span>
       </div>
-      <h1 style="font-size: 1.6rem; font-weight: 800; color: #fff; margin: 0; display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+      <h1 class="perm-page-title">
         <span style="display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 10px; background: rgba(99, 102, 241, 0.15); color: #818cf8; border: 1px solid rgba(99, 102, 241, 0.3);">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
@@ -171,18 +347,18 @@
             </div>
 
             <!-- Expandable Permission Editor Form -->
-            <div id="perm-editor-{{this.id}}" style="display: none; margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px dashed rgba(255, 255, 255, 0.15); background: rgba(15, 23, 42, 0.7); border-radius: 8px; padding: 1.25rem;">
+            <div id="perm-editor-{{this.id}}" class="perm-editor-box" style="display: none;">
               <form method="POST" action="/employees/{{this.id}}/permissions">
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 1.25rem;">
                   
                   <!-- Column 1: Role & Account Status -->
                   <div>
-                    <h4 style="font-size: 0.9rem; color: #fff; margin: 0 0 0.75rem 0; display: flex; align-items: center; gap: 0.4rem;">
+                    <h4 class="perm-section-title">
                       <span>🛡️</span> {{t 'employees.role'}} &amp; {{t 'common.status'}}
                     </h4>
                     <div style="margin-bottom: 0.75rem;">
                       <label style="display: block; font-size: 0.8rem; color: var(--color-text-muted); margin-bottom: 0.25rem;">{{#if isBn}}সিস্টেম ভূমিকা{{else}}System Role{{/if}}</label>
-                      <select name="role" class="form-control" style="width: 100%; padding: 0.5rem 0.75rem; font-size: 0.85rem; background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(99, 102, 241, 0.3); color: #fff; border-radius: 6px;" onchange="handleRoleChange('{{this.id}}', this.value)">
+                      <select name="role" class="form-control perm-select" onchange="handleRoleChange('{{this.id}}', this.value)">
                         <option value="GENERAL" {{#if (eq this.role 'GENERAL')}}selected{{/if}}>🧑‍💼 GENERAL ({{#if isBn}}সাধারণ কর্মী{{else}}Staff Member{{/if}})</option>
                         <option value="SUPER_ADMIN" {{#if (eq this.role 'SUPER_ADMIN')}}selected{{/if}}>👑 SUPER_ADMIN ({{#if isBn}}সম্পূর্ণ কোম্পানি অ্যাক্সেস{{else}}Full Company Access{{/if}})</option>
                       </select>
@@ -190,7 +366,7 @@
 
                     <div>
                       <label style="display: block; font-size: 0.8rem; color: var(--color-text-muted); margin-bottom: 0.25rem;">{{#if isBn}}অ্যাকাউন্ট অ্যাক্সেস অবস্থা{{else}}Account Access State{{/if}}</label>
-                      <select name="isActive" class="form-control" style="width: 100%; padding: 0.5rem 0.75rem; font-size: 0.85rem; background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(99, 102, 241, 0.3); color: #fff; border-radius: 6px;">
+                      <select name="isActive" class="form-control perm-select">
                         <option value="true" {{#if this.isActive}}selected{{/if}}>🟢 {{#if isBn}}সক্রিয় (লগইনের অনুমতি আছে){{else}}Active (Permitted to Log In){{/if}}</option>
                         <option value="false" {{#unless this.isActive}}selected{{/unless}}>🔴 {{#if isBn}}স্থগিত (তাৎক্ষণিকভাবে বাধা){{else}}Suspended (Blocked Immediately){{/if}}</option>
                       </select>
@@ -199,23 +375,23 @@
 
                   <!-- Column 2: Action Permissions -->
                   <div>
-                    <h4 style="font-size: 0.9rem; color: #fff; margin: 0 0 0.75rem 0; display: flex; align-items: center; gap: 0.4rem;">
+                    <h4 class="perm-section-title">
                       <span>⚡</span> {{t 'permissions.actionPermissions'}}
                     </h4>
                     <div style="display: flex; flex-direction: column; gap: 0.6rem;">
-                      <label style="display: flex; align-items: center; gap: 0.6rem; cursor: pointer; color: #e2e8f0; font-size: 0.85rem;">
+                      <label class="perm-action-item">
                         <input type="checkbox" name="canCreate" value="true" {{#if (or (eq this.role 'SUPER_ADMIN') this.canCreate)}}checked{{/if}} style="width: 17px; height: 17px; accent-color: #10b981;">
                         <span><strong>Create</strong> &bull; Add new customers and electric bills</span>
                       </label>
-                      <label style="display: flex; align-items: center; gap: 0.6rem; cursor: pointer; color: #e2e8f0; font-size: 0.85rem;">
+                      <label class="perm-action-item">
                         <input type="checkbox" name="canEdit" value="true" {{#if (or (eq this.role 'SUPER_ADMIN') this.canEdit)}}checked{{/if}} style="width: 17px; height: 17px; accent-color: #3b82f6;">
                         <span><strong>Edit</strong> &bull; Update existing customer and bill records</span>
                       </label>
-                      <label style="display: flex; align-items: center; gap: 0.6rem; cursor: pointer; color: #e2e8f0; font-size: 0.85rem;">
+                      <label class="perm-action-item">
                         <input type="checkbox" name="canDelete" value="true" {{#if (or (eq this.role 'SUPER_ADMIN') this.canDelete)}}checked{{/if}} style="width: 17px; height: 17px; accent-color: #ef4444;">
                         <span><strong>Delete</strong> &bull; Remove customer records and bills</span>
                       </label>
-                      <label style="display: flex; align-items: center; gap: 0.6rem; cursor: pointer; color: #e2e8f0; font-size: 0.85rem;">
+                      <label class="perm-action-item">
                         <input type="checkbox" name="canView" value="true" {{#if (or (eq this.role 'SUPER_ADMIN') this.canView)}}checked{{/if}} style="width: 17px; height: 17px; accent-color: #8b5cf6;">
                         <span><strong>View</strong> &bull; Read-only viewing of assigned ledger &amp; customers</span>
                       </label>
@@ -225,7 +401,7 @@
                   <!-- Column 3: Authorized Garages -->
                   <div style="grid-column: 1 / -1;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
-                      <h4 style="font-size: 0.9rem; color: #fff; margin: 0; display: flex; align-items: center; gap: 0.4rem;">
+                      <h4 class="perm-section-title" style="margin: 0;">
                         <span>🏢</span> {{t 'permissions.assignedGarages'}}
                       </h4>
                       <div style="display: flex; gap: 0.4rem;">
@@ -240,11 +416,11 @@
 
                     <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 0.75rem;" id="garage-list-{{this.id}}">
                       {{#each ../garages}}
-                        <label style="display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.75rem; border-radius: 6px; background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255, 255, 255, 0.1); cursor: pointer; transition: border-color 0.2s;">
+                        <label class="perm-garage-card">
                           <input type="checkbox" name="garageIds" value="{{this.id}}" {{#if (includes ../permittedGarageIds this.id)}}checked{{/if}} style="margin-top: 3px; width: 18px; height: 18px; accent-color: #6366f1;">
                           <div>
-                            <strong style="color: #f8fafc; font-size: 0.85rem; display: block;">{{this.garageName}}</strong>
-                            <span style="color: var(--color-text-muted); font-size: 0.75rem;">{{this.address}}</span>
+                            <strong class="perm-garage-name">{{this.garageName}}</strong>
+                            <span class="perm-garage-address">{{this.address}}</span>
                           </div>
                         </label>
                       {{/each}}
@@ -253,7 +429,7 @@
                 </div>
 
                 <!-- Form Action Buttons -->
-                <div style="display: flex; justify-content: flex-end; gap: 0.75rem; border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 1rem;">
+                <div class="perm-editor-actions">
                   <button type="button" class="btn btn-secondary btn-sm" onclick="togglePermForm('{{this.id}}')">{{t 'common.cancel'}}</button>
                   <button type="submit" class="btn btn-primary btn-sm" style="display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.4rem 1.25rem;">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -287,11 +463,11 @@
   </div>
 
   <!-- Role & Permissions Reference Matrix -->
-  <div class="card" style="padding: 1.5rem; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(99, 102, 241, 0.2);">
+  <div class="card perm-matrix-card">
     <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.25rem;">
       <span style="font-size: 1.25rem;">📋</span>
       <div>
-        <h3 style="font-size: 1.1rem; font-weight: 700; color: #fff; margin: 0;">{{t 'permissions.breakdownTitle'}}</h3>
+        <h3>{{t 'permissions.breakdownTitle'}}</h3>
         <p style="color: var(--color-text-muted); font-size: 0.85rem; margin: 0.15rem 0 0 0;">
           {{t 'permissions.breakdownSubtitle'}}
         </p>
@@ -299,67 +475,67 @@
     </div>
 
     <div style="overflow-x: auto;">
-      <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+      <table class="perm-matrix-table" style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
         <thead>
-          <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); text-align: left;">
-            <th style="padding: 0.75rem 1rem; color: #94a3b8; font-weight: 600;">{{t 'permissions.systemModule'}}</th>
-            <th style="padding: 0.75rem 1rem; color: #fbbf24; font-weight: 700;">👑 SUPER_ADMIN</th>
-            <th style="padding: 0.75rem 1rem; color: #22d3ee; font-weight: 700;">🧑‍💼 GENERAL ({{#if isBn}}কর্মী{{else}}Employee{{/if}})</th>
+          <tr style="text-align: left;">
+            <th>{{t 'permissions.systemModule'}}</th>
+            <th style="color: #fbbf24; font-weight: 700;">👑 SUPER_ADMIN</th>
+            <th style="color: #22d3ee; font-weight: 700;">🧑‍💼 GENERAL ({{#if isBn}}কর্মী{{else}}Employee{{/if}})</th>
           </tr>
         </thead>
         <tbody>
-          <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
-            <td style="padding: 0.75rem 1rem; color: #e2e8f0; font-weight: 500;">
+          <tr>
+            <td style="font-weight: 600;">
               🏠 <strong>{{t 'permissions.garageScope'}}</strong>
             </td>
-            <td style="padding: 0.75rem 1rem; color: #34d399;">
+            <td style="color: #10b981; font-weight: 600;">
               ✅ {{t 'permissions.allGaragesFull'}}
             </td>
-            <td style="padding: 0.75rem 1rem; color: #38bdf8;">
+            <td style="color: #0284c7; font-weight: 500;">
               🔍 <strong>{{t 'permissions.assignedGaragesOnly'}}</strong> ({{#if isBn}}অনির্বাচিত গ্যারেজ সম্পূর্ণ লুকানো{{else}}Unassigned garages are completely hidden{{/if}})
             </td>
           </tr>
-          <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
-            <td style="padding: 0.75rem 1rem; color: #e2e8f0; font-weight: 500;">
+          <tr>
+            <td style="font-weight: 600;">
               📊 <strong>{{#if isBn}}ড্যাশবোর্ড ও কেপিআই মেট্রিক্স{{else}}Dashboard &amp; KPI Metrics{{/if}}</strong>
             </td>
-            <td style="padding: 0.75rem 1rem; color: #34d399;">
+            <td style="color: #10b981; font-weight: 600;">
               ✅ {{#if isBn}}সম্পূর্ণ কোম্পানির সারসংখ্যান{{else}}Company-wide aggregates{{/if}}
             </td>
-            <td style="padding: 0.75rem 1rem; color: #38bdf8;">
+            <td style="color: #0284c7; font-weight: 500;">
               🔍 {{#if isBn}}শুধুমাত্র অনুমোদিত গ্যারেজের ডেটা{{else}}Aggregates scoped strictly to authorized garages{{/if}}
             </td>
           </tr>
-          <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
-            <td style="padding: 0.75rem 1rem; color: #e2e8f0; font-weight: 500;">
+          <tr>
+            <td style="font-weight: 600;">
               ➕ <strong>{{t 'permissions.canCreate'}} ({{t 'nav.customers'}} &amp; {{t 'nav.bills'}})</strong>
             </td>
-            <td style="padding: 0.75rem 1rem; color: #34d399;">
+            <td style="color: #10b981; font-weight: 600;">
               ✅ {{#if isBn}}অনুমতিপ্রাপ্ত{{else}}Allowed{{/if}}
             </td>
-            <td style="padding: 0.75rem 1rem; color: #94a3b8;">
+            <td style="color: var(--color-text-muted);">
               {{#if isBn}}<code>canCreate</code> পারমিশন দ্বারা নিয়ন্ত্রিত (অনুমোদিত গ্যারেজে){{else}}Controlled by <code>canCreate</code> permission (within authorized garages){{/if}}
             </td>
           </tr>
-          <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
-            <td style="padding: 0.75rem 1rem; color: #e2e8f0; font-weight: 500;">
+          <tr>
+            <td style="font-weight: 600;">
               ✏️ <strong>{{t 'permissions.canEdit'}} ({{t 'nav.customers'}} &amp; {{t 'nav.bills'}})</strong>
             </td>
-            <td style="padding: 0.75rem 1rem; color: #34d399;">
+            <td style="color: #10b981; font-weight: 600;">
               ✅ {{#if isBn}}অনুমতিপ্রাপ্ত{{else}}Allowed{{/if}}
             </td>
-            <td style="padding: 0.75rem 1rem; color: #94a3b8;">
+            <td style="color: var(--color-text-muted);">
               {{#if isBn}}<code>canEdit</code> পারমিশন দ্বারা নিয়ন্ত্রিত (অনুমোদিত গ্যারেজে){{else}}Controlled by <code>canEdit</code> permission (within authorized garages){{/if}}
             </td>
           </tr>
-          <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
-            <td style="padding: 0.75rem 1rem; color: #e2e8f0; font-weight: 500;">
+          <tr>
+            <td style="font-weight: 600;">
               🗑️ <strong>{{t 'permissions.canDelete'}} ({{t 'nav.customers'}} &amp; {{t 'nav.bills'}})</strong>
             </td>
-            <td style="padding: 0.75rem 1rem; color: #34d399;">
+            <td style="color: #10b981; font-weight: 600;">
               ✅ {{#if isBn}}অনুমতিপ্রাপ্ত{{else}}Allowed{{/if}}
             </td>
-            <td style="padding: 0.75rem 1rem; color: #94a3b8;">
+            <td style="color: var(--color-text-muted);">
               {{#if isBn}}<code>canDelete</code> পারমিশন দ্বারা নিয়ন্ত্রিত (অনুমোদিত গ্যারেজে){{else}}Controlled by <code>canDelete</code> permission (within authorized garages){{/if}}
             </td>
           </tr>

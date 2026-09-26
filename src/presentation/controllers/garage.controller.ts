@@ -134,7 +134,7 @@ export class GarageController {
         req,
       });
 
-      return res.redirect('/garages?success=Garage+registered+successfully');
+      return res.redirect('/garages?success=msg.garageCreated');
     } catch (err: any) {
       return res.render('garages/create', {
         title: 'Register New Garage - EGMS Portal',
@@ -164,7 +164,7 @@ export class GarageController {
     if (!isSuperAdmin) {
       const allowed = user.garageIds && Array.isArray(user.garageIds) && user.garageIds.includes(id);
       if (!allowed) {
-        return res.redirect('/garages?error=You+do+not+have+permission+to+view+this+garage');
+        return res.redirect('/garages?error=msg.permissionDenied');
       }
     }
 
@@ -260,7 +260,7 @@ export class GarageController {
         req,
       });
 
-      return res.redirect(`/garages/${id}?success=Garage+details+updated+successfully`);
+      return res.redirect(`/garages/${id}?success=msg.garageUpdated`);
     } catch (err: any) {
       return res.render('garages/edit', {
         title: 'Edit Garage - EGMS Portal',
