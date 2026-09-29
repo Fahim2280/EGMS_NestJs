@@ -136,6 +136,18 @@
     background: rgba(239, 68, 68, 0.3);
     color: #ef4444;
   }
+  @media (max-width: 576px) {
+    .file-preview-info {
+      flex: 1 1 100%;
+      min-width: 0;
+    }
+    .file-preview-name {
+      max-width: 100%;
+    }
+    .file-uploader-box {
+      padding: 1.15rem 0.75rem;
+    }
+  }
 </style>
 
 <div class="file-uploader-wrapper" id="{{#if uploaderId}}{{uploaderId}}{{else}}fileUploader{{/if}}" style="margin-bottom: 1.25rem;">

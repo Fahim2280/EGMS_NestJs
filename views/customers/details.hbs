@@ -8,6 +8,15 @@
       {{#if customer.customerCode}}
       <span class="badge" style="background: rgba(20, 184, 166, 0.15); color: #2dd4bf; border: 1px solid rgba(20,184,166,0.3); font-size: 0.9rem; font-weight: 700; padding: 0.25rem 0.65rem; border-radius: 6px; letter-spacing: 0.04em;">{{customer.customerCode}}</span>
       {{/if}}
+      {{#if customer.isActive}}
+      <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); font-size: 0.85rem; font-weight: 600; padding: 0.25rem 0.65rem; border-radius: 6px;">
+        ● {{t 'customers.active'}}
+      </span>
+      {{else}}
+      <span class="badge" style="background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); font-size: 0.85rem; font-weight: 700; padding: 0.25rem 0.65rem; border-radius: 6px;">
+        🚫 {{t 'customers.suspended'}}
+      </span>
+      {{/if}}
     </div>
     <p class="page-subtitle" style="margin-top: 0.35rem;">
       {{#if customer.customerCode}}
@@ -17,14 +26,41 @@
     </p>
   </div>
   <div class="header-actions">
+    {{#if isSuperAdmin}}
+      {{#if customer.isActive}}
+      <form id="suspendCustomerHeaderForm" action="/customers/{{customer.id}}/toggle-status" method="POST" style="display: inline; margin: 0;">
+        <button type="button" class="btn" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.35); font-weight: 600;" onclick="triggerCustomerSuspendModal('suspendCustomerHeaderForm')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 0.35rem;"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+          {{t 'customers.suspendAction'}}
+        </button>
+      </form>
+      {{else}}
+      <form id="reactivateCustomerHeaderForm" action="/customers/{{customer.id}}/toggle-status" method="POST" style="display: inline; margin: 0;">
+        <button type="button" class="btn" style="background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.35); font-weight: 600;" onclick="triggerCustomerReactivateModal('reactivateCustomerHeaderForm')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 0.35rem;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          {{t 'customers.reactivateAction'}}
+        </button>
+      </form>
+      {{/if}}
+    {{/if}}
     {{#if (or isSuperAdmin currentUser.canCreate)}}
-    <a href="/bills/new?customerId={{customer.id}}" class="btn btn-primary" style="background: #10b981; border-color: #10b981;">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-        <line x1="12" y1="5" x2="12" y2="19"/>
-        <line x1="5" y1="12" x2="19" y2="12"/>
-      </svg>
-      {{t 'bills.newBill'}}
-    </a>
+      {{#if customer.isActive}}
+      <a href="/bills/new?customerId={{customer.id}}" class="btn btn-primary" style="background: #10b981; border-color: #10b981;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="12" y1="5" x2="12" y2="19"/>
+          <line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        {{t 'bills.newBill'}}
+      </a>
+      {{else}}
+      <button type="button" class="btn btn-secondary" style="opacity: 0.5; cursor: not-allowed;" title="{{t 'customers.suspendedNoticeShort'}}" disabled>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="12" y1="5" x2="12" y2="19"/>
+          <line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        {{t 'bills.newBill'}} ({{t 'customers.suspended'}})
+      </button>
+      {{/if}}
     {{/if}}
     {{#if (or isSuperAdmin currentUser.canEdit)}}
     <a href="/customers/{{customer.id}}/edit" class="btn btn-secondary">
@@ -33,6 +69,28 @@
     {{/if}}
   </div>
 </div>
+
+{{#unless customer.isActive}}
+<div class="card" style="margin-bottom: 1.5rem; background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.25); border-left: 4px solid #ef4444; padding: 1rem 1.25rem;">
+  <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+    <div style="display: flex; align-items: center; gap: 0.75rem;">
+      <div style="font-size: 1.75rem; line-height: 1;">🚫</div>
+      <div>
+        <div style="font-weight: 700; color: #ef4444; font-size: 1.05rem;">{{t 'customers.suspendedNoticeShort'}}</div>
+        <div style="color: var(--color-text-secondary); font-size: 0.9rem; margin-top: 0.15rem;">{{t 'customers.suspendedNotice'}}</div>
+      </div>
+    </div>
+    {{#if isSuperAdmin}}
+    <form id="bannerReactivateCustomerForm" action="/customers/{{customer.id}}/toggle-status" method="POST" style="margin: 0;">
+      <button type="button" class="btn btn-success" style="background: #10b981; border-color: #10b981; font-weight: 600;" onclick="triggerCustomerReactivateModal('bannerReactivateCustomerForm')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right: 0.35rem;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        {{t 'customers.reactivateAction'}}
+      </button>
+    </form>
+    {{/if}}
+  </div>
+</div>
+{{/unless}}
 
 <!-- Profile Info Grid -->
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
@@ -111,45 +169,168 @@
   <div style="font-size: 1rem; color: var(--color-text-primary);">{{customer.address}}</div>
 </div>
 
+<style>
+  .doc-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding: 1.15rem 1.4rem;
+  }
+  .doc-header-info {
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+  .doc-header-title {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    flex-wrap: wrap;
+    font-size: 1.05rem;
+    font-weight: 700;
+    line-height: 1.35;
+  }
+  .doc-header-icon {
+    font-size: 1.2rem;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+  }
+  .doc-header-text {
+    color: var(--color-text-primary, #ffffff);
+  }
+  .doc-header-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(99, 102, 241, 0.15);
+    border: 1px solid rgba(99, 102, 241, 0.35);
+    color: #818cf8;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 1px 7px;
+    border-radius: 9999px;
+    line-height: 1.2;
+  }
+  .doc-header-subtitle {
+    color: var(--color-text-muted, #94a3b8);
+    font-size: 0.82rem;
+    margin: 0.25rem 0 0 0;
+    line-height: 1.35;
+  }
+  .doc-header-upload-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+  }
+  .doc-section-body {
+    padding: 1.25rem;
+    box-sizing: border-box;
+  }
+
+  @media (max-width: 576px) {
+    .doc-section-header {
+      padding: 0.85rem 0.85rem !important;
+      flex-direction: column;
+      align-items: stretch !important;
+      gap: 0.75rem !important;
+    }
+    .doc-header-title {
+      font-size: 0.95rem !important;
+    }
+    .doc-header-subtitle {
+      font-size: 0.76rem !important;
+    }
+    .doc-header-upload-btn {
+      width: 100% !important;
+      height: 38px !important;
+      font-size: 0.85rem !important;
+      border-radius: var(--radius-md) !important;
+    }
+    .doc-section-body {
+      padding: 0.75rem 0.85rem !important;
+    }
+    .modal-responsive-card {
+      padding: 1.15rem 0.85rem !important;
+    }
+  }
+
+  @media (max-width: 360px) {
+    .doc-section-header {
+      padding: 0.75rem 0.65rem !important;
+    }
+    .doc-section-body {
+      padding: 0.65rem 0.65rem !important;
+    }
+    .doc-header-title {
+      font-size: 0.88rem !important;
+    }
+  }
+
+  [data-theme="light"] .doc-header-text {
+    color: #0f172a;
+  }
+  [data-theme="light"] .doc-header-count {
+    background: #e0e7ff;
+    border-color: #c7d2fe;
+    color: #4338ca;
+  }
+  [data-theme="light"] .doc-header-subtitle {
+    color: #64748b;
+  }
+</style>
+
 <!-- Customer Documents & Attachments Section -->
-<div class="card" style="margin-bottom: 2rem;">
-  <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
-    <div>
-      <h2 class="card-title" style="margin: 0; display: flex; align-items: center; gap: 0.5rem;">
-        <span>📁</span> {{t 'documents.title'}} {{#if customer.documents.length}}({{bnNum customer.documents.length}}){{/if}}
+<div class="card doc-section-card" style="margin-bottom: 2rem;">
+  <div class="card-header doc-section-header">
+    <div class="doc-header-info">
+      <h2 class="card-title doc-header-title">
+        <span class="doc-header-icon">📁</span>
+        <span class="doc-header-text">{{t 'documents.title'}}</span>
+        {{#if customer.documents.length}}
+          <span class="doc-header-count">({{bnNum customer.documents.length}})</span>
+        {{/if}}
       </h2>
-      <p style="color: var(--color-text-muted); font-size: 0.85rem; margin: 0.25rem 0 0 0;">{{t 'documents.subtitle'}}</p>
+      <p class="doc-header-subtitle">{{t 'documents.subtitle'}}</p>
     </div>
     {{#if (or isSuperAdmin currentUser.canEdit currentUser.canCreate)}}
-    <button type="button" class="btn btn-primary btn-sm" onclick="document.getElementById('uploadCustomerDocModal').style.display='flex'">
-      + {{t 'documents.upload'}}
+    <button type="button" class="btn btn-primary btn-sm doc-header-upload-btn" onclick="document.getElementById('uploadCustomerDocModal').style.display='flex'">
+      <span>+</span> <span>{{t 'documents.upload'}}</span>
     </button>
     {{/if}}
   </div>
 
-  <div style="padding: 1.25rem;">
+  <div class="card-body doc-section-body">
     {{> document-list documents=customer.documents deleteUrlPrefix=(concat "/customers/" customer.id "/documents") canDelete=(or isSuperAdmin currentUser.canDelete)}}
   </div>
 </div>
 
 <!-- Guarantors / জামিনদারবৃন্দ Section -->
 <div class="card" style="margin-bottom: 2rem;">
-  <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
-    <div>
-      <h2 class="card-title" style="margin: 0; display: flex; align-items: center; gap: 0.5rem;">
-        <span>🛡️</span> {{t 'guarantors.title'}} ({{bnNum customer.guarantors.length}})
+  <div class="card-header doc-section-header">
+    <div class="doc-header-info">
+      <h2 class="card-title doc-header-title">
+        <span class="doc-header-icon">🛡️</span>
+        <span class="doc-header-text">{{t 'guarantors.title'}}</span>
+        <span class="doc-header-count">({{bnNum customer.guarantors.length}})</span>
       </h2>
-      <p style="color: var(--color-text-muted); font-size: 0.85rem; margin: 0.25rem 0 0 0;">{{t 'guarantors.subtitle'}}</p>
+      <p class="doc-header-subtitle">{{t 'guarantors.subtitle'}}</p>
     </div>
     {{#if (or isSuperAdmin currentUser.canCreate)}}
-    <button type="button" class="btn btn-primary btn-sm" onclick="document.getElementById('addGuarantorModal').style.display='flex'">
-      + {{t 'guarantors.add'}}
+    <button type="button" class="btn btn-primary btn-sm doc-header-upload-btn" onclick="document.getElementById('addGuarantorModal').style.display='flex'">
+      <span>+</span> <span>{{t 'guarantors.add'}}</span>
     </button>
     {{/if}}
   </div>
 
   {{#if customer.guarantors.length}}
-    <div style="padding: 1.25rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.25rem;">
+    <div class="card-body doc-section-body" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 1.25rem;">
       {{#each customer.guarantors}}
         <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 1.25rem; display: flex; flex-direction: column; justify-content: space-between;">
           <div>
@@ -254,10 +435,120 @@
   {{/if}}
 </div>
 
+<!-- Bills Date Filter Bar -->
+<div class="card" style="padding: 1rem 1.25rem; margin-bottom: 1.5rem;" id="bills-filter">
+  <!-- Mobile toggle -->
+  <div class="dfb-mobile-toggle" onclick="toggleFilterDrawer('customerBillsFilter')">
+    <span class="dfb-toggle-icon">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="10" y1="18" x2="14" y2="18"/></svg>
+    </span>
+    <span class="dfb-toggle-label">
+      {{#if isBn}}ফিল্টার ও তারিখ{{else}}Filter & Date{{/if}}
+      {{#if (or fromDate toDate)}}<span class="dfb-active-dot"></span>{{/if}}
+    </span>
+    <svg class="dfb-toggle-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+  </div>
+
+  <form id="customerBillsFilter" class="dfb-form dfb-collapse"
+        method="GET" action="/customers/{{customer.id}}">
+    <!-- From date -->
+    <div class="dfb-group">
+      <label class="dfb-label" for="cbFrom">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        {{#if isBn}}শুরু{{else}}From{{/if}}
+      </label>
+      <input type="date" id="cbFrom" name="fromDate" class="dfb-input" value="{{fromDate}}" onchange="clearPreset('customerBillsFilter')">
+    </div>
+    <!-- To date -->
+    <div class="dfb-group">
+      <label class="dfb-label" for="cbTo">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        {{#if isBn}}শেষ{{else}}To{{/if}}
+      </label>
+      <input type="date" id="cbTo" name="toDate" class="dfb-input" value="{{toDate}}" onchange="clearPreset('customerBillsFilter')">
+    </div>
+    <!-- Actions -->
+    <div class="dfb-actions">
+      <button type="submit" class="btn btn-primary dfb-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        {{#if isBn}}ফিল্টার{{else}}Filter{{/if}}
+      </button>
+      {{#if (or fromDate toDate)}}
+        <a id="cbReset" href="/customers/{{customer.id}}#bills-filter" class="btn btn-secondary dfb-btn" style="color: #ef4444;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          {{#if isBn}}রিসেট{{else}}Reset{{/if}}
+        </a>
+      {{/if}}
+    </div>
+    <!-- Preset Pills -->
+    <div class="dfb-presets">
+      <button type="button" class="dfb-preset-pill {{#if (eq preset 'today')}}dfb-preset-active{{/if}}"
+              onclick="setDatePreset('today','customerBillsFilter')">{{#if isBn}}আজ{{else}}Today{{/if}}</button>
+      <button type="button" class="dfb-preset-pill {{#if (eq preset 'thisMonth')}}dfb-preset-active{{/if}}"
+              onclick="setDatePreset('thisMonth','customerBillsFilter')">{{#if isBn}}এই মাস{{else}}This Month{{/if}}</button>
+      <button type="button" class="dfb-preset-pill {{#if (eq preset 'lastMonth')}}dfb-preset-active{{/if}}"
+              onclick="setDatePreset('lastMonth','customerBillsFilter')">{{#if isBn}}গত মাস{{else}}Last Month{{/if}}</button>
+      <button type="button" class="dfb-preset-pill {{#if (eq preset 'last30')}}dfb-preset-active{{/if}}"
+              onclick="setDatePreset('last30','customerBillsFilter')">{{#if isBn}}শেষ ৩০ দিন{{else}}Last 30 Days{{/if}}</button>
+      <button type="button" class="dfb-preset-pill {{#if (eq preset 'thisYear')}}dfb-preset-active{{/if}}"
+              onclick="setDatePreset('thisYear','customerBillsFilter')">{{#if isBn}}এই বছর{{else}}This Year{{/if}}</button>
+      <button type="button" class="dfb-preset-pill {{#if (eq preset 'all')}}dfb-preset-active{{/if}}"
+              onclick="setDatePreset('all','customerBillsFilter')">{{#if isBn}}সব{{else}}All Time{{/if}}</button>
+    </div>
+    <input type="hidden" name="preset" id="customerBillsFilter_preset" value="{{preset}}">
+  </form>
+
+  {{#if (or fromDate toDate)}}
+    <div style="margin-top: 0.75rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem; font-size: 0.8rem; color: var(--color-text-muted); border-top: 1px solid var(--color-border); padding-top: 0.75rem;">
+      <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span>
+          {{#if isBn}}ফিল্টার করা বিল: {{else}}Filtered bills: {{/if}}
+          <strong style="color: var(--color-text-primary);">{{bnNum totalFilteredBillsCount}}</strong>
+          {{#if fromDate}}&nbsp;·&nbsp;{{#if isBn}}থেকে{{else}}From{{/if}} <strong>{{fromDate}}</strong>{{/if}}
+          {{#if toDate}}&nbsp;·&nbsp;{{#if isBn}}পর্যন্ত{{else}}To{{/if}} <strong>{{toDate}}</strong>{{/if}}
+        </span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+        <span>{{#if isBn}}ব্যবহৃত ইউনিট: {{else}}Units: {{/if}}<strong style="color: #38bdf8;">{{bnNum periodSummary.units}} {{t 'common.unitShort'}}</strong></span>
+        <span>{{#if isBn}}মোট বিল: {{else}}Total Billed: {{/if}}<strong style="color: #818cf8;">{{t 'common.currency'}}{{bnNum periodSummary.billed}}</strong></span>
+        <span>{{#if isBn}}পরিশোধিত: {{else}}Paid: {{/if}}<strong style="color: #10b981;">{{t 'common.currency'}}{{bnNum periodSummary.paid}}</strong></span>
+      </div>
+    </div>
+  {{/if}}
+</div>
+
+{{#if (or fromDate toDate)}}
+<script>
+  (function() {
+    if (window.location.search && window.location.search.includes('Date')) {
+      const el = document.getElementById('bills-filter');
+      if (el) {
+        setTimeout(function() {
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
+      }
+    }
+  })();
+</script>
+{{/if}}
+
 <!-- Bills Ledger Table -->
-<div class="card">
-  <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
-    <h2 class="card-title">{{t 'bills.title'}} ({{bnNum bills.length}})</h2>
+<div class="card" id="bills-section">
+  <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+    <div style="display: flex; align-items: center; gap: 0.65rem;">
+      <h2 class="card-title" style="margin: 0;">{{t 'bills.title'}} ({{bnNum bills.length}})</h2>
+      {{#if (or fromDate toDate)}}
+        <span class="badge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; font-size: 0.75rem; padding: 2px 8px; border-radius: 12px;">
+          {{#if isBn}}ফিল্টার সক্রিয়{{else}}Filter Active{{/if}}
+        </span>
+      {{/if}}
+    </div>
+    {{#if (or isSuperAdmin currentUser.canCreate)}}
+      <a href="/bills/new?customerId={{customer.id}}" class="btn btn-primary btn-sm" style="background: #10b981; border-color: #10b981;">
+        + {{t 'bills.newBill'}}
+      </a>
+    {{/if}}
   </div>
 
   {{#if bills.length}}
@@ -321,10 +612,22 @@
   {{else}}
     <div style="text-align: center; padding: 3rem 1rem;">
       <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">⚡</div>
-      <h3 style="color: var(--color-text-primary); font-size: 1.15rem; font-weight: 600; margin-bottom: 0.5rem;">{{t 'bills.noBills'}}</h3>
-      <p style="color: var(--color-text-muted); margin-bottom: 1.5rem;">{{t 'bills.noBillsSub'}}</p>
-      {{#if (or isSuperAdmin currentUser.canCreate)}}
-      <a href="/bills/new?customerId={{customer.id}}" class="btn btn-primary" style="background: #10b981; border-color: #10b981;">{{t 'bills.newBill'}}</a>
+      {{#if (or fromDate toDate)}}
+        <h3 style="color: var(--color-text-primary); font-size: 1.15rem; font-weight: 600; margin-bottom: 0.5rem;">
+          {{#if isBn}}নির্বাচিত সময়সীমার মধ্যে কোনো বিল পাওয়া যায়নি{{else}}No bills found for the selected date range{{/if}}
+        </h3>
+        <p style="color: var(--color-text-muted); margin-bottom: 1.5rem;">
+          {{#if isBn}}তারিখ পরিবর্তন করুন অথবা ফিল্টার রিসেট করুন।{{else}}Try adjusting the dates or reset the filter.{{/if}}
+        </p>
+        <a href="/customers/{{customer.id}}#bills-filter" class="btn btn-secondary">
+          {{#if isBn}}ফিল্টার রিসেট করুন{{else}}Reset Filter{{/if}}
+        </a>
+      {{else}}
+        <h3 style="color: var(--color-text-primary); font-size: 1.15rem; font-weight: 600; margin-bottom: 0.5rem;">{{t 'bills.noBills'}}</h3>
+        <p style="color: var(--color-text-muted); margin-bottom: 1.5rem;">{{t 'bills.noBillsSub'}}</p>
+        {{#if (or isSuperAdmin currentUser.canCreate)}}
+        <a href="/bills/new?customerId={{customer.id}}" class="btn btn-primary" style="background: #10b981; border-color: #10b981;">{{t 'bills.newBill'}}</a>
+        {{/if}}
       {{/if}}
     </div>
   {{/if}}
@@ -388,7 +691,7 @@
 
 <!-- Upload Customer Document Modal -->
 <div id="uploadCustomerDocModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center; padding: 1rem;">
-  <div class="card" style="max-width: 580px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 1.75rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); border-top: 3px solid #38bdf8;">
+  <div class="card modal-responsive-card" style="max-width: 580px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 1.75rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); border-top: 3px solid #38bdf8;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; border-bottom: 1px solid var(--color-border); padding-bottom: 0.75rem;">
       <h3 style="margin: 0; font-size: 1.15rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 0.5rem;">
         <span>📤</span> {{t 'documents.uploadNew'}}
@@ -425,7 +728,7 @@
 
 <!-- Upload Guarantor Document Modal -->
 <div id="uploadGuarantorDocModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center; padding: 1rem;">
-  <div class="card" style="max-width: 580px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 1.75rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); border-top: 3px solid #818cf8;">
+  <div class="card modal-responsive-card" style="max-width: 580px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 1.75rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); border-top: 3px solid #818cf8;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; border-bottom: 1px solid var(--color-border); padding-bottom: 0.75rem;">
       <h3 style="margin: 0; font-size: 1.15rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 0.5rem;">
         <span>🛡️</span> {{t 'documents.uploadNew'}} &mdash; <span id="guarantorModalTargetName" style="color: #a5b4fc;"></span>
@@ -471,5 +774,65 @@
     if (modal) {
       modal.style.display = 'flex';
     }
+  }
+
+  function triggerCustomerSuspendModal(formId) {
+    const targetFormId = formId || 'suspendCustomerHeaderForm';
+    const form = document.getElementById(targetFormId);
+    if (typeof window.showConfirmModal !== 'function') {
+      if (confirm('{{t "customers.confirmSuspend"}}')) {
+        if (form) form.submit();
+      }
+      return;
+    }
+
+    window.showConfirmModal({
+      title: "{{t 'customers.suspendModalTitle'}}",
+      desc: "{{t 'customers.suspendModalDesc'}}",
+      type: 'warning',
+      icon: '⚠️',
+      targetName: {{{json customer.name}}},
+      targetSub: "{{#if customer.customerCode}}ID: {{customer.customerCode}} &bull; {{/if}}System #{{#if customer.cId}}{{bnNum customer.cId}}{{else}}{{bnNum customer.id}}{{/if}}",
+      targetBadgeText: "{{t 'customers.active'}}",
+      targetBadgeClass: "badge-success",
+      calloutText: "{{t 'customers.suspendModalWarning'}}",
+      calloutIcon: "⚠️",
+      cancelText: "{{t 'common.cancel'}}",
+      submitText: "{{t 'customers.suspendModalBtn'}}",
+      submitBtnClass: "btn-warning",
+      onConfirm: function() {
+        if (form) form.submit();
+      }
+    });
+  }
+
+  function triggerCustomerReactivateModal(formId) {
+    const targetFormId = formId || 'reactivateCustomerHeaderForm';
+    const form = document.getElementById(targetFormId);
+    if (typeof window.showConfirmModal !== 'function') {
+      if (confirm('{{t "customers.confirmReactivate"}}')) {
+        if (form) form.submit();
+      }
+      return;
+    }
+
+    window.showConfirmModal({
+      title: "{{t 'customers.reactivateModalTitle'}}",
+      desc: "{{t 'customers.reactivateModalDesc'}}",
+      type: 'success',
+      icon: '⚡',
+      targetName: {{{json customer.name}}},
+      targetSub: "{{#if customer.customerCode}}ID: {{customer.customerCode}} &bull; {{/if}}System #{{#if customer.cId}}{{bnNum customer.cId}}{{else}}{{bnNum customer.id}}{{/if}}",
+      targetBadgeText: "{{t 'customers.suspended'}}",
+      targetBadgeClass: "badge-danger",
+      calloutText: "{{t 'customers.reactivateModalNotice'}}",
+      calloutIcon: "✨",
+      cancelText: "{{t 'common.cancel'}}",
+      submitText: "{{t 'customers.reactivateModalBtn'}}",
+      submitBtnClass: "btn-success",
+      onConfirm: function() {
+        if (form) form.submit();
+      }
+    });
   }
 </script>

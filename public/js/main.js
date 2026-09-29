@@ -708,8 +708,385 @@ function initPasswordToggles() {
 }
 
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initPasswordToggles);
+  document.addEventListener('DOMContentLoaded', () => {
+    initPasswordToggles();
+    initAuditNotifications();
+    initConfirmModal();
+  });
 } else {
   initPasswordToggles();
+  initAuditNotifications();
+  initConfirmModal();
 }
+
+// ============================================================
+// Super Admin Audit Log Notification System
+// ============================================================
+function initAuditNotifications() {
+  const notifBtn = document.getElementById('auditNotifBtn');
+  const notifDropdown = document.getElementById('auditNotifDropdown');
+  const notifBadge = document.getElementById('auditNotifBadge');
+  const notifPulse = document.getElementById('auditNotifPulse');
+  const notifPill = document.getElementById('auditNotifPill');
+  const notifList = document.getElementById('auditNotifList');
+  const markReadBtn = document.getElementById('auditNotifMarkReadBtn');
+
+  if (!notifBtn || !notifDropdown) return; // Only runs if Super Admin bell is present
+
+  const STORAGE_KEY = 'egms_audit_last_read';
+  const isBn = document.documentElement.getAttribute('lang') === 'bn';
+
+  function toBnDigits(str) {
+    const digits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+    return String(str).replace(/[0-9]/g, (d) => digits[parseInt(d, 10)]);
+  }
+
+  function formatTimeAgo(isoDate) {
+    if (!isoDate) return '';
+    const now = Date.now();
+    const past = new Date(isoDate).getTime();
+    const diffSec = Math.max(0, Math.floor((now - past) / 1000));
+
+    if (diffSec < 60) {
+      return isBn ? 'এইমাত্র' : 'Just now';
+    }
+    const diffMin = Math.floor(diffSec / 60);
+    if (diffMin < 60) {
+      return isBn ? `${toBnDigits(diffMin)} মিনিট আগে` : `${diffMin}m ago`;
+    }
+    const diffHours = Math.floor(diffMin / 60);
+    if (diffHours < 24) {
+      return isBn ? `${toBnDigits(diffHours)} ঘণ্টা আগে` : `${diffHours}h ago`;
+    }
+    const diffDays = Math.floor(diffHours / 24);
+    return isBn ? `${toBnDigits(diffDays)} দিন আগে` : `${diffDays}d ago`;
+  }
+
+  function getActionBadge(action) {
+    const badges = {
+      CREATE: { label: isBn ? 'তৈরি' : 'CREATE', icon: '➕', color: '#34d399', bg: 'rgba(16, 185, 129, 0.15)' },
+      UPDATE: { label: isBn ? 'আপডেট' : 'UPDATE', icon: '✏️', color: '#60a5fa', bg: 'rgba(59, 130, 246, 0.15)' },
+      DELETE: { label: isBn ? 'মুছে ফেলা' : 'DELETE', icon: '🗑️', color: '#fb7185', bg: 'rgba(244, 63, 94, 0.15)' },
+      LOGIN: { label: isBn ? 'লগইন' : 'LOGIN', icon: '🔑', color: '#c084fc', bg: 'rgba(168, 85, 247, 0.15)' },
+      LOGOUT: { label: isBn ? 'লগআউট' : 'LOGOUT', icon: '🚪', color: '#94a3b8', bg: 'rgba(148, 163, 184, 0.15)' },
+      PERMISSIONS_UPDATE: { label: isBn ? 'পারমিশন' : 'PERMISSION', icon: '🛡️', color: '#fbbf24', bg: 'rgba(245, 158, 11, 0.15)' },
+      PASSWORD_RESET: { label: isBn ? 'রিসেট' : 'RESET', icon: '🔒', color: '#f472b6', bg: 'rgba(236, 72, 153, 0.15)' },
+    };
+    const b = badges[action] || { label: action, icon: '⚡', color: '#818cf8', bg: 'rgba(99, 102, 241, 0.15)' };
+    return `<span style="display:inline-flex;align-items:center;gap:3px;font-size:0.68rem;font-weight:700;padding:1px 6px;border-radius:4px;background:${b.bg};color:${b.color};">${b.icon} ${b.label}</span>`;
+  }
+
+  function getEntityBadge(entityType) {
+    const entities = {
+      CUSTOMER: isBn ? 'গ্রাহক' : 'Customer',
+      ELECTRIC_BILL: isBn ? 'বিদ্যুৎ বিল' : 'Bill',
+      GARAGE: isBn ? 'গ্যারেজ' : 'Garage',
+      EMPLOYEE: isBn ? 'কর্মী' : 'Employee',
+      AUTH: isBn ? 'নিরাপত্তা' : 'Auth',
+      COMPANY: isBn ? 'কোম্পানি' : 'Company',
+    };
+    const label = entities[entityType] || entityType;
+    return `<span style="display:inline-flex;align-items:center;font-size:0.66rem;font-weight:600;padding:1px 5px;border-radius:3px;background:rgba(99,102,241,0.12);color:#a5b4fc;">${label}</span>`;
+  }
+
+  async function fetchNotifications() {
+    try {
+      const lastRead = localStorage.getItem(STORAGE_KEY) || '';
+      const url = '/audit-logs/notifications/recent' + (lastRead ? `?since=${encodeURIComponent(lastRead)}` : '');
+      const res = await fetch(url, { credentials: 'same-origin' });
+      if (!res.ok) return;
+      const data = await res.json();
+
+      const unreadCount = data.unreadCount || 0;
+      if (unreadCount > 0) {
+        const displayCount = unreadCount > 99 ? '99+' : (isBn ? toBnDigits(unreadCount) : String(unreadCount));
+        if (notifBadge) {
+          notifBadge.textContent = displayCount;
+          notifBadge.style.display = 'flex';
+        }
+        if (notifPulse) notifPulse.style.display = 'block';
+        if (notifPill) {
+          notifPill.textContent = isBn ? `${toBnDigits(unreadCount)} নতুন` : `${unreadCount} new`;
+          notifPill.style.display = 'inline-block';
+        }
+      } else {
+        if (notifBadge) notifBadge.style.display = 'none';
+        if (notifPulse) notifPulse.style.display = 'none';
+        if (notifPill) notifPill.style.display = 'none';
+      }
+
+      if (notifList && data.logs) {
+        if (data.logs.length === 0) {
+          notifList.innerHTML = `
+            <div style="padding: 2rem 1rem; text-align: center; color: var(--color-text-muted); font-size: 0.85rem;">
+              <div style="font-size: 1.5rem; margin-bottom: 0.35rem;">🛡️</div>
+              <div>${isBn ? 'নতুন কোন অডিট নোটিফিকেশন নেই' : 'No recent audit alerts'}</div>
+            </div>`;
+          return;
+        }
+
+        const lastReadTimestamp = lastRead ? new Date(lastRead).getTime() : 0;
+        let html = '';
+        data.logs.forEach((log) => {
+          const logTime = new Date(log.createdDate).getTime();
+          const isUnread = logTime > lastReadTimestamp;
+          const displayDetails = isBn ? (log.detailsBn || log.details) : log.details;
+          const subDetails = isBn && log.details !== displayDetails ? log.details : '';
+          const timeAgo = formatTimeAgo(log.createdDate);
+          const initial = log.userName && log.userName[0] ? log.userName[0].toUpperCase() : 'U';
+
+          html += `
+            <a href="/audit-logs?search=${encodeURIComponent(log.userName || '')}&action=${encodeURIComponent(log.action || 'ALL')}" class="audit-notif-item ${isUnread ? 'is-unread' : ''}">
+              <div class="audit-notif-avatar">${initial}</div>
+              <div class="audit-notif-content">
+                <div class="audit-notif-top">
+                  <span class="audit-notif-user">${log.userName || (isBn ? 'ব্যবহারকারী' : 'User')}</span>
+                  <span class="audit-notif-time">${timeAgo}</span>
+                </div>
+                <div class="audit-notif-badges">
+                  ${getActionBadge(log.action)}
+                  ${getEntityBadge(log.entityType)}
+                </div>
+                <div class="audit-notif-details">${displayDetails}</div>
+                ${subDetails ? `<div class="audit-notif-details-sub">${subDetails}</div>` : ''}
+              </div>
+            </a>`;
+        });
+        notifList.innerHTML = html;
+      }
+    } catch (e) {
+      // Non-blocking fallback
+    }
+  }
+
+  // Toggle Dropdown
+  notifBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const isHidden = notifDropdown.style.display === 'none' || !notifDropdown.style.display;
+    if (isHidden) {
+      notifDropdown.style.display = 'flex';
+      notifBtn.classList.add('active');
+      fetchNotifications();
+    } else {
+      notifDropdown.style.display = 'none';
+      notifBtn.classList.remove('active');
+    }
+  });
+
+  // Dedicated Close Button (especially for mobile)
+  const closeBtn = document.getElementById('auditNotifCloseBtn');
+  if (closeBtn) {
+    closeBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      notifDropdown.style.display = 'none';
+      notifBtn.classList.remove('active');
+    });
+  }
+
+  // Prevent taps inside dropdown from bubbling and closing it
+  notifDropdown.addEventListener('click', (e) => {
+    e.stopPropagation();
+  });
+
+  // Mark all read
+  if (markReadBtn) {
+    markReadBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      localStorage.setItem(STORAGE_KEY, new Date().toISOString());
+      if (notifBadge) notifBadge.style.display = 'none';
+      if (notifPulse) notifPulse.style.display = 'none';
+      if (notifPill) notifPill.style.display = 'none';
+      document.querySelectorAll('.audit-notif-item.is-unread').forEach((el) => {
+        el.classList.remove('is-unread');
+      });
+    });
+  }
+
+  // Close when clicking outside
+  document.addEventListener('click', (e) => {
+    if (notifDropdown.style.display === 'flex' && !notifDropdown.contains(e.target) && !notifBtn.contains(e.target)) {
+      notifDropdown.style.display = 'none';
+      notifBtn.classList.remove('active');
+    }
+  });
+
+  // Close on Escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && notifDropdown.style.display === 'flex') {
+      notifDropdown.style.display = 'none';
+      notifBtn.classList.remove('active');
+    }
+  });
+
+  // Initial fetch and poll every 45 seconds
+  fetchNotifications();
+  setInterval(fetchNotifications, 45000);
+}
+
+// ============================================================
+// Universal Modern Confirmation Modal Dialog
+// ============================================================
+function initConfirmModal() {
+  const modal = document.getElementById('appConfirmModal');
+  const closeBtn = document.getElementById('confirmModalCloseBtn');
+  const cancelBtn = document.getElementById('confirmModalCancelBtn');
+  const submitBtn = document.getElementById('confirmModalSubmitBtn');
+  const submitText = document.getElementById('confirmModalSubmitText');
+  const submitIcon = document.getElementById('confirmModalSubmitIcon');
+  const titleEl = document.getElementById('confirmModalTitle');
+  const descEl = document.getElementById('confirmModalDesc');
+  const iconBadge = document.getElementById('confirmModalIconBadge');
+  const iconEl = document.getElementById('confirmModalIcon');
+  const previewBox = document.getElementById('confirmModalPreview');
+  const avatarEl = document.getElementById('confirmModalAvatar');
+  const targetNameEl = document.getElementById('confirmModalTargetName');
+  const targetSubEl = document.getElementById('confirmModalTargetSub');
+  const targetBadgeEl = document.getElementById('confirmModalTargetBadge');
+  const calloutBox = document.getElementById('confirmModalCallout');
+  const calloutIcon = document.getElementById('confirmModalCalloutIcon');
+  const calloutText = document.getElementById('confirmModalCalloutText');
+
+  if (!modal || !submitBtn) return;
+
+  let activeCallback = null;
+
+  function closeModal() {
+    modal.style.display = 'none';
+    activeCallback = null;
+    document.body.style.overflow = '';
+  }
+
+  function openModal(options) {
+    options = options || {};
+    activeCallback = typeof options.onConfirm === 'function' ? options.onConfirm : null;
+
+    // Title & Description
+    if (titleEl) titleEl.textContent = options.title || 'Confirm Action';
+    if (descEl) descEl.textContent = options.desc || options.message || '';
+
+    // Icon & Badge type: 'warning' | 'danger' | 'success' | 'info'
+    const type = options.type || 'warning';
+    if (iconBadge) {
+      iconBadge.className = `confirm-modal-icon-badge type-${type}`;
+      if (iconEl) {
+        if (options.icon) {
+          iconEl.textContent = options.icon;
+        } else if (type === 'danger') {
+          iconEl.textContent = '⛔';
+        } else if (type === 'success') {
+          iconEl.textContent = '✅';
+        } else {
+          iconEl.textContent = '⚠️';
+        }
+      }
+    }
+
+    // Callout warning / notice
+    if (calloutBox) {
+      const calloutMsg = options.calloutText || options.warning;
+      if (calloutMsg) {
+        calloutBox.className = `confirm-modal-callout type-${type}`;
+        if (calloutIcon) calloutIcon.textContent = options.calloutIcon || (type === 'danger' ? '🚫' : type === 'success' ? '✨' : '⚠️');
+        if (calloutText) calloutText.textContent = calloutMsg;
+        calloutBox.style.display = 'flex';
+      } else {
+        calloutBox.style.display = 'none';
+      }
+    }
+
+    // Target Preview (e.g. customer/employee preview)
+    if (previewBox) {
+      if (options.targetName) {
+        if (targetNameEl) targetNameEl.textContent = options.targetName;
+        if (targetSubEl) {
+          targetSubEl.innerHTML = options.targetSub || '';
+        }
+        if (avatarEl) {
+          const trimmed = String(options.targetName).trim();
+          avatarEl.textContent = options.targetAvatar || (trimmed[0] ? trimmed[0].toUpperCase() : 'U');
+        }
+        if (targetBadgeEl) {
+          if (options.targetBadgeHtml) {
+            targetBadgeEl.innerHTML = options.targetBadgeHtml;
+          } else if (options.targetBadgeText) {
+            targetBadgeEl.innerHTML = `<span class="badge ${options.targetBadgeClass || 'badge-warning'}">${options.targetBadgeText}</span>`;
+          } else {
+            targetBadgeEl.innerHTML = '';
+          }
+        }
+        previewBox.style.display = 'flex';
+      } else {
+        previewBox.style.display = 'none';
+      }
+    }
+
+    // Buttons
+    if (cancelBtn) {
+      if (options.cancelText) cancelBtn.textContent = options.cancelText;
+    }
+    if (submitBtn) {
+      submitBtn.className = `btn confirm-submit-btn ${options.submitBtnClass || (type === 'danger' ? 'btn-danger' : type === 'success' ? 'btn-success' : 'btn-warning')}`;
+      if (submitText) submitText.textContent = options.submitText || options.confirmText || 'Confirm';
+      if (submitIcon) submitIcon.textContent = options.submitIcon || '';
+    }
+
+    // Display
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    if (submitBtn) submitBtn.focus();
+  }
+
+  // Event handlers
+  if (closeBtn) closeBtn.addEventListener('click', closeModal);
+  if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closeModal();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal.style.display === 'flex') {
+      closeModal();
+    }
+  });
+
+  submitBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    const cb = activeCallback;
+    closeModal();
+    if (cb) cb();
+  });
+
+  // Intercept forms with data-confirm-modal="true"
+  document.addEventListener('submit', (e) => {
+    const form = e.target;
+    if (!form || !form.matches || !form.matches('form[data-confirm-modal="true"]')) return;
+    if (form.dataset.confirmed === 'true') {
+      delete form.dataset.confirmed;
+      return;
+    }
+    e.preventDefault();
+    openModal({
+      title: form.dataset.confirmTitle || 'Confirm Action',
+      desc: form.dataset.confirmDesc || '',
+      type: form.dataset.confirmType || 'warning',
+      icon: form.dataset.confirmIcon || '',
+      warning: form.dataset.confirmWarning || '',
+      targetName: form.dataset.confirmTargetName || '',
+      targetSub: form.dataset.confirmTargetSub || '',
+      targetBadgeText: form.dataset.confirmTargetBadge || '',
+      targetBadgeClass: form.dataset.confirmTargetBadgeClass || 'badge-warning',
+      submitText: form.dataset.confirmSubmit || 'Confirm',
+      submitBtnClass: form.dataset.confirmBtnClass || '',
+      onConfirm: () => {
+        form.dataset.confirmed = 'true';
+        form.submit();
+      }
+    });
+  });
+
+  // Expose globally
+  window.showConfirmModal = openModal;
+}
+
 

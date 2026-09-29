@@ -21,6 +21,7 @@ import { LoginHandler } from './commands/handlers/login.handler';
 import { CreateCustomerHandler } from './commands/handlers/create-customer.handler';
 import { UpdateCustomerHandler } from './commands/handlers/update-customer.handler';
 import { DeleteCustomerHandler } from './commands/handlers/delete-customer.handler';
+import { ToggleCustomerStatusHandler } from './commands/handlers/toggle-customer-status.handler';
 import { CreateElectricBillHandler } from './commands/handlers/create-electric-bill.handler';
 import { UpdateElectricBillHandler } from './commands/handlers/update-electric-bill.handler';
 import { DeleteElectricBillHandler } from './commands/handlers/delete-electric-bill.handler';
@@ -67,6 +68,7 @@ const CommandHandlers = [
   CreateCustomerHandler,
   UpdateCustomerHandler,
   DeleteCustomerHandler,
+  ToggleCustomerStatusHandler,
   CreateElectricBillHandler,
   UpdateElectricBillHandler,
   DeleteElectricBillHandler,

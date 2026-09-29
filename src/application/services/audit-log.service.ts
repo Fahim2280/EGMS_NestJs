@@ -4,6 +4,8 @@ import {
   AuditLog,
   AUDIT_LOG_REPOSITORY_TOKEN,
   IAuditLogRepository,
+  EMPLOYEE_REPOSITORY_TOKEN,
+  IEmployeeRepository,
 } from '@domain/index';
 
 export interface RecordAuditLogParams {
@@ -28,6 +30,8 @@ export class AuditLogService {
   constructor(
     @Inject(AUDIT_LOG_REPOSITORY_TOKEN)
     private readonly auditRepo: IAuditLogRepository,
+    @Inject(EMPLOYEE_REPOSITORY_TOKEN)
+    private readonly employeeRepo: IEmployeeRepository,
   ) {}
 
   async record(params: RecordAuditLogParams): Promise<void> {
@@ -51,6 +55,27 @@ export class AuditLogService {
         ua = ua.substring(0, 250) + '...';
       }
 
+      let entityName = params.entityName || null;
+      let details = params.details || null;
+
+      if (params.entityType === 'EMPLOYEE' && params.entityId) {
+        if (!entityName || entityName.startsWith('#') || entityName === params.entityId) {
+          try {
+            const emp = await this.employeeRepo.findById(params.entityId);
+            if (emp?.name) {
+              entityName = emp.name;
+            }
+          } catch {}
+        }
+
+        if (entityName && details) {
+          details = details
+            .split(`employee #${params.entityId}`).join(`employee ${entityName}`)
+            .split(`employee ${params.entityId}`).join(`employee ${entityName}`)
+            .split(`#${params.entityId}`).join(entityName);
+        }
+      }
+
       const log = AuditLog.create({
         id: uuidv4(),
         companyId: params.companyId,
@@ -60,8 +85,8 @@ export class AuditLogService {
         action: params.action,
         entityType: params.entityType,
         entityId: params.entityId || null,
-        entityName: params.entityName || null,
-        details: params.details || null,
+        entityName: entityName,
+        details: details,
         ipAddress: ip || null,
         userAgent: ua || null,
         createdDate: new Date(),

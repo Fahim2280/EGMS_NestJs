@@ -46,6 +46,9 @@ export class GenerateMonthlyBillsHandler
     let failCount = 0;
 
     for (const customer of customers) {
+      if (!customer.isActive) {
+        continue;
+      }
       try {
         const customerBills = await this.billRepo.findByCustomerId(customer.id);
         const billExists = customerBills.some((b) => {

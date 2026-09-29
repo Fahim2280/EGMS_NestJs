@@ -40,6 +40,7 @@ export class GetCustomersByCompanyHandler
       advanceMoney: c.advanceMoney,
       garageId: c.garageId,
       garageName: c.garageName,
+      isActive: c.isActive,
       createdDate: c.createdDate,
     }));
   }

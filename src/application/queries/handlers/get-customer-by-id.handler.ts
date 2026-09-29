@@ -52,6 +52,7 @@ export class GetCustomerByIdHandler
       advanceMoney: customer.advanceMoney,
       garageId: customer.garageId,
       garageName: customer.garageName,
+      isActive: customer.isActive,
       createdDate: customer.createdDate,
       bills: bills.map((b) => ({
         id: b.id,

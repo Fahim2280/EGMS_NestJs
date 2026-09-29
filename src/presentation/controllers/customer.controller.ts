@@ -26,6 +26,7 @@ import {
 import { CreateCustomerCommand } from '@application/commands/impl/create-customer.command';
 import { UpdateCustomerCommand } from '@application/commands/impl/update-customer.command';
 import { DeleteCustomerCommand } from '@application/commands/impl/delete-customer.command';
+import { ToggleCustomerStatusCommand } from '@application/commands/impl/toggle-customer-status.command';
 import { CreateGuarantorCommand } from '@application/commands/impl/create-guarantor.command';
 import { UpdateGuarantorCommand } from '@application/commands/impl/update-guarantor.command';
 import { DeleteGuarantorCommand } from '@application/commands/impl/delete-guarantor.command';
@@ -295,14 +296,55 @@ export class CustomerController {
       }
 
       let bills = customer.bills || [];
+      const totalAllBillsCount = bills.length;
+
+      let effectiveFromDate = fromDate;
+      let effectiveToDate = toDate;
+
+      // Handle preset calculation when direct dates are not supplied
+      if (preset && !fromDate && !toDate) {
+        const now = new Date();
+        const pad = (n: number) => String(n).padStart(2, '0');
+        const fmt = (d: Date) =>
+          `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+        const todayStr = fmt(now);
+
+        switch (preset) {
+          case 'today':
+            effectiveFromDate = todayStr;
+            effectiveToDate = todayStr;
+            break;
+          case 'thisMonth':
+            effectiveFromDate = fmt(new Date(now.getFullYear(), now.getMonth(), 1));
+            effectiveToDate = todayStr;
+            break;
+          case 'lastMonth': {
+            const lm = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+            effectiveFromDate = fmt(lm);
+            effectiveToDate = fmt(new Date(now.getFullYear(), now.getMonth(), 0));
+            break;
+          }
+          case 'last30': {
+            const d = new Date(now);
+            d.setDate(d.getDate() - 30);
+            effectiveFromDate = fmt(d);
+            effectiveToDate = todayStr;
+            break;
+          }
+          case 'thisYear':
+            effectiveFromDate = `${now.getFullYear()}-01-01`;
+            effectiveToDate = todayStr;
+            break;
+        }
+      }
 
       // Filter customer bills by date range
-      if (fromDate) {
-        const fromTime = new Date(fromDate).setHours(0, 0, 0, 0);
+      if (effectiveFromDate) {
+        const fromTime = new Date(`${effectiveFromDate}T00:00:00`).getTime();
         bills = bills.filter((b: any) => new Date(b.date).getTime() >= fromTime);
       }
-      if (toDate) {
-        const toTime = new Date(toDate).setHours(23, 59, 59, 999);
+      if (effectiveToDate) {
+        const toTime = new Date(`${effectiveToDate}T23:59:59.999`).getTime();
         bills = bills.filter((b: any) => new Date(b.date).getTime() <= toTime);
       }
 
@@ -328,14 +370,15 @@ export class CustomerController {
         canDelete: isSuperAdmin || Boolean(user.canDelete),
         customer,
         bills,
-        totalBillsCount: bills.length,
+        totalBillsCount: totalAllBillsCount,
+        totalFilteredBillsCount: bills.length,
         periodSummary: {
           units: periodUnits,
           billed: periodBilled,
           paid: periodPaid,
         },
-        fromDate: fromDate || '',
-        toDate: toDate || '',
+        fromDate: effectiveFromDate || '',
+        toDate: effectiveToDate || '',
         preset: preset || '',
       });
     } catch {
@@ -498,6 +541,72 @@ export class CustomerController {
       return res.redirect('/customers?success=msg.customerDeleted');
     } catch {
       return res.redirect('/customers?error=msg.customerDeleteFailed');
+    }
+  }
+
+  // --- TOGGLE STATUS (SUSPEND / REACTIVATE) ---
+  @Post(':id/toggle-status')
+  async handleToggleStatus(
+    @Param('id') id: string,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    const user = (req as any).user;
+    const isSuperAdmin = user.role === 'SUPER_ADMIN' || user.isSuperAdmin;
+
+    if (!isSuperAdmin) {
+      const returnUrl = req.headers.referer || `/customers/${id}`;
+      return res.redirect(`${returnUrl}${returnUrl.includes('?') ? '&' : '?'}error=msg.superAdminRequired`);
+    }
+
+    try {
+      const result = await this.commandBus.execute(
+        new ToggleCustomerStatusCommand(
+          id,
+          user.companyId,
+          `${user.sub || user.companyId}|${user.role || 'SUPER_ADMIN'}`,
+        ),
+      );
+
+      const customer = result.customer;
+      const isSuspended = !result.isActive;
+
+      await this.auditLogService.record({
+        companyId: user.companyId,
+        userId: user.sub || user.companyId,
+        userName: user.name,
+        userRole: user.role,
+        action: 'UPDATE',
+        entityType: 'CUSTOMER',
+        entityId: id,
+        entityName: customer.name,
+        details: isSuspended
+          ? `Suspended customer account ${customer.name} (${customer.customerCode || customer.id})`
+          : `Reactivated customer account ${customer.name} (${customer.customerCode || customer.id})`,
+        req,
+      });
+
+      const referer = req.headers.referer || '';
+      let returnUrl = `/customers/${id}`;
+      if (referer) {
+        try {
+          const urlObj = new URL(referer);
+          // Preserve query parameters except error/success
+          urlObj.searchParams.delete('error');
+          urlObj.searchParams.delete('success');
+          returnUrl = urlObj.pathname + (urlObj.searchParams.toString() ? `?${urlObj.searchParams.toString()}` : '');
+        } catch {
+          returnUrl = referer.split('?')[0];
+        }
+      }
+
+      const msgKey = isSuspended ? 'msg.customerSuspended' : 'msg.customerReactivated';
+      const separator = returnUrl.includes('?') ? '&' : '?';
+      return res.redirect(`${returnUrl}${separator}success=${msgKey}`);
+    } catch (err: any) {
+      const returnUrl = req.headers.referer || `/customers/${id}`;
+      const separator = returnUrl.includes('?') ? '&' : '?';
+      return res.redirect(`${returnUrl}${separator}error=${encodeURIComponent(err.message || 'Operation failed')}`);
     }
   }
 

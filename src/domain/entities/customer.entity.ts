@@ -165,6 +165,34 @@ export class Customer extends AuditableEntity {
     this.modifiedDate = new Date();
   }
 
+  public suspend(byStamp?: string): void {
+    this.isActive = false;
+    if (byStamp) {
+      this.markModified(byStamp);
+    } else {
+      this.modifiedDate = new Date();
+    }
+  }
+
+  public reactivate(byStamp?: string): void {
+    this.isActive = true;
+    if (byStamp) {
+      this.markModified(byStamp);
+    } else {
+      this.modifiedDate = new Date();
+    }
+  }
+
+  public toggleStatus(byStamp?: string): boolean {
+    this.isActive = !this.isActive;
+    if (byStamp) {
+      this.markModified(byStamp);
+    } else {
+      this.modifiedDate = new Date();
+    }
+    return this.isActive;
+  }
+
   private validate(props: CreateCustomerProps): void {
     if (!props.id) throw new Error('Customer ID is required.');
     if (!props.companyId) throw new Error('Company ID is required.');

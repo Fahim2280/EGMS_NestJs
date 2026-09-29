@@ -119,6 +119,7 @@ export class CustomerBillSummaryDto {
   lastMeterReading: number;
   previousDues: number;
   lastBillDate: Date | null;
+  isActive?: boolean;
 }
 
 export class PreviewBillRequestDto {

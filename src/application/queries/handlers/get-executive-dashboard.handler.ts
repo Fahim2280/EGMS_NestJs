@@ -68,6 +68,9 @@ export class GetExecutiveDashboardHandler
         mobileNumber: customer.mobileNumber,
         advanceMoney: customerAdvanceMoney,
         presentDues: customerPresentDues,
+        garageId: customer.garageId,
+        garageName: customer.garageName,
+        isActive: customer.isActive,
         lastBillDate: latestBill ? latestBill.date : customer.createdDate,
         hasBills: Boolean(latestBill),
       });

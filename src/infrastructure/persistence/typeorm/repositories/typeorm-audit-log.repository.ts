@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import {
@@ -10,11 +10,44 @@ import {
 import { AuditLogOrmEntity } from '../entities/audit-log.orm-entity';
 
 @Injectable()
-export class TypeOrmAuditLogRepository implements IAuditLogRepository {
+export class TypeOrmAuditLogRepository
+  implements IAuditLogRepository, OnModuleInit
+{
+  private readonly logger = new Logger(TypeOrmAuditLogRepository.name);
+
   constructor(
     @InjectRepository(AuditLogOrmEntity)
     private readonly repo: Repository<AuditLogOrmEntity>,
   ) {}
+
+  async onModuleInit(): Promise<void> {
+    try {
+      // 1. Backfill entityName from employees table for existing EMPLOYEE logs
+      await this.repo.query(`
+        UPDATE audit_logs al
+        INNER JOIN employees e ON al.entityId = e.id
+        SET al.entityName = e.name
+        WHERE al.entityType = 'EMPLOYEE' AND (al.entityName IS NULL OR al.entityName = '' OR al.entityName LIKE '#%')
+      `);
+
+      // 2. Clean up details containing employee #ID
+      await this.repo.query(`
+        UPDATE audit_logs al
+        INNER JOIN employees e ON al.entityId = e.id
+        SET al.details = REPLACE(al.details, CONCAT('#', e.id), e.name)
+        WHERE al.entityType = 'EMPLOYEE' AND al.details LIKE CONCAT('%#', e.id, '%')
+      `);
+
+      await this.repo.query(`
+        UPDATE audit_logs al
+        INNER JOIN employees e ON al.entityId = e.id
+        SET al.details = REPLACE(al.details, e.id, e.name)
+        WHERE al.entityType = 'EMPLOYEE' AND al.details LIKE CONCAT('%', e.id, '%')
+      `);
+    } catch (err: any) {
+      this.logger.debug(`Audit log employee name backfill skipped: ${err?.message}`);
+    }
+  }
 
   async save(domain: AuditLog): Promise<AuditLog> {
     const orm = this.toOrm(domain);

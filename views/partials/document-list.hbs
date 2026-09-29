@@ -10,38 +10,52 @@
 <style>
   .doc-grid-container {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+    gap: 0.85rem;
+    width: 100%;
+    box-sizing: border-box;
   }
   .doc-card-item {
     background: rgba(15, 23, 42, 0.55);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 8px;
+    border-radius: 10px;
     padding: 0.85rem 1rem;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     transition: all 0.2s ease;
+    box-sizing: border-box;
+    min-width: 0;
+    width: 100%;
+    overflow: hidden;
   }
   .doc-card-item:hover {
     border-color: rgba(56, 189, 248, 0.35);
     background: rgba(15, 23, 42, 0.75);
     transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   }
   .doc-card-header {
     display: flex;
     align-items: flex-start;
     gap: 0.65rem;
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.65rem;
+    min-width: 0;
+    width: 100%;
   }
   .doc-card-icon {
-    font-size: 1.6rem;
+    font-size: 1.5rem;
     flex-shrink: 0;
     line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 2px;
   }
   .doc-card-details {
     min-width: 0;
     flex: 1 1 auto;
+    overflow: hidden;
   }
   .doc-card-title {
     color: #f1f5f9;
@@ -50,46 +64,99 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    margin-bottom: 0.2rem;
+    margin-bottom: 0.25rem;
+    line-height: 1.35;
   }
   .doc-card-meta {
     display: flex;
     align-items: center;
     gap: 0.4rem;
     flex-wrap: wrap;
-    font-size: 0.75rem;
+    font-size: 0.74rem;
     color: #94a3b8;
+    line-height: 1.25;
   }
   .doc-card-badge {
     background: rgba(99, 102, 241, 0.15);
     border: 1px solid rgba(99, 102, 241, 0.3);
     color: #a5b4fc;
     font-size: 0.68rem;
-    font-weight: 600;
-    padding: 1px 5px;
+    font-weight: 700;
+    padding: 1px 6px;
     border-radius: 4px;
     text-transform: uppercase;
+    letter-spacing: 0.03em;
   }
+  .doc-delete-form {
+    margin: 0;
+    display: inline-flex;
+    flex-shrink: 0;
+    margin-left: 0.25rem;
+  }
+  .doc-btn-delete {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    background: rgba(239, 68, 68, 0.12);
+    border: 1px solid rgba(239, 68, 68, 0.28);
+    color: #f87171;
+    cursor: pointer;
+    font-size: 0.76rem;
+    font-weight: 700;
+    line-height: 1;
+    transition: all 0.2s ease;
+    padding: 0;
+  }
+  .doc-btn-delete:hover {
+    background: rgba(239, 68, 68, 0.25);
+    border-color: rgba(239, 68, 68, 0.5);
+    color: #ef4444;
+    transform: scale(1.06);
+  }
+  .doc-btn-delete:active {
+    transform: scale(0.95);
+  }
+
   .doc-card-actions {
     display: flex;
     align-items: center;
     gap: 0.5rem;
     border-top: 1px solid rgba(255, 255, 255, 0.06);
-    padding-top: 0.6rem;
-    margin-top: 0.4rem;
+    padding-top: 0.65rem;
+    margin-top: 0.45rem;
+    width: 100%;
+    box-sizing: border-box;
   }
   .doc-btn-action {
+    flex: 1 1 0;
+    min-width: 0;
     display: inline-flex;
     align-items: center;
-    gap: 0.3rem;
-    font-size: 0.76rem;
+    justify-content: center;
+    gap: 0.35rem;
+    font-size: 0.78rem;
     font-weight: 600;
-    padding: 0.28rem 0.65rem;
+    padding: 0.38rem 0.5rem;
     border-radius: 6px;
     text-decoration: none;
-    transition: all 0.2s;
+    transition: all 0.2s ease;
     cursor: pointer;
     border: none;
+    box-sizing: border-box;
+    white-space: nowrap;
+  }
+  .doc-btn-icon {
+    font-size: 0.85rem;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+  .doc-btn-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   .doc-btn-download {
     background: rgba(56, 189, 248, 0.15);
@@ -108,16 +175,6 @@
   .doc-btn-preview:hover {
     background: rgba(255, 255, 255, 0.12);
     color: #fff;
-  }
-  .doc-btn-delete {
-    background: rgba(239, 68, 68, 0.15);
-    border: 1px solid rgba(239, 68, 68, 0.3);
-    color: #f87171;
-    margin-left: auto;
-  }
-  .doc-btn-delete:hover {
-    background: rgba(239, 68, 68, 0.25);
-    color: #ef4444;
   }
 
   /* Light Theme Overrides */
@@ -182,6 +239,57 @@
   [data-theme="light"] .doc-empty-sub {
     color: #64748b !important;
   }
+
+  /* Responsive Media Queries */
+  @media (max-width: 576px) {
+    .doc-grid-container {
+      grid-template-columns: 1fr !important;
+      gap: 0.75rem;
+    }
+    .doc-card-item {
+      padding: 0.75rem 0.85rem;
+      border-radius: 8px;
+    }
+    .doc-card-title {
+      font-size: 0.84rem;
+    }
+    .doc-card-meta {
+      font-size: 0.72rem;
+      gap: 0.3rem;
+    }
+    .doc-card-actions {
+      gap: 0.4rem;
+      padding-top: 0.55rem;
+      margin-top: 0.45rem;
+    }
+    .doc-btn-action {
+      padding: 0.42rem 0.35rem;
+      font-size: 0.74rem;
+      gap: 0.25rem;
+      min-height: 34px;
+    }
+    .doc-btn-icon {
+      font-size: 0.82rem;
+    }
+    .doc-btn-delete {
+      width: 26px;
+      height: 26px;
+      font-size: 0.75rem;
+    }
+  }
+
+  @media (max-width: 360px) {
+    .doc-card-item {
+      padding: 0.65rem 0.7rem;
+    }
+    .doc-card-actions {
+      gap: 0.35rem;
+    }
+    .doc-btn-action {
+      padding: 0.38rem 0.25rem;
+      font-size: 0.7rem;
+    }
+  }
 </style>
 
 {{#if documents.length}}
@@ -202,30 +310,32 @@
               {{/if}}
             </div>
           </div>
-        </div>
-
-        <div class="doc-card-actions">
-          <a href="/files/download?path={{this.filePath}}&name={{this.originalName}}" class="doc-btn-action doc-btn-download" title="{{t 'documents.download'}}">
-            📥 {{t 'documents.download'}}
-          </a>
-          <a href="/files/preview?path={{this.filePath}}&name={{this.originalName}}" target="_blank" rel="noopener" class="doc-btn-action doc-btn-preview" title="{{t 'documents.preview'}}">
-            👁️ {{t 'documents.preview'}}
-          </a>
           {{#if ../canDelete}}
             {{#if ../deleteUrlPrefix}}
-              <form action="{{../deleteUrlPrefix}}/{{this.id}}/delete" method="POST" style="margin: 0; display: inline-flex;" onsubmit="return confirm('{{t 'documents.confirmDelete'}}');">
-                <button type="submit" class="doc-btn-action doc-btn-delete" title="{{t 'common.delete'}}">
+              <form action="{{../deleteUrlPrefix}}/{{this.id}}/delete" method="POST" class="doc-delete-form" onsubmit="return confirm('{{t 'documents.confirmDelete'}}');">
+                <button type="submit" class="doc-btn-delete" title="{{t 'common.delete'}}" aria-label="{{t 'common.delete'}}">
                   ✕
                 </button>
               </form>
             {{/if}}
           {{/if}}
         </div>
+
+        <div class="doc-card-actions">
+          <a href="/files/download?path={{this.filePath}}&name={{this.originalName}}" class="doc-btn-action doc-btn-download" title="{{t 'documents.download'}}">
+            <span class="doc-btn-icon">📥</span>
+            <span class="doc-btn-text">{{t 'documents.download'}}</span>
+          </a>
+          <a href="/files/preview?path={{this.filePath}}&name={{this.originalName}}" target="_blank" rel="noopener" class="doc-btn-action doc-btn-preview" title="{{t 'documents.preview'}}">
+            <span class="doc-btn-icon">👁️</span>
+            <span class="doc-btn-text">{{t 'documents.preview'}}</span>
+          </a>
+        </div>
       </div>
     {{/each}}
   </div>
 {{else}}
-  <div class="doc-empty-box" style="text-align: center; padding: 2rem 1rem; background: rgba(15, 23, 42, 0.3); border: 1px dashed rgba(255, 255, 255, 0.08); border-radius: 8px;">
+  <div class="doc-empty-box" style="text-align: center; padding: 2rem 1rem; background: rgba(15, 23, 42, 0.3); border: 1px dashed rgba(255, 255, 255, 0.08); border-radius: 8px; box-sizing: border-box; word-break: break-word;">
     <div style="font-size: 2rem; margin-bottom: 0.35rem;">📂</div>
     <div class="doc-empty-title" style="color: #cbd5e1; font-size: 0.9rem; font-weight: 600;">
       {{#if emptyMessage}}{{emptyMessage}}{{else}}{{t 'documents.noDocuments'}}{{/if}}

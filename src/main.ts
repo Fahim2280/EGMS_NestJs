@@ -13,6 +13,7 @@ import {
   formatNumberWithLang,
   formatDateWithLang,
   formatTimeWithLang,
+  translateAuditDetails,
 } from './infrastructure/i18n/i18n.service';
 import { CurrentUserInterceptor } from './infrastructure/auth/current-user.interceptor';
 
@@ -338,10 +339,72 @@ async function bootstrap() {
     const lang = options?.data?.root?.lang || 'en';
     const label = isSuperAdmin
       ? (lang === 'bn' ? 'সুপার অ্যাডমিন' : 'Super Admin')
-      : (lang === 'bn' ? 'সাধারণ কর্মকর্তা' : 'General Employee');
+      : (lang === 'bn' ? 'সাধারণ কর্মকর্তা' : 'General Staff');
     const badgeClass = isSuperAdmin ? 'badge-admin' : 'badge-officer';
     return new (hbs as any).handlebars.SafeString(
       `<span class="badge ${badgeClass}"><span class="badge-dot"></span>${label}</span>`,
+    );
+  });
+
+  hbs.registerHelper('tAuditDetail', function (details: string, options: any) {
+    const lang = options?.data?.root?.lang || (typeof options === 'string' ? options : 'en');
+    return translateAuditDetails(details, lang as any);
+  });
+
+  hbs.registerHelper('auditActionBadge', function (action: string, options: any) {
+    const lang = options?.data?.root?.lang || 'en';
+    const isBn = lang === 'bn';
+
+    const badges: Record<string, { labelBn: string; labelEn: string; icon: string; bg: string; color: string; border: string }> = {
+      CREATE: { labelBn: 'নতুন তৈরি', labelEn: 'CREATE', icon: '➕', bg: 'rgba(16, 185, 129, 0.15)', color: '#34d399', border: 'rgba(16, 185, 129, 0.3)' },
+      UPDATE: { labelBn: 'আপডেট', labelEn: 'UPDATE', icon: '✏️', bg: 'rgba(59, 130, 246, 0.15)', color: '#60a5fa', border: 'rgba(59, 130, 246, 0.3)' },
+      DELETE: { labelBn: 'মুছে ফেলা', labelEn: 'DELETE', icon: '🗑️', bg: 'rgba(244, 63, 94, 0.15)', color: '#fb7185', border: 'rgba(244, 63, 94, 0.3)' },
+      LOGIN: { labelBn: 'লগইন', labelEn: 'LOGIN', icon: '🔑', bg: 'rgba(168, 85, 247, 0.15)', color: '#c084fc', border: 'rgba(168, 85, 247, 0.3)' },
+      LOGOUT: { labelBn: 'লগআউট', labelEn: 'LOGOUT', icon: '🚪', bg: 'rgba(148, 163, 184, 0.15)', color: '#94a3b8', border: 'rgba(148, 163, 184, 0.3)' },
+      PERMISSIONS_UPDATE: { labelBn: 'পারমিশন', labelEn: 'PERMISSION', icon: '🛡️', bg: 'rgba(245, 158, 11, 0.15)', color: '#fbbf24', border: 'rgba(245, 158, 11, 0.3)' },
+      PASSWORD_RESET: { labelBn: 'রিসেট', labelEn: 'RESET', icon: '🔒', bg: 'rgba(236, 72, 153, 0.15)', color: '#f472b6', border: 'rgba(236, 72, 153, 0.3)' },
+    };
+
+    const item = badges[action] || {
+      labelBn: action,
+      labelEn: action,
+      icon: '⚡',
+      bg: 'rgba(99, 102, 241, 0.15)',
+      color: '#818cf8',
+      border: 'rgba(99, 102, 241, 0.3)',
+    };
+
+    const mainLabel = isBn ? item.labelBn : item.labelEn;
+    const subLabel = isBn ? `<span style="opacity:0.7;font-size:0.68rem;margin-left:4px;font-weight:600;">${item.labelEn}</span>` : '';
+
+    return new (hbs as any).handlebars.SafeString(
+      `<span class="badge" style="background: ${item.bg}; color: ${item.color}; border: 1px solid ${item.border}; font-weight: 700; padding: 0.3rem 0.65rem; border-radius: 6px; font-size: 0.78rem; display: inline-flex; align-items: center; gap: 4px;">
+        <span>${item.icon}</span> <span>${mainLabel}</span>${subLabel}
+      </span>`,
+    );
+  });
+
+  hbs.registerHelper('auditEntityBadge', function (entityType: string, options: any) {
+    const lang = options?.data?.root?.lang || 'en';
+    const isBn = lang === 'bn';
+
+    const entities: Record<string, { labelBn: string; labelEn: string; icon: string }> = {
+      CUSTOMER: { labelBn: 'গ্রাহক', labelEn: 'CUSTOMER', icon: '👥' },
+      ELECTRIC_BILL: { labelBn: 'বিদ্যুৎ বিল', labelEn: 'BILL', icon: '⚡' },
+      GARAGE: { labelBn: 'গ্যারেজ', labelEn: 'GARAGE', icon: '🏢' },
+      EMPLOYEE: { labelBn: 'কর্মকর্তা', labelEn: 'EMPLOYEE', icon: '🧑‍💼' },
+      AUTH: { labelBn: 'নিরাপত্তা', labelEn: 'AUTH', icon: '🔐' },
+      COMPANY: { labelBn: 'কোম্পানি', labelEn: 'COMPANY', icon: '🏛️' },
+    };
+
+    const item = entities[entityType] || { labelBn: entityType, labelEn: entityType, icon: '🏷️' };
+    const mainLabel = isBn ? item.labelBn : item.labelEn;
+    const subLabel = isBn ? `<span style="opacity:0.7;font-size:0.65rem;margin-left:4px;font-weight:600;">${item.labelEn}</span>` : '';
+
+    return new (hbs as any).handlebars.SafeString(
+      `<span class="badge" style="background: rgba(99, 102, 241, 0.12); color: #a5b4fc; border: 1px solid rgba(99, 102, 241, 0.25); font-size: 0.72rem; font-weight: 600; padding: 2px 7px; border-radius: 4px; display: inline-flex; align-items: center; gap: 3px;">
+        <span>${item.icon}</span> <span>${mainLabel}</span>${subLabel}
+      </span>`,
     );
   });
 

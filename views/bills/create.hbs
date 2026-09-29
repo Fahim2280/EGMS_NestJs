@@ -47,11 +47,14 @@
           <select id="customerId" name="customerId" class="form-input" required>
             <option value="">{{t 'bills.chooseCustomer'}}</option>
             {{#each customers}}
-              <option value="{{this.id}}" data-subtext="📱 {{this.mobileNumber}}" {{#if (eq ../preselectedCustomerId this.id)}}selected{{/if}}>
-                {{this.name}}
+              <option value="{{this.id}}" data-subtext="📱 {{this.mobileNumber}}" data-active="{{this.isActive}}" {{#unless this.isActive}}disabled style="color: #ef4444; background: rgba(239, 68, 68, 0.06);"{{/unless}} {{#if (eq ../preselectedCustomerId this.id)}}selected{{/if}}>
+                {{this.name}}{{#if this.customerCode}} ({{this.customerCode}}){{/if}}{{#unless this.isActive}} [🚫 {{t 'customers.suspended'}}]{{/unless}}
               </option>
             {{/each}}
           </select>
+          <div id="customerSuspendedWarning" style="display: none; margin-top: 0.75rem; background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; padding: 0.75rem 1rem; color: #f87171; font-size: 0.88rem;">
+            🚫 <strong>{{t 'customers.suspendedNoticeShort'}}:</strong> {{t 'customers.suspendedNotice'}}
+          </div>
         </div>
 
         <div class="form-grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
@@ -239,12 +242,21 @@
     let customerName = '';
 
     async function fetchCustomerSummary(id) {
+      const warningEl = document.getElementById('customerSuspendedWarning');
+      const submitBtn = document.querySelector('#billForm button[type="submit"]');
+
       if (!id) {
         previousUnit = 0;
         previousDues = 0;
         if (displayPreviousUnit) displayPreviousUnit.value = '0.00';
         const custNameEl = document.getElementById('previewCustomerName');
         if (custNameEl) custNameEl.textContent = '{{t "bills.chooseCustomer"}}';
+        if (warningEl) warningEl.style.display = 'none';
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.style.opacity = '1';
+          submitBtn.style.cursor = 'pointer';
+        }
         recalc();
         return;
       }
@@ -253,12 +265,19 @@
         if (!res.ok) return;
         const json = await res.json();
         if (json.success) {
+          const isSuspended = json.data.isActive === false;
+          if (warningEl) warningEl.style.display = isSuspended ? 'block' : 'none';
+          if (submitBtn) {
+            submitBtn.disabled = isSuspended;
+            submitBtn.style.opacity = isSuspended ? '0.5' : '1';
+            submitBtn.style.cursor = isSuspended ? 'not-allowed' : 'pointer';
+          }
           previousUnit = Number(json.data.lastMeterReading) || 0;
           previousDues = Number(json.data.previousDues) || 0;
           customerName = json.data.customerName || '';
           if (displayPreviousUnit) displayPreviousUnit.value = previousUnit.toFixed(2);
           const custNameEl = document.getElementById('previewCustomerName');
-          if (custNameEl) custNameEl.textContent = customerName;
+          if (custNameEl) custNameEl.textContent = customerName + (isSuspended ? ' [🚫 {{t "customers.suspended"}}]' : '');
           recalc();
         }
       } catch (err) {

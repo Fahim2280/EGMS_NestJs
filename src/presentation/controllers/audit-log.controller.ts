@@ -16,7 +16,10 @@ import { GetAuditLogsQuery } from '@application/queries/impl/get-audit-logs.quer
 import {
   AUDIT_LOG_REPOSITORY_TOKEN,
   IAuditLogRepository,
+  EMPLOYEE_REPOSITORY_TOKEN,
+  IEmployeeRepository,
 } from '@domain/index';
+import { translateAuditDetails } from '@infrastructure/i18n/i18n.service';
 
 @Controller('audit-logs')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -26,6 +29,8 @@ export class AuditLogController {
     private readonly queryBus: QueryBus,
     @Inject(AUDIT_LOG_REPOSITORY_TOKEN)
     private readonly auditRepo: IAuditLogRepository,
+    @Inject(EMPLOYEE_REPOSITORY_TOKEN)
+    private readonly employeeRepo: IEmployeeRepository,
   ) {}
 
   @Get()
@@ -37,10 +42,16 @@ export class AuditLogController {
     @Query('search') search?: string,
     @Query('days') days?: string,
     @Query('page') page?: string,
+    @Query('fromDate') fromDate?: string,
+    @Query('toDate') toDate?: string,
   ) {
     const user = (req as any).user;
     const pageNum = Math.max(1, parseInt(page || '1', 10) || 1);
     const daysNum = days ? parseInt(days, 10) : undefined;
+    const isBn = (req as any).lang === 'bn' || req.cookies?.lang === 'bn';
+
+    const parsedFrom = fromDate ? new Date(fromDate) : undefined;
+    const parsedTo = toDate ? new Date(toDate) : undefined;
 
     const result = await this.queryBus.execute(
       new GetAuditLogsQuery(
@@ -51,6 +62,8 @@ export class AuditLogController {
         daysNum,
         pageNum,
         25,
+        parsedFrom,
+        parsedTo,
       ),
     );
 
@@ -70,7 +83,9 @@ export class AuditLogController {
     }
 
     return res.render('audit-logs/index', {
-      title: 'Audit Log & Security Activity - EGMS Portal',
+      title: isBn
+        ? 'অডিট লগ ও নিরাপত্তা কার্যক্রম - EGMS Portal'
+        : 'Audit Log & Security Activity - EGMS Portal',
       activeNav: 'audit-logs',
       user,
       currentUser: user,
@@ -90,6 +105,8 @@ export class AuditLogController {
       selectedEntityType: entityType || 'ALL',
       selectedDays: days || '',
       search: search || '',
+      fromDate: fromDate || '',
+      toDate: toDate || '',
     });
   }
 
@@ -100,14 +117,34 @@ export class AuditLogController {
     @Query('action') action?: string,
     @Query('entityType') entityType?: string,
     @Query('search') search?: string,
+    @Query('fromDate') fromDate?: string,
+    @Query('toDate') toDate?: string,
   ) {
     const user = (req as any).user;
+
+    const parsedFrom = fromDate ? new Date(fromDate) : undefined;
+    const parsedTo = toDate ? new Date(toDate) : undefined;
 
     const logs = await this.auditRepo.findAllForExport(user.companyId, {
       action: action && action !== 'ALL' ? action : undefined,
       entityType: entityType && entityType !== 'ALL' ? entityType : undefined,
       search: search && search.trim() ? search.trim() : undefined,
+      fromDate: parsedFrom,
+      toDate: parsedTo,
     });
+
+    const employeeMap = new Map<string, string>();
+    const hasEmployeeLogs = logs.some((l) => l.entityType === 'EMPLOYEE');
+    if (hasEmployeeLogs) {
+      try {
+        const allEmployees = await this.employeeRepo.findByCompanyId(
+          user.companyId,
+        );
+        for (const emp of allEmployees) {
+          employeeMap.set(emp.id, emp.name);
+        }
+      } catch {}
+    }
 
     const escapeCsv = (val: any) => {
       if (val === null || val === undefined) return '""';
@@ -128,20 +165,44 @@ export class AuditLogController {
       'User Agent',
     ].join(',');
 
-    const rows = logs.map((l) =>
-      [
+    const rows = logs.map((l) => {
+      let entityName = l.entityName;
+      let details = l.details;
+      if (l.entityType === 'EMPLOYEE' && l.entityId) {
+        const empName = employeeMap.get(l.entityId);
+        if (empName) {
+          if (
+            !entityName ||
+            entityName.startsWith('#') ||
+            entityName === l.entityId
+          ) {
+            entityName = empName;
+          }
+          if (details) {
+            details = details
+              .split(`employee #${l.entityId}`)
+              .join(`employee ${empName}`)
+              .split(`employee ${l.entityId}`)
+              .join(`employee ${empName}`)
+              .split(`#${l.entityId}`)
+              .join(empName);
+          }
+        }
+      }
+
+      return [
         escapeCsv(l.createdDate ? new Date(l.createdDate).toISOString() : ''),
         escapeCsv(l.userName),
         escapeCsv(l.userRole),
         escapeCsv(l.action),
         escapeCsv(l.entityType),
         escapeCsv(l.entityId),
-        escapeCsv(l.entityName),
-        escapeCsv(l.details),
+        escapeCsv(entityName),
+        escapeCsv(details),
         escapeCsv(l.ipAddress),
         escapeCsv(l.userAgent),
-      ].join(','),
-    );
+      ].join(',');
+    });
 
     const csvContent = [header, ...rows].join('\r\n');
 
@@ -151,5 +212,94 @@ export class AuditLogController {
       `attachment; filename="audit-logs-${new Date().toISOString().slice(0, 10)}.csv"`,
     );
     return res.send(csvContent);
+  }
+
+  @Get('notifications/recent')
+  async getRecentNotifications(
+    @Req() req: Request,
+    @Res() res: Response,
+    @Query('since') since?: string,
+  ) {
+    const user = (req as any).user;
+    if (!user || user.role !== 'SUPER_ADMIN') {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+
+    // Fetch the most recent audit logs for the company
+    const logs = await this.auditRepo.findAllForExport(user.companyId, {});
+
+    // Sort descending by createdDate
+    logs.sort(
+      (a, b) =>
+        new Date(b.createdDate).getTime() - new Date(a.createdDate).getTime(),
+    );
+    const recentLogs = logs.slice(0, 10);
+
+    // Resolve employee names
+    const employeeMap = new Map<string, string>();
+    const hasEmployeeLogs = recentLogs.some((l) => l.entityType === 'EMPLOYEE');
+    if (hasEmployeeLogs) {
+      try {
+        const allEmployees = await this.employeeRepo.findByCompanyId(
+          user.companyId,
+        );
+        for (const emp of allEmployees) {
+          employeeMap.set(emp.id, emp.name);
+        }
+      } catch {}
+    }
+
+    const sinceDate = since ? new Date(since) : null;
+    let unreadCount = 0;
+    if (sinceDate && !isNaN(sinceDate.getTime())) {
+      unreadCount = logs.filter(
+        (l) => new Date(l.createdDate).getTime() > sinceDate.getTime(),
+      ).length;
+    } else {
+      unreadCount = Math.min(recentLogs.length, 5);
+    }
+
+    const formattedLogs = recentLogs.map((l) => {
+      let entityName = l.entityName;
+      let details = l.details;
+      if (l.entityType === 'EMPLOYEE' && l.entityId) {
+        const empName = employeeMap.get(l.entityId);
+        if (empName) {
+          if (
+            !entityName ||
+            entityName.startsWith('#') ||
+            entityName === l.entityId
+          ) {
+            entityName = empName;
+          }
+          if (details) {
+            details = details
+              .split(`employee #${l.entityId}`)
+              .join(`employee ${empName}`)
+              .split(`employee ${l.entityId}`)
+              .join(`employee ${empName}`)
+              .split(`#${l.entityId}`)
+              .join(empName);
+          }
+        }
+      }
+
+      return {
+        id: l.id,
+        userName: l.userName,
+        userRole: l.userRole,
+        action: l.action,
+        entityType: l.entityType,
+        entityName,
+        details,
+        detailsBn: translateAuditDetails(details || '', 'bn'),
+        createdDate: l.createdDate,
+      };
+    });
+
+    return res.json({
+      unreadCount,
+      logs: formattedLogs,
+    });
   }
 }

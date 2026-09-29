@@ -84,7 +84,7 @@ export class EmployeeController {
         dto.documents = uploadedDocs;
       }
 
-      await this.commandBus.execute(
+      const createdEmployee = await this.commandBus.execute(
         new CreateEmployeeCommand(user.companyId, dto),
       );
 
@@ -95,6 +95,7 @@ export class EmployeeController {
         userRole: user.role,
         action: 'CREATE',
         entityType: 'EMPLOYEE',
+        entityId: createdEmployee?.id || undefined,
         entityName: dto.name,
         details: `Registered new employee ${dto.name} (${dto.email})`,
         req,
@@ -128,14 +129,19 @@ export class EmployeeController {
       suspended: employees.filter((e: any) => !e.isActive).length,
     };
 
+    const isBn = (req as any).lang === 'bn' || req.cookies?.lang === 'bn';
+
     return res.render('employees/permissions', {
-      title: 'User Permissions & Access Control - EGMS Portal',
+      title: isBn
+        ? 'ব্যবহারকারী পারমিশন ও গ্যারেজ অ্যাক্সেস নিয়ন্ত্রণ - EGMS Portal'
+        : 'User Permissions & Garage Access Control - EGMS Portal',
       activeNav: 'permissions',
       user,
       isSuperAdmin: true,
       employees,
       garages,
       stats,
+      isBn,
     });
   }
 
@@ -190,6 +196,12 @@ export class EmployeeController {
         }
       }
 
+      const targetEmp = await this.queryBus
+        .execute(new GetEmployeeByIdQuery(id, user.companyId))
+        .catch(() => null);
+      const targetName =
+        targetEmp?.name || body.employeeName || body.name || `Employee #${id}`;
+
       await this.commandBus.execute(
         new UpdateEmployeePermissionCommand(
           id,
@@ -213,7 +225,8 @@ export class EmployeeController {
         action: 'PERMISSIONS_UPDATE',
         entityType: 'EMPLOYEE',
         entityId: id,
-        details: `Updated role & permissions for employee #${id}: role=${body.role || 'GENERAL'}, active=${isActive}, canCreate=${canCreate}, canEdit=${canEdit}, canDelete=${canDelete}`,
+        entityName: targetEmp?.name || body.employeeName || body.name || undefined,
+        details: `Updated role & permissions for employee ${targetName}: role=${body.role || 'GENERAL'}, active=${isActive}, canCreate=${canCreate}, canEdit=${canEdit}, canDelete=${canDelete}`,
         req,
       });
 
@@ -352,6 +365,11 @@ export class EmployeeController {
   ) {
     const user = (req as any).user;
     try {
+      const targetEmp = await this.queryBus
+        .execute(new GetEmployeeByIdQuery(id, user.companyId))
+        .catch(() => null);
+      const targetName = targetEmp?.name || `Employee #${id}`;
+
       await this.commandBus.execute(
         new DeleteEmployeeCommand(id, user.companyId, `${user.companyId}|SUPER_ADMIN`),
       );
@@ -364,7 +382,8 @@ export class EmployeeController {
         action: 'DELETE',
         entityType: 'EMPLOYEE',
         entityId: id,
-        details: `Deleted employee record #${id}`,
+        entityName: targetEmp?.name || undefined,
+        details: `Deleted employee record for ${targetName}`,
         req,
       });
 

@@ -273,18 +273,26 @@
                 </td>
                 <td style="color: #94a3b8; font-size: 0.85rem;">{{tDate this.lastBillDate}}</td>
                 <td>
-                  {{#if this.hasBills}}
-                    <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">Billed</span>
+                  {{#unless this.isActive}}
+                    <span class="badge" style="background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); font-weight: 700;">
+                      🚫 {{t 'customers.suspended'}}
+                    </span>
                   {{else}}
-                    <span class="badge" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24;">No Bills</span>
-                  {{/if}}
+                    {{#if this.hasBills}}
+                      <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">Billed</span>
+                    {{else}}
+                      <span class="badge" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24;">No Bills</span>
+                    {{/if}}
+                  {{/unless}}
                 </td>
                 <td style="text-align: right;">
                   <div class="table-actions-group">
                     {{#if ../canCreate}}
-                    <a href="/bills/new?customerId={{this.id}}" class="btn btn-primary btn-icon-action" style="background: #10b981; border-color: #10b981;" title="{{t 'bills.newBill'}}" aria-label="{{t 'bills.newBill'}}">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-                    </a>
+                      {{#if this.isActive}}
+                      <a href="/bills/new?customerId={{this.id}}" class="btn btn-primary btn-icon-action" style="background: #10b981; border-color: #10b981;" title="{{t 'bills.newBill'}}" aria-label="{{t 'bills.newBill'}}">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                      </a>
+                      {{/if}}
                     {{/if}}
                     <a href="/customers/{{this.id}}" class="btn btn-secondary btn-icon-action" title="{{t 'common.view'}}" aria-label="{{t 'common.view'}}">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>

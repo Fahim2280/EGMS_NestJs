@@ -83,6 +83,7 @@ export class CustomerResponseDto {
   advanceMoney: number;
   garageId?: string;
   garageName?: string;
+  isActive: boolean;
   createdDate: Date;
   bills?: any[];
   guarantors?: GuarantorResponseDto[];
@@ -98,6 +99,7 @@ export class CustomerDashboardItemDto {
   advanceMoney: number;
   garageId?: string;
   garageName?: string;
+  isActive: boolean;
   lastBillDate: Date;
   hasBills: boolean;
 }

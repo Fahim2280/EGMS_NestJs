@@ -39,6 +39,7 @@ export class BillingCalculationService {
         lastMeterReading: customer.previousUnit,
         previousDues: customer.advanceMoney,
         lastBillDate: null,
+        isActive: customer.isActive,
       };
     }
 
@@ -48,6 +49,7 @@ export class BillingCalculationService {
       lastMeterReading: lastBill.currentUnit,
       previousDues: lastBill.presentDues,
       lastBillDate: lastBill.date,
+      isActive: customer.isActive,
     };
   }
 
@@ -60,6 +62,9 @@ export class BillingCalculationService {
     unitRate: number = RATE_PER_UNIT,
   ): Promise<ElectricBillPreviewDto> {
     const summary = await this.getCustomerBillSummary(customerId, companyId);
+    if (summary.isActive === false) {
+      throw new BadRequestException('msg.customerSuspendedBillingBlocked');
+    }
     const totalUnit = currentMeterReading - summary.lastMeterReading;
     const rate = unitRate > 0 ? unitRate : RATE_PER_UNIT;
     const electricBillAmount = Math.max(0, totalUnit) * rate;
@@ -94,6 +99,10 @@ export class BillingCalculationService {
     const customer = await this.customerRepo.getByIdAsync(customerId);
     if (!customer || customer.companyId !== companyId) {
       throw new NotFoundException('Customer not found.');
+    }
+
+    if (!customer.isActive && !excludeBillId) {
+      throw new BadRequestException('msg.customerSuspendedBillingBlocked');
     }
 
     const previousBill = await this.billRepo.findPreviousBill(

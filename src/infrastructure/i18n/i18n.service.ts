@@ -117,3 +117,122 @@ export function formatTimeWithLang(date: any, lang: 'en' | 'bn' = 'en'): string 
     return '';
   }
 }
+
+export function translateAuditDetails(details?: string | null, lang: 'en' | 'bn' = 'en'): string {
+  if (!details || typeof details !== 'string') return '';
+  if (lang !== 'bn') return details;
+
+  const text = details.trim();
+
+  // 1. User login / logout
+  const loginMatch = text.match(/^User\s+(.+?)\s+\((.+?)\)\s+signed\s+in$/i);
+  if (loginMatch) {
+    return `ব্যবহারকারী ${loginMatch[1]} (${loginMatch[2]}) সাইন ইন করেছেন`;
+  }
+  const logoutMatch = text.match(/^User\s+(.+?)\s+logged\s+out$/i);
+  if (logoutMatch) {
+    return `ব্যবহারকারী ${logoutMatch[1]} সাইন আউট করেছেন`;
+  }
+
+  // 2. Updated company profile details and tariff rate (৳15.05)
+  const companyMatch = text.match(/^Updated\s+company\s+profile\s+details\s+and\s+tariff\s+rate\s+\(৳?([0-9.]+)\)$/i);
+  if (companyMatch) {
+    return `কোম্পানি প্রোফাইল বিবরণ ও ইউনিট ট্যারিফ রেট (৳${toBengaliDigits(companyMatch[1])}) আপডেট করা হয়েছে`;
+  }
+
+  // 3. Customer registration / update / deletion
+  const custRegMatch = text.match(/^Registered\s+customer\s+(.+?)\s+\((.+?)\)\s+with\s+advance\s+৳?([0-9.]+)/i);
+  if (custRegMatch) {
+    return `নতুন গ্রাহক ${custRegMatch[1]} (${custRegMatch[2]}) অগ্রিম ৳${toBengaliDigits(custRegMatch[3])} সহ নিবন্ধিত হয়েছেন`;
+  }
+  const custUpdMatch = text.match(/^Updated\s+customer\s+profile\s+(.+?)\s+\((.+?)\)$/i);
+  if (custUpdMatch) {
+    return `গ্রাহক প্রোফাইল ${custUpdMatch[1]} (${custUpdMatch[2]}) আপডেট করা হয়েছে`;
+  }
+  const custDelMatch = text.match(/^Deleted\s+customer\s+record\s+(.+)$/i);
+  if (custDelMatch) {
+    return `গ্রাহক রেকর্ড ${custDelMatch[1]} মুছে ফেলা হয়েছে`;
+  }
+  const custSuspendMatch = text.match(/^Suspended\s+customer\s+account\s+(.+?)\s+\((.+?)\)$/i);
+  if (custSuspendMatch) {
+    return `গ্রাহক ${custSuspendMatch[1]} (${custSuspendMatch[2]}) এর অ্যাকাউন্ট স্থগিত (Blocked) করা হয়েছে`;
+  }
+  const custReactivateMatch = text.match(/^Reactivated\s+customer\s+account\s+(.+?)\s+\((.+?)\)$/i);
+  if (custReactivateMatch) {
+    return `গ্রাহক ${custReactivateMatch[1]} (${custReactivateMatch[2]}) এর অ্যাকাউন্ট পুনরায় সক্রিয় করা হয়েছে`;
+  }
+
+  // 4. Employee permissions / registration / update / deletion
+  const permMatch = text.match(/^Updated\s+role\s+&\s+permissions\s+for\s+employee\s+(.+?):\s*(.*)$/i);
+  if (permMatch) {
+    const empName = permMatch[1];
+    const permDetails = permMatch[2];
+    const translatedPerms = permDetails
+      .replace(/role=SUPER_ADMIN/gi, 'রোল=সুপার অ্যাডমিন')
+      .replace(/role=GENERAL_STAFF/gi, 'রোল=সাধারণ কর্মী')
+      .replace(/role=GENERAL/gi, 'রোল=সাধারণ কর্মী')
+      .replace(/active=true/gi, 'সক্রিয়=হ্যাঁ')
+      .replace(/active=false/gi, 'সক্রিয়=না')
+      .replace(/canCreate=true/gi, 'তৈরি=হ্যাঁ')
+      .replace(/canCreate=false/gi, 'তৈরি=না')
+      .replace(/canEdit=true/gi, 'এডিট=হ্যাঁ')
+      .replace(/canEdit=false/gi, 'এডিট=না')
+      .replace(/canDelete=true/gi, 'ডিলিট=হ্যাঁ')
+      .replace(/canDelete=false/gi, 'ডিলিট=না');
+    return `কর্মী ${empName} এর রোল ও পারমিশন আপডেট করা হয়েছে: ${translatedPerms}`;
+  }
+
+  const empRegMatch = text.match(/^Registered\s+new\s+employee\s+(.+?)\s+\((.+?)\)$/i);
+  if (empRegMatch) {
+    return `নতুন কর্মী ${empRegMatch[1]} (${empRegMatch[2]}) নিবন্ধিত হয়েছেন`;
+  }
+  const empUpdMatch = text.match(/^Updated\s+profile\s+details\s+for\s+employee\s+(.+)$/i);
+  if (empUpdMatch) {
+    return `কর্মী ${empUpdMatch[1]} এর প্রোফাইল বিবরণ আপডেট করা হয়েছে`;
+  }
+  const empDelMatch = text.match(/^Deleted\s+employee\s+record\s+for\s+(.+)$/i);
+  if (empDelMatch) {
+    return `কর্মী ${empDelMatch[1]} এর অ্যাকাউন্ট অপসারণ করা হয়েছে`;
+  }
+
+  // 5. Electric Bills
+  const billGenMatch = text.match(/^Generated\s+electric\s+bill\s+for\s+customer\s+(.+?)\s+\(meter\s+reading:\s*(.+?)\)$/i);
+  if (billGenMatch) {
+    return `গ্রাহক ${billGenMatch[1]} এর বিদ্যুৎ বিল তৈরি করা হয়েছে (মিটার রিডিং: ${toBengaliDigits(billGenMatch[2])})`;
+  }
+  const billUpdMatch = text.match(/^Updated\s+electric\s+bill\s+#?([0-9a-zA-Z-]+)$/i);
+  if (billUpdMatch) {
+    return `বিদ্যুৎ বিল #${toBengaliDigits(billUpdMatch[1])} আপডেট করা হয়েছে`;
+  }
+  const billDelMatch = text.match(/^Deleted\s+electric\s+bill\s+#?([0-9a-zA-Z-]+)$/i);
+  if (billDelMatch) {
+    return `বিদ্যুৎ বিল #${toBengaliDigits(billDelMatch[1])} মুছে ফেলা হয়েছে`;
+  }
+  if (/Generated monthly electric bills for all eligible customers/i.test(text)) {
+    return 'সকল যোগ্য গ্রাহকদের জন্য মাসিক বিদ্যুৎ বিল একসাথে তৈরি করা হয়েছে';
+  }
+
+  // 6. Garages
+  const garageRegMatch = text.match(/^Registered\s+new\s+garage\s+facility:\s*(.+?)\s+located\s+at\s*(.+)$/i);
+  if (garageRegMatch) {
+    return `নতুন গ্যারেজ সুবিধা নিবন্ধিত: ${garageRegMatch[1]} (অবস্থান: ${garageRegMatch[2]})`;
+  }
+  const garageUpdMatch = text.match(/^Updated\s+garage\s+facility:\s*(.+)$/i);
+  if (garageUpdMatch) {
+    return `গ্যারেজ সুবিধা ${garageUpdMatch[1]} এর তথ্য আপডেট করা হয়েছে`;
+  }
+
+  // 7. Documents / Files
+  const docUploadMatch = text.match(/^Uploaded\s+([0-9]+)\s+document\(s\)\s+for\s+(customer|employee)\s+(.+)$/i);
+  if (docUploadMatch) {
+    const roleLabel = docUploadMatch[2].toLowerCase() === 'customer' ? 'গ্রাহক' : 'কর্মী';
+    return `${roleLabel} ${docUploadMatch[3]} এর জন্য ${toBengaliDigits(docUploadMatch[1])} টি ডকুমেন্ট আপলোড করা হয়েছে`;
+  }
+  const docRemoveMatch = text.match(/^Removed\s+document\s+"(.+?)"\s+for\s+(customer|employee)\s+(.+)$/i);
+  if (docRemoveMatch) {
+    const roleLabel = docRemoveMatch[2].toLowerCase() === 'customer' ? 'গ্রাহক' : 'কর্মী';
+    return `${roleLabel} ${docRemoveMatch[3]} এর "${docRemoveMatch[1]}" ডকুমেন্ট মুছে ফেলা হয়েছে`;
+  }
+
+  return text;
+}
