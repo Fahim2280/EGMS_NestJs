@@ -645,10 +645,12 @@
     }
   }
 </style>
-<div id="addGuarantorModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center; padding: 1rem;">
-  <div class="card guarantor-modal-card" style="max-width: 650px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 1.75rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; border-bottom: 1px solid var(--color-border); padding-bottom: 0.75rem;">
-      <h3 style="margin: 0; font-size: 1.25rem; font-weight: 700; color: #fff;">+ {{t 'guarantors.add'}}</h3>
+<div id="addGuarantorModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(5px); z-index: 9999; align-items: center; justify-content: center; padding: 1.5rem 1rem; overflow-y: auto;">
+  <div class="card guarantor-modal-card" style="max-width: 650px; width: 100%; max-height: calc(100vh - 3.5rem); overflow-y: auto; padding: 1.75rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); border-top: 3px solid #6366f1; margin: auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; border-bottom: 1px solid var(--color-border); padding-bottom: 0.75rem; position: sticky; top: -1.75rem; background: inherit; z-index: 10; padding-top: 0.25rem;">
+      <h3 style="margin: 0; font-size: 1.25rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 0.5rem;">
+        <span>🛡️</span> + {{t 'guarantors.add'}}
+      </h3>
       <button type="button" onclick="document.getElementById('addGuarantorModal').style.display='none'" style="background: transparent; border: none; color: var(--color-text-muted); font-size: 1.5rem; cursor: pointer; line-height: 1;">&times;</button>
     </div>
     <form action="/customers/{{customer.id}}/guarantors" method="POST">
@@ -681,17 +683,17 @@
           <textarea id="gAddress" name="address" class="form-input" rows="2" required placeholder="Guarantor residential or business address..."></textarea>
         </div>
       </div>
-      <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem;">
+      <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem; position: sticky; bottom: -1.75rem; background: inherit; padding-top: 1rem; padding-bottom: 0.25rem; border-top: 1px solid var(--color-border); z-index: 10;">
         <button type="button" class="btn btn-secondary" onclick="document.getElementById('addGuarantorModal').style.display='none'">{{t 'common.cancel'}}</button>
-        <button type="submit" class="btn btn-primary">{{t 'guarantors.save'}}</button>
+        <button type="submit" class="btn btn-primary" style="background: #6366f1; border-color: #6366f1; font-weight: 700; box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);">{{t 'guarantors.save'}}</button>
       </div>
     </form>
   </div>
 </div>
 
 <!-- Upload Customer Document Modal -->
-<div id="uploadCustomerDocModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center; padding: 1rem;">
-  <div class="card modal-responsive-card" style="max-width: 580px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 1.75rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); border-top: 3px solid #38bdf8;">
+<div id="uploadCustomerDocModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(5px); z-index: 9999; align-items: center; justify-content: center; padding: 1.5rem 1rem; overflow-y: auto;">
+  <div class="card modal-responsive-card" style="max-width: 580px; width: 100%; max-height: calc(100vh - 3.5rem); overflow-y: auto; padding: 1.75rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); border-top: 3px solid #38bdf8; margin: auto;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; border-bottom: 1px solid var(--color-border); padding-bottom: 0.75rem;">
       <h3 style="margin: 0; font-size: 1.15rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 0.5rem;">
         <span>📤</span> {{t 'documents.uploadNew'}}
@@ -727,8 +729,8 @@
 </div>
 
 <!-- Upload Guarantor Document Modal -->
-<div id="uploadGuarantorDocModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center; padding: 1rem;">
-  <div class="card modal-responsive-card" style="max-width: 580px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 1.75rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); border-top: 3px solid #818cf8;">
+<div id="uploadGuarantorDocModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(5px); z-index: 9999; align-items: center; justify-content: center; padding: 1.5rem 1rem; overflow-y: auto;">
+  <div class="card modal-responsive-card" style="max-width: 580px; width: 100%; max-height: calc(100vh - 3.5rem); overflow-y: auto; padding: 1.75rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); border-top: 3px solid #818cf8; margin: auto;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; border-bottom: 1px solid var(--color-border); padding-bottom: 0.75rem;">
       <h3 style="margin: 0; font-size: 1.15rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 0.5rem;">
         <span>🛡️</span> {{t 'documents.uploadNew'}} &mdash; <span id="guarantorModalTargetName" style="color: #a5b4fc;"></span>

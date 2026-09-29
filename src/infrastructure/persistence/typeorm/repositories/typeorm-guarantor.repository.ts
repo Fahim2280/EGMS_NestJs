@@ -25,6 +25,14 @@ export class TypeOrmGuarantorRepository
     return orms.map((orm) => this.toDomain(orm));
   }
 
+  async findByEmployeeId(employeeId: string): Promise<Guarantor[]> {
+    const orms = await this.guarantorRepo.find({
+      where: { employeeId, isDeleted: false },
+      order: { createdDate: 'ASC' },
+    });
+    return orms.map((orm) => this.toDomain(orm));
+  }
+
   async findByCompanyId(companyId: string): Promise<Guarantor[]> {
     const orms = await this.guarantorRepo.find({
       where: { companyId, isDeleted: false },
@@ -36,6 +44,12 @@ export class TypeOrmGuarantorRepository
   async countByCustomerId(customerId: string): Promise<number> {
     return this.guarantorRepo.count({
       where: { customerId, isDeleted: false },
+    });
+  }
+
+  async countByEmployeeId(employeeId: string): Promise<number> {
+    return this.guarantorRepo.count({
+      where: { employeeId, isDeleted: false },
     });
   }
 
@@ -58,10 +72,30 @@ export class TypeOrmGuarantorRepository
     return orm ? this.toDomain(orm) : null;
   }
 
+  async findByEmployeeAndNid(
+    employeeId: string,
+    nidNumber: string,
+    excludeId?: string,
+  ): Promise<Guarantor | null> {
+    const qb = this.guarantorRepo
+      .createQueryBuilder('g')
+      .where('g.employeeId = :employeeId', { employeeId })
+      .andWhere('g.nidNumber = :nidNumber', { nidNumber: nidNumber.trim() })
+      .andWhere('g.isDeleted = :isDeleted', { isDeleted: false });
+
+    if (excludeId) {
+      qb.andWhere('g.id != :excludeId', { excludeId });
+    }
+
+    const orm = await qb.getOne();
+    return orm ? this.toDomain(orm) : null;
+  }
+
   protected toDomain(orm: GuarantorOrmEntity): Guarantor {
     return new Guarantor({
       id: orm.id,
-      customerId: orm.customerId,
+      customerId: orm.customerId || undefined,
+      employeeId: orm.employeeId || undefined,
       companyId: orm.companyId,
       name: orm.name,
       fatherName: orm.fatherName,
@@ -86,7 +120,8 @@ export class TypeOrmGuarantorRepository
   protected toOrm(domain: Guarantor): GuarantorOrmEntity {
     const orm = new GuarantorOrmEntity();
     orm.id = domain.id;
-    orm.customerId = domain.customerId;
+    orm.customerId = domain.customerId || null;
+    orm.employeeId = domain.employeeId || null;
     orm.companyId = domain.companyId;
     orm.name = domain.name;
     orm.fatherName = domain.fatherName;

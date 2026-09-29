@@ -1,4 +1,4 @@
-<div class="container" style="max-width: 650px; padding-top: 2rem; padding-bottom: 3rem;">
+<div class="container" style="max-width: 800px; padding-top: 2rem; padding-bottom: 3rem;">
   <div class="card" style="box-shadow: var(--shadow-lg);">
     <div class="card-header" style="border-bottom: 1px solid var(--color-border); padding: 1.5rem 2rem;">
       <div style="display: flex; align-items: center; gap: 0.75rem;">
@@ -99,7 +99,7 @@
 
         {{> phone-repeater containerId="employeePhones" primaryFieldName="phoneNumber" jsonFieldName="phoneNumbersJson" initialPhones=(or formData.phoneNumbers formData.phoneNumber) required=true}}
 
-        <div class="form-group" style="margin-bottom: 2rem;">
+        <div class="form-group" style="margin-bottom: 1.75rem;">
           <label class="form-label" for="empAddress" style="display: block; margin-bottom: 0.35rem; font-size: 0.85rem; font-weight: 600;">{{#if isBn}}আবাসিক ঠিকানা *{{else}}Residential Address *{{/if}}</label>
           <textarea
             id="empAddress"
@@ -111,6 +111,9 @@
             style="width: 100%; padding: 0.7rem; border-radius: var(--radius-md); background: rgba(15, 23, 42, 0.8); border: 1px solid var(--color-border); color: #fff; resize: vertical;"
           >{{formData.address}}</textarea>
         </div>
+
+        <!-- Guarantor Section (Optional) -->
+        {{> guarantor-create-section targetType="employee" formData=formData}}
 
         <div style="margin-bottom: 2rem; padding-top: 1.25rem; border-top: 1px solid rgba(255, 255, 255, 0.08);">
           <label class="form-label" style="display: block; margin-bottom: 0.5rem; font-size: 0.95rem; font-weight: 700; color: #fff;">

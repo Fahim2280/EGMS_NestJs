@@ -10,12 +10,14 @@ import { AutoMap } from '@automapper/classes';
 import { BaseAuditableOrmEntity } from './base-auditable.orm-entity';
 import { CompanyOrmEntity } from './company.orm-entity';
 import { CustomerOrmEntity } from './customer.orm-entity';
+import { EmployeeOrmEntity } from './employee.orm-entity';
 
 import { ContactPhone } from '../../../../domain/common/contact-phone.interface';
 import { AttachedDocument } from '../../../../domain/common/attached-document.interface';
 
 @Entity('guarantors')
 @Index(['companyId', 'customerId'])
+@Index(['companyId', 'employeeId'])
 @Index(['companyId', 'nidNumber'])
 export class GuarantorOrmEntity extends BaseAuditableOrmEntity {
   @AutoMap()
@@ -23,8 +25,12 @@ export class GuarantorOrmEntity extends BaseAuditableOrmEntity {
   id: string;
 
   @AutoMap()
-  @Column('varchar', { length: 100 })
-  customerId: string;
+  @Column('varchar', { length: 100, nullable: true })
+  customerId?: string | null;
+
+  @AutoMap()
+  @Column('varchar', { length: 100, nullable: true })
+  employeeId?: string | null;
 
   @AutoMap()
   @Column('varchar', { length: 100 })
@@ -65,10 +71,18 @@ export class GuarantorOrmEntity extends BaseAuditableOrmEntity {
   relationship: string;
 
   @ManyToOne(() => CustomerOrmEntity, (customer) => customer.guarantors, {
+    nullable: true,
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'customerId' })
-  customer: CustomerOrmEntity;
+  customer?: CustomerOrmEntity | null;
+
+  @ManyToOne(() => EmployeeOrmEntity, (employee) => employee.guarantors, {
+    nullable: true,
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'employeeId' })
+  employee?: EmployeeOrmEntity | null;
 
   @ManyToOne(() => CompanyOrmEntity, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'companyId' })

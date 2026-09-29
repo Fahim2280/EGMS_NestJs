@@ -4,7 +4,8 @@ import { AttachedDocument } from '../common/attached-document.interface';
 
 export interface CreateGuarantorProps extends AuditableProps {
   id: string;
-  customerId: string;
+  customerId?: string;
+  employeeId?: string;
   companyId: string;
   name: string;
   fatherName?: string;
@@ -20,7 +21,8 @@ export interface CreateGuarantorProps extends AuditableProps {
 
 export class Guarantor extends AuditableEntity {
   public readonly id: string;
-  public readonly customerId: string;
+  public readonly customerId?: string;
+  public readonly employeeId?: string;
   public readonly companyId: string;
   public name: string;
   public fatherName: string;
@@ -37,6 +39,7 @@ export class Guarantor extends AuditableEntity {
     this.validate(props);
     this.id = props.id;
     this.customerId = props.customerId;
+    this.employeeId = props.employeeId;
     this.companyId = props.companyId;
     this.name = props.name.trim();
     this.fatherName = (props.fatherName || '').trim();
@@ -155,7 +158,9 @@ export class Guarantor extends AuditableEntity {
 
   private validate(props: CreateGuarantorProps): void {
     if (!props.id) throw new Error('Guarantor ID is required.');
-    if (!props.customerId) throw new Error('Customer ID is required.');
+    if (!props.customerId && !props.employeeId) {
+      throw new Error('Either Customer ID or Employee ID is required.');
+    }
     if (!props.companyId) throw new Error('Company ID is required.');
     if (!props.name || props.name.trim().length < 2) {
       throw new Error('Guarantor name must be at least 2 characters.');

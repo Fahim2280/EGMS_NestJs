@@ -62,6 +62,47 @@ export class CreateCustomerDto {
   @IsString()
   @IsOptional()
   customerCode?: string;
+
+  // Optional initial guarantor(s) support
+  @IsString()
+  @IsOptional()
+  hasGuarantor?: string;
+
+  @IsString()
+  @IsOptional()
+  guarantorsJson?: string;
+
+  @IsString()
+  @IsOptional()
+  guarantorName?: string;
+
+  @IsString()
+  @IsOptional()
+  guarantorRelationship?: string;
+
+  @IsString()
+  @IsOptional()
+  guarantorMobileNumber?: string;
+
+  @IsString()
+  @IsOptional()
+  guarantorPhoneNumbersJson?: string;
+
+  @IsString()
+  @IsOptional()
+  guarantorNidNumber?: string;
+
+  @IsString()
+  @IsOptional()
+  guarantorFatherName?: string;
+
+  @IsString()
+  @IsOptional()
+  guarantorMotherName?: string;
+
+  @IsString()
+  @IsOptional()
+  guarantorAddress?: string;
 }
 
 export class UpdateCustomerDto extends CreateCustomerDto {}

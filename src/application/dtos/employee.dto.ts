@@ -48,6 +48,47 @@ export class CreateEmployeeDto {
   @IsNotEmpty({ message: 'NID Number is required' })
   @MinLength(5, { message: 'NID Number must be at least 5 characters' })
   nidNumber: string;
+
+  // Optional initial guarantor(s) support
+  @IsString()
+  @IsOptional()
+  hasGuarantor?: string;
+
+  @IsString()
+  @IsOptional()
+  guarantorsJson?: string;
+
+  @IsString()
+  @IsOptional()
+  guarantorName?: string;
+
+  @IsString()
+  @IsOptional()
+  guarantorRelationship?: string;
+
+  @IsString()
+  @IsOptional()
+  guarantorMobileNumber?: string;
+
+  @IsString()
+  @IsOptional()
+  guarantorPhoneNumbersJson?: string;
+
+  @IsString()
+  @IsOptional()
+  guarantorNidNumber?: string;
+
+  @IsString()
+  @IsOptional()
+  guarantorFatherName?: string;
+
+  @IsString()
+  @IsOptional()
+  guarantorMotherName?: string;
+
+  @IsString()
+  @IsOptional()
+  guarantorAddress?: string;
 }
 
 export class UpdateEmployeeDto {

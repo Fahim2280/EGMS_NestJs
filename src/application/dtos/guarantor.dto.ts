@@ -53,7 +53,8 @@ export class UpdateGuarantorDto extends CreateGuarantorDto {}
 
 export class GuarantorResponseDto {
   id: string;
-  customerId: string;
+  customerId?: string;
+  employeeId?: string;
   companyId: string;
   name: string;
   fatherName: string;

@@ -6,12 +6,14 @@ import {
   JoinTable,
   ManyToMany,
   ManyToOne,
+  OneToMany,
   PrimaryColumn,
 } from 'typeorm';
 import { AutoMap } from '@automapper/classes';
 import { BaseAuditableOrmEntity } from './base-auditable.orm-entity';
 import { CompanyOrmEntity } from './company.orm-entity';
 import { GarageOrmEntity } from './garage.orm-entity';
+import { GuarantorOrmEntity } from './guarantor.orm-entity';
 
 import { ContactPhone } from '../../../../domain/common/contact-phone.interface';
 import { AttachedDocument } from '../../../../domain/common/attached-document.interface';
@@ -92,4 +94,9 @@ export class EmployeeOrmEntity extends BaseAuditableOrmEntity {
     inverseJoinColumn: { name: 'garageId', referencedColumnName: 'id' },
   })
   permittedGarages: GarageOrmEntity[];
+
+  @OneToMany(() => GuarantorOrmEntity, (guarantor) => guarantor.employee, {
+    cascade: true,
+  })
+  guarantors: GuarantorOrmEntity[];
 }

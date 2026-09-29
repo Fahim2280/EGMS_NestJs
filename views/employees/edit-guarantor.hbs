@@ -1,0 +1,85 @@
+<div class="page-header">
+  <div class="header-content">
+    <a href="/employees/{{employee.id}}" style="color: var(--color-text-muted); text-decoration: none; font-size: 0.875rem; display: inline-flex; align-items: center; gap: 0.25rem; margin-bottom: 0.5rem;">
+      &larr; {{t 'common.back'}}
+    </a>
+    <h1 class="page-title">{{t 'guarantors.edit'}}</h1>
+    <p class="page-subtitle">{{t 'guarantors.empSubtitle'}}</p>
+  </div>
+</div>
+
+<div class="card" style="max-width: 800px; margin: 0 auto;">
+  {{#if error}}
+    <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem; color: #ef4444; font-size: 0.9rem;">
+      {{error}}
+    </div>
+  {{/if}}
+
+  <form action="/employees/{{employee.id}}/guarantors/{{guarantor.id}}" method="POST" enctype="multipart/form-data">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
+      <div class="form-group">
+        <label class="form-label" for="name">{{t 'guarantors.name'}} *</label>
+        <input type="text" id="name" name="name" class="form-input" required value="{{guarantor.name}}" placeholder="Guarantor full name">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="relationship">{{t 'guarantors.empRelationship'}}</label>
+        <input type="text" id="relationship" name="relationship" class="form-input" value="{{guarantor.relationship}}" placeholder="e.g. Father, Brother, Relative, Colleague, Friend">
+      </div>
+
+      <div class="form-group" style="grid-column: 1 / -1;">
+        {{> phone-repeater containerId="empGuarantorEditPhones" primaryFieldName="mobileNumber" jsonFieldName="phoneNumbersJson" initialPhones=(or guarantor.phoneNumbers guarantor.mobileNumber) required=true}}
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="nidNumber">{{t 'guarantors.nid'}} *</label>
+        <input type="text" id="nidNumber" name="nidNumber" class="form-input" required value="{{guarantor.nidNumber}}" placeholder="National ID number">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="fatherName">{{t 'guarantors.fatherName'}}</label>
+        <input type="text" id="fatherName" name="fatherName" class="form-input" value="{{guarantor.fatherName}}" placeholder="Father's full name">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="motherName">{{t 'guarantors.motherName'}}</label>
+        <input type="text" id="motherName" name="motherName" class="form-input" value="{{guarantor.motherName}}" placeholder="Mother's full name">
+      </div>
+
+      <div class="form-group" style="grid-column: 1 / -1;">
+        <label class="form-label" for="address">{{t 'guarantors.address'}} *</label>
+        <textarea id="address" name="address" class="form-input" rows="2" required placeholder="Guarantor residential or business address...">{{guarantor.address}}</textarea>
+      </div>
+
+      <div class="form-group" style="grid-column: 1 / -1; margin-top: 0.5rem; padding-top: 1rem; border-top: 1px solid rgba(255, 255, 255, 0.08);">
+        <label class="form-label" style="font-weight: 700; color: #fff; font-size: 0.95rem; margin-bottom: 0.75rem;">
+          📁 {{t 'documents.title'}}
+        </label>
+
+        {{#if guarantor.documents.length}}
+          <div style="margin-bottom: 1rem;">
+            {{> document-list documents=guarantor.documents deleteUrlPrefix=(concat "/employees/" employee.id "/guarantors/" guarantor.id "/documents") canDelete=true}}
+          </div>
+        {{/if}}
+
+        <div style="margin-bottom: 1rem;">
+          <label class="form-label" for="gEditDocType">{{t 'documents.documentType'}}</label>
+          <select id="gEditDocType" name="documentType" class="form-input">
+            <option value="GENERAL">{{t 'documents.typeGeneral'}}</option>
+            <option value="NID">{{t 'documents.typeNid'}}</option>
+            <option value="PASSPORT">{{t 'documents.typePassport'}}</option>
+            <option value="PHOTO">{{t 'documents.typePhoto'}}</option>
+            <option value="OTHER">{{t 'documents.typeOther'}}</option>
+          </select>
+        </div>
+
+        {{> file-uploader uploaderId="empGuarantorEditDocs" fieldName="files" maxFiles=10 label=(t 'documents.uploadNew')}}
+      </div>
+    </div>
+
+    <div class="form-actions" style="margin-top: 2rem; display: flex; gap: 0.75rem; justify-content: flex-end; flex-wrap: wrap;">
+      <a href="/employees/{{employee.id}}" class="btn btn-secondary">{{t 'common.cancel'}}</a>
+      <button type="submit" class="btn btn-primary">{{t 'guarantors.update'}}</button>
+    </div>
+  </form>
+</div>

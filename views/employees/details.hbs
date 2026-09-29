@@ -96,6 +96,128 @@
 
   <!-- Audit & Actions -->
   <div style="display:flex;flex-direction:column;gap:1.5rem;">
+    <!-- Guarantors / জামিনদারবৃন্দ Section -->
+    <div class="card">
+      <div class="card-header doc-section-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+        <div class="doc-header-info">
+          <h3 class="card-title doc-header-title" style="margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+            <span class="doc-header-icon">🛡️</span>
+            <span class="doc-header-text">{{t 'guarantors.title'}}</span>
+            <span class="doc-header-count">({{bnNum employee.guarantors.length}})</span>
+          </h3>
+          <p class="doc-header-subtitle" style="color: var(--color-text-muted); font-size: 0.82rem; margin: 0.2rem 0 0 0;">{{t 'guarantors.empSubtitle'}}</p>
+        </div>
+        <button type="button" class="btn btn-primary btn-sm" onclick="document.getElementById('addEmpGuarantorModal').style.display='flex'">
+          <span>+</span> <span>{{t 'guarantors.add'}}</span>
+        </button>
+      </div>
+
+      {{#if employee.guarantors.length}}
+        <div class="card-body" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 1.25rem;">
+          {{#each employee.guarantors}}
+            <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 1.25rem; display: flex; flex-direction: column; justify-content: space-between;">
+              <div>
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
+                  <div>
+                    <div style="font-size: 1.1rem; font-weight: 700; color: var(--color-text-primary);">{{this.name}}</div>
+                    {{#if this.relationship}}
+                      <span class="badge" style="background: rgba(99, 102, 241, 0.15); color: #818cf8; font-size: 0.75rem; margin-top: 0.25rem;">
+                        {{this.relationship}}
+                      </span>
+                    {{/if}}
+                  </div>
+                  <div class="table-actions-group">
+                    <a href="/employees/{{../employee.id}}/guarantors/{{this.id}}/edit" class="btn btn-secondary btn-icon-action" title="{{t 'common.edit'}}" aria-label="{{t 'common.edit'}}">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </a>
+                    <form action="/employees/{{../employee.id}}/guarantors/{{this.id}}/delete" method="POST" style="display: inline;"
+                          data-confirm-modal="true"
+                          data-confirm-type="danger"
+                          data-confirm-title="{{t 'common.delete'}}"
+                          data-confirm-desc="{{t 'guarantors.confirmDelete'}}"
+                          data-confirm-submit="{{t 'common.delete'}}"
+                          data-confirm-btn-class="btn-danger"
+                          data-confirm-target-name="{{this.name}}"
+                          data-confirm-target-sub="{{#if this.relationship}}{{this.relationship}} &bull; {{/if}}NID: {{this.nidNumber}}">
+                      <button type="submit" class="btn btn-danger btn-icon-action" title="{{t 'common.delete'}}" aria-label="{{t 'common.delete'}}">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                      </button>
+                    </form>
+                  </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem; font-size: 0.85rem;">
+                  <div>
+                    <div style="color: var(--color-text-muted); font-size: 0.75rem; text-transform: uppercase;">{{t 'phones.title'}}</div>
+                    <div style="color: var(--color-text-secondary); font-weight: 600; display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap;">
+                      <a href="tel:{{this.mobileNumber}}" style="color: #38bdf8; text-decoration: none;">📞 {{this.mobileNumber}}</a>
+                      <span style="font-size: 0.65rem; color: #34d399; background: rgba(16, 185, 129, 0.15); padding: 1px 5px; border-radius: 8px;">{{t 'phones.primary'}}</span>
+                    </div>
+                    {{#if this.phoneNumbers}}
+                      {{#if (gt this.phoneNumbers.length 1)}}
+                        <div style="display: flex; flex-direction: column; gap: 0.2rem; margin-top: 0.35rem;">
+                          {{#each this.phoneNumbers}}
+                            {{#unless this.isPrimary}}
+                              <div style="font-size: 0.75rem; display: flex; align-items: center; gap: 0.3rem;">
+                                <a href="tel:{{this.number}}" style="color: var(--color-text-muted); text-decoration: none;">📞 {{this.number}}</a>
+                                <span style="font-size: 0.65rem; color: var(--color-text-muted); background: rgba(255, 255, 255, 0.08); padding: 1px 4px; border-radius: 4px;">{{this.type}}</span>
+                              </div>
+                            {{/unless}}
+                          {{/each}}
+                        </div>
+                      {{/if}}
+                    {{/if}}
+                  </div>
+                  <div>
+                    <div style="color: var(--color-text-muted); font-size: 0.75rem; text-transform: uppercase;">{{t 'guarantors.nid'}}</div>
+                    <code style="color: #93c5fd; font-size: 0.8rem;">{{this.nidNumber}}</code>
+                  </div>
+                  {{#if this.fatherName}}
+                  <div>
+                    <div style="color: var(--color-text-muted); font-size: 0.75rem; text-transform: uppercase;">{{t 'guarantors.fatherName'}}</div>
+                    <div style="color: var(--color-text-secondary);">{{this.fatherName}}</div>
+                  </div>
+                  {{/if}}
+                  {{#if this.motherName}}
+                  <div>
+                    <div style="color: var(--color-text-muted); font-size: 0.75rem; text-transform: uppercase;">{{t 'guarantors.motherName'}}</div>
+                    <div style="color: var(--color-text-secondary);">{{this.motherName}}</div>
+                  </div>
+                  {{/if}}
+                </div>
+
+                <div style="font-size: 0.85rem; border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 0.5rem;">
+                  <span style="color: var(--color-text-muted); font-size: 0.75rem; text-transform: uppercase;">{{t 'guarantors.address'}}:</span>
+                  <span style="color: var(--color-text-secondary);"> {{this.address}}</span>
+                </div>
+
+                <div style="margin-top: 0.85rem; padding-top: 0.85rem; border-top: 1px solid rgba(255, 255, 255, 0.08);">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                    <span style="color: var(--color-text-muted); font-size: 0.75rem; text-transform: uppercase; font-weight: 600;">
+                      📎 {{t 'documents.title'}} {{#if this.documents.length}}({{bnNum this.documents.length}}){{/if}}
+                    </span>
+                    <button type="button" class="btn btn-secondary btn-sm" style="font-size: 0.72rem; padding: 2px 7px;" onclick="openEmpGuarantorUploadModal('{{this.id}}', '{{this.name}}')">
+                      + {{t 'documents.upload'}}
+                    </button>
+                  </div>
+                  {{> document-list documents=this.documents deleteUrlPrefix=(concat "/employees/" ../employee.id "/guarantors/" this.id "/documents") canDelete=true}}
+                </div>
+              </div>
+            </div>
+          {{/each}}
+        </div>
+      {{else}}
+        <div class="card-body" style="text-align: center; padding: 2.5rem 1rem;">
+          <div style="font-size: 2rem; margin-bottom: 0.5rem;">🛡️</div>
+          <h4 style="color: var(--color-text-primary); font-size: 1rem; font-weight: 600; margin-bottom: 0.25rem;">{{t 'guarantors.noGuarantors'}}</h4>
+          <p style="color: var(--color-text-muted); font-size: 0.85rem; margin-bottom: 1rem;">{{t 'guarantors.noEmpGuarantorsSub'}}</p>
+          <button type="button" class="btn btn-primary btn-sm" onclick="document.getElementById('addEmpGuarantorModal').style.display='flex'">
+            + {{t 'guarantors.add'}}
+          </button>
+        </div>
+      {{/if}}
+    </div>
+
     <!-- Documents & Attachments Card -->
     <div class="card">
       <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
@@ -176,3 +298,107 @@
     </form>
   </div>
 </div>
+
+<!-- Add Employee Guarantor Modal -->
+<div id="addEmpGuarantorModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(5px); z-index: 9999; align-items: center; justify-content: center; padding: 1.5rem 1rem; overflow-y: auto;">
+  <div class="card guarantor-modal-card" style="max-width: 650px; width: 100%; max-height: calc(100vh - 3.5rem); overflow-y: auto; padding: 1.75rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); border-top: 3px solid #6366f1; margin: auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; border-bottom: 1px solid var(--color-border); padding-bottom: 0.75rem; position: sticky; top: -1.75rem; background: inherit; z-index: 10; padding-top: 0.25rem;">
+      <h3 style="margin: 0; font-size: 1.25rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 0.5rem;">
+        <span>🛡️</span> + {{t 'guarantors.add'}}
+      </h3>
+      <button type="button" onclick="document.getElementById('addEmpGuarantorModal').style.display='none'" style="background: transparent; border: none; color: var(--color-text-muted); font-size: 1.5rem; cursor: pointer; line-height: 1;">&times;</button>
+    </div>
+    <form action="/employees/{{employee.id}}/guarantors" method="POST" enctype="multipart/form-data">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+        <div class="form-group">
+          <label class="form-label" for="egName">{{t 'guarantors.name'}} *</label>
+          <input type="text" id="egName" name="name" class="form-input" required placeholder="Full Name">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="egRelationship">{{t 'guarantors.empRelationship'}}</label>
+          <input type="text" id="egRelationship" name="relationship" class="form-input" placeholder="e.g. Father, Brother, Relative, Colleague, Friend">
+        </div>
+        <div class="form-group" style="grid-column: 1 / -1;">
+          {{> phone-repeater containerId="empGuarantorPhonesModal" primaryFieldName="mobileNumber" jsonFieldName="phoneNumbersJson" required=true}}
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="egNid">{{t 'guarantors.nid'}} *</label>
+          <input type="text" id="egNid" name="nidNumber" class="form-input" required placeholder="National ID Number">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="egFather">{{t 'guarantors.fatherName'}}</label>
+          <input type="text" id="egFather" name="fatherName" class="form-input" placeholder="Father's Name">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="egMother">{{t 'guarantors.motherName'}}</label>
+          <input type="text" id="egMother" name="motherName" class="form-input" placeholder="Mother's Name">
+        </div>
+        <div class="form-group" style="grid-column: 1 / -1;">
+          <label class="form-label" for="egAddress">{{t 'guarantors.address'}} *</label>
+          <textarea id="egAddress" name="address" class="form-input" rows="2" required placeholder="Guarantor residential or business address..."></textarea>
+        </div>
+        <div class="form-group" style="grid-column: 1 / -1; border-top: 1px solid var(--color-border); padding-top: 0.75rem;">
+          <label class="form-label" style="font-weight: 600; margin-bottom: 0.5rem;">
+            📎 {{t 'documents.title'}} (NID, Photo, Documents)
+          </label>
+          {{> file-uploader uploaderId="empGuarantorCreateUploader" fieldName="files" maxFiles=10 label=(t 'documents.upload')}}
+        </div>
+      </div>
+      <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem; position: sticky; bottom: -1.75rem; background: inherit; padding-top: 1rem; padding-bottom: 0.25rem; border-top: 1px solid var(--color-border); z-index: 10;">
+        <button type="button" class="btn btn-secondary" onclick="document.getElementById('addEmpGuarantorModal').style.display='none'">{{t 'common.cancel'}}</button>
+        <button type="submit" class="btn btn-primary" style="background: #6366f1; border-color: #6366f1; font-weight: 700; box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);">{{t 'guarantors.save'}}</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Upload Employee Guarantor Document Modal -->
+<div id="uploadEmpGuarantorDocModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(5px); z-index: 9999; align-items: center; justify-content: center; padding: 1.5rem 1rem; overflow-y: auto;">
+  <div class="card modal-responsive-card" style="max-width: 580px; width: 100%; max-height: calc(100vh - 3.5rem); overflow-y: auto; padding: 1.75rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); border-top: 3px solid #818cf8; margin: auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; border-bottom: 1px solid var(--color-border); padding-bottom: 0.75rem;">
+      <h3 style="margin: 0; font-size: 1.15rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 0.5rem;">
+        <span>🛡️</span> {{t 'documents.uploadNew'}} &mdash; <span id="empGuarantorModalTargetName" style="color: #a5b4fc;"></span>
+      </h3>
+      <button type="button" onclick="document.getElementById('uploadEmpGuarantorDocModal').style.display='none'" style="background: transparent; border: none; color: var(--color-text-muted); font-size: 1.5rem; cursor: pointer; line-height: 1;">&times;</button>
+    </div>
+    <form id="empGuarantorUploadForm" action="" method="POST" enctype="multipart/form-data">
+      <div style="margin-bottom: 1rem;">
+        <label class="form-label" for="empGDocType">{{t 'documents.documentType'}}</label>
+        <select id="empGDocType" name="tag" class="form-input">
+          <option value="GENERAL">{{t 'documents.typeGeneral'}}</option>
+          <option value="NID">{{t 'documents.typeNid'}}</option>
+          <option value="PASSPORT">{{t 'documents.typePassport'}}</option>
+          <option value="PHOTO">{{t 'documents.typePhoto'}}</option>
+          <option value="SIGNATURE">{{t 'documents.typeSignature'}}</option>
+          <option value="OTHER">{{t 'documents.typeOther'}}</option>
+        </select>
+      </div>
+
+      {{> file-uploader uploaderId="empGuarantorModalUploader" fieldName="files" maxFiles=10}}
+
+      <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.25rem;">
+        <button type="button" class="btn btn-secondary" onclick="document.getElementById('uploadEmpGuarantorDocModal').style.display='none'">{{t 'common.cancel'}}</button>
+        <button type="submit" class="btn btn-primary" style="background: #818cf8; border-color: #818cf8; color: #0f172a; font-weight: 700;">
+          {{t 'documents.upload'}}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function openEmpGuarantorUploadModal(guarantorId, guarantorName) {
+    const form = document.getElementById('empGuarantorUploadForm');
+    const nameSpan = document.getElementById('empGuarantorModalTargetName');
+    if (form) {
+      form.action = '/employees/{{employee.id}}/guarantors/' + guarantorId + '/documents';
+    }
+    if (nameSpan) {
+      nameSpan.textContent = guarantorName || '';
+    }
+    const modal = document.getElementById('uploadEmpGuarantorDocModal');
+    if (modal) {
+      modal.style.display = 'flex';
+    }
+  }
+</script>

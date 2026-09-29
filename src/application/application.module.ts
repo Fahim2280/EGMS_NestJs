@@ -33,6 +33,9 @@ import { UpdateEmployeePermissionHandler } from './commands/handlers/update-empl
 import { CreateGuarantorHandler } from './commands/handlers/create-guarantor.handler';
 import { UpdateGuarantorHandler } from './commands/handlers/update-guarantor.handler';
 import { DeleteGuarantorHandler } from './commands/handlers/delete-guarantor.handler';
+import { CreateEmployeeGuarantorHandler } from './commands/handlers/create-employee-guarantor.handler';
+import { UpdateEmployeeGuarantorHandler } from './commands/handlers/update-employee-guarantor.handler';
+import { DeleteEmployeeGuarantorHandler } from './commands/handlers/delete-employee-guarantor.handler';
 
 // Query Handlers
 import { GetCompanyByIdHandler } from './queries/handlers/get-company-by-id.handler';
@@ -50,6 +53,7 @@ import { GetCustomerBillSummaryHandler } from './queries/handlers/get-customer-b
 import { PreviewElectricBillHandler } from './queries/handlers/preview-electric-bill.handler';
 import { GetExecutiveDashboardHandler } from './queries/handlers/get-executive-dashboard.handler';
 import { GetGuarantorsByCustomerHandler } from './queries/handlers/get-guarantors-by-customer.handler';
+import { GetGuarantorsByEmployeeHandler } from './queries/handlers/get-guarantors-by-employee.handler';
 import { GetAuditLogsHandler } from './queries/handlers/get-audit-logs.handler';
 
 // AutoMapper Profiles
@@ -80,6 +84,9 @@ const CommandHandlers = [
   CreateGuarantorHandler,
   UpdateGuarantorHandler,
   DeleteGuarantorHandler,
+  CreateEmployeeGuarantorHandler,
+  UpdateEmployeeGuarantorHandler,
+  DeleteEmployeeGuarantorHandler,
 ];
 
 const QueryHandlers = [
@@ -98,6 +105,7 @@ const QueryHandlers = [
   PreviewElectricBillHandler,
   GetExecutiveDashboardHandler,
   GetGuarantorsByCustomerHandler,
+  GetGuarantorsByEmployeeHandler,
   GetAuditLogsHandler,
 ];
 

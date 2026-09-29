@@ -125,7 +125,10 @@
         </div>
       </div>
 
-      <!-- Section 3: Documents & Identity Attachments -->
+      <!-- Section 3: Guarantor Information (Optional) -->
+      {{> guarantor-create-section targetType="customer" formData=formData}}
+
+      <!-- Section 4: Documents & Identity Attachments -->
       <div style="margin-bottom: 1.5rem;">
         <div class="form-section-title" style="margin-bottom: 1.25rem;">
           <span class="section-icon-badge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8;">
@@ -190,7 +193,7 @@
           <div class="guide-step-badge step-3">৩</div>
           <div>
             <strong class="guide-strong">জামিনদারবৃন্দ {{#unless isBn}}<span style="font-size: 0.78rem; opacity: 0.8;">(Guarantors)</span>{{/unless}}:</strong>
-            <span class="guide-text">গ্রাহক নিবন্ধনের পর তার প্রোফাইল পেজ থেকে পিতা-মাতার নাম ও পরিচয়পত্রসহ একাধিক আইনগত জামিনদার সরাসরি যোগ করতে পারবেন।</span>
+            <span class="guide-text">গ্রাহক নিবন্ধনের সময়ই একই পেজে সরাসরি জামিনদার যোগ করতে পারবেন, অথবা পরেও তার প্রোফাইল পেজ থেকে পিতা-মাতার নাম ও পরিচয়পত্রসহ একাধিক জামিনদার যুক্ত করা যাবে।</span>
           </div>
         </div>
 

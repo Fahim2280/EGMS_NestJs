@@ -3583,16 +3583,47 @@ html[lang="bn"] button {
 
 /* Light Theme Modals */
 [data-theme="light"] [id$="Modal"],
-[data-theme="light"] .modal-backdrop {
+[data-theme="light"] .modal-backdrop,
+[data-theme="light"] .modal-backdrop-overlay {
   background: rgba(15, 23, 42, 0.45) !important;
 }
 
 [data-theme="light"] [id$="Modal"] .card,
-[data-theme="light"] .guarantor-modal-card {
+[data-theme="light"] .guarantor-modal-card,
+[data-theme="light"] .modal-responsive-card {
   background: #ffffff !important;
   border: 1px solid #e2e8f0 !important;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
   color: #0f172a !important;
+}
+
+[data-theme="light"] [id$="Modal"] .form-label,
+[data-theme="light"] [id$="Modal"] label,
+[data-theme="light"] .guarantor-modal-card .form-label,
+[data-theme="light"] .modal-responsive-card .form-label {
+  color: #1e293b !important;
+}
+
+[data-theme="light"] [id$="Modal"] .form-input,
+[data-theme="light"] [id$="Modal"] .form-control,
+[data-theme="light"] .guarantor-modal-card .form-input,
+[data-theme="light"] .guarantor-modal-card textarea,
+[data-theme="light"] .modal-responsive-card .form-input,
+[data-theme="light"] .modal-responsive-card textarea {
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #0f172a !important;
+}
+
+[data-theme="light"] .guarantor-modal-card .phone-row-item,
+[data-theme="light"] [id$="Modal"] .phone-row-item {
+  background: #f8fafc !important;
+  border: 1px solid #e2e8f0 !important;
+}
+
+[data-theme="light"] .guarantor-modal-card .phone-repeater-header .form-label,
+[data-theme="light"] [id$="Modal"] .phone-repeater-header .form-label {
+  color: #1e293b !important;
 }
 
 [data-theme="light"] [id$="Modal"] h3,
@@ -4832,20 +4863,40 @@ select.filter-select {
 }
 
 /* --- DFB & Toolbar Card Overflow & Custom Select Integration --- */
-.card:has(.dfb-form),
-.card:has(.custom-select-wrapper),
-.card:has(.table-filter-form),
+.card:not(.guarantor-modal-card):not(.modal-responsive-card):has(.dfb-form),
+.card:not(.guarantor-modal-card):not(.modal-responsive-card):has(.custom-select-wrapper),
+.card:not(.guarantor-modal-card):not(.modal-responsive-card):has(.table-filter-form),
 .card.dfb-card,
 .dfb-wrapper,
 .dfb-form {
   overflow: visible !important;
 }
 
-.card:has(.dfb-form),
-.card:has(.custom-select-wrapper),
+.card:not(.guarantor-modal-card):not(.modal-responsive-card):has(.dfb-form),
+.card:not(.guarantor-modal-card):not(.modal-responsive-card):has(.custom-select-wrapper),
 .card.dfb-card {
   position: relative;
   z-index: 25;
+}
+
+/* Modals must ALWAYS have dedicated scrolling and never inherit overflow: visible */
+.guarantor-modal-card,
+.modal-responsive-card,
+[id$="Modal"] .card {
+  position: relative !important;
+  max-height: calc(100vh - 3rem) !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  box-sizing: border-box !important;
+  transform: none !important;
+}
+
+.guarantor-modal-card:hover,
+.modal-responsive-card:hover,
+[id$="Modal"] .card:hover {
+  transform: none !important;
 }
 
 /* Custom-select inside .dfb-group (Desktop & Default) */

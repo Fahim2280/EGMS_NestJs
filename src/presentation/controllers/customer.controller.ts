@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Inject,
   Param,
   Post,
   Query,
@@ -11,7 +12,7 @@ import {
   UseInterceptors,
   UploadedFiles,
 } from '@nestjs/common';
-import { FilesInterceptor } from '@nestjs/platform-express';
+import { FilesInterceptor, AnyFilesInterceptor } from '@nestjs/platform-express';
 import { FileService } from '@infrastructure/services/file.service';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { Request, Response } from 'express';
@@ -38,6 +39,10 @@ import { JwtAuthGuard } from '@infrastructure/auth/jwt-auth.guard';
 import { PermissionsGuard } from '@infrastructure/auth/permissions.guard';
 import { RequirePermissions } from '@infrastructure/auth/permissions.decorator';
 import { AuditLogService } from '@application/services/audit-log.service';
+import {
+  GUARANTOR_REPOSITORY_TOKEN,
+  IGuarantorRepository,
+} from '@domain/index';
 
 @Controller('customers')
 @UseGuards(JwtAuthGuard)
@@ -47,6 +52,8 @@ export class CustomerController {
     private readonly queryBus: QueryBus,
     private readonly auditLogService: AuditLogService,
     private readonly fileService: FileService,
+    @Inject(GUARANTOR_REPOSITORY_TOKEN)
+    private readonly guarantorRepo: IGuarantorRepository,
   ) {}
 
   // --- VIEW: List customers ---
@@ -174,7 +181,7 @@ export class CustomerController {
   @Post()
   @UseGuards(PermissionsGuard)
   @RequirePermissions('canCreate')
-  @UseInterceptors(FilesInterceptor('files', 10, { limits: { fileSize: 25 * 1024 * 1024 } }))
+  @UseInterceptors(AnyFilesInterceptor({ limits: { fileSize: 25 * 1024 * 1024 } }))
   async handleCreate(
     @Body() dto: CreateCustomerDto,
     @UploadedFiles() files: any[],
@@ -202,22 +209,110 @@ export class CustomerController {
     }
 
     try {
-      if (files && files.length > 0) {
+      // Upload customer's own documents (files field only)
+      const customerFiles = (files || []).filter((f: any) => f.fieldname === 'files');
+      if (customerFiles.length > 0) {
         const uploadedDocs = await this.fileService.uploadFiles(
-          files,
+          customerFiles,
           'customers',
           (dto as any).documentType || 'GENERAL',
         );
         dto.documents = uploadedDocs;
       }
 
-      await this.commandBus.execute(
+      const customer = await this.commandBus.execute(
         new CreateCustomerCommand(
           user.companyId,
           dto,
           `${user.sub || user.companyId}|${user.role || 'SUPER_ADMIN'}`,
         ),
       );
+
+      // Create initial guarantor(s) if provided on the registration form
+      const guarantorsToCreate: CreateGuarantorDto[] = [];
+      if (dto.guarantorsJson) {
+        try {
+          const parsed = typeof dto.guarantorsJson === 'string' ? JSON.parse(dto.guarantorsJson) : dto.guarantorsJson;
+          if (Array.isArray(parsed)) {
+            for (const g of parsed) {
+              if (g && g.name && g.name.trim() && g.nidNumber && g.nidNumber.trim()) {
+                guarantorsToCreate.push({
+                  name: g.name.trim(),
+                  relationship: g.relationship?.trim(),
+                  mobileNumber: g.mobileNumber?.trim() || g.phoneNumber?.trim(),
+                  phoneNumbersJson: g.phoneNumbersJson,
+                  nidNumber: g.nidNumber.trim(),
+                  fatherName: g.fatherName?.trim(),
+                  motherName: g.motherName?.trim(),
+                  address: g.address?.trim() || dto.address,
+                });
+              }
+            }
+          }
+        } catch (e) {
+          // ignore parse error, fallback to flat fields below
+        }
+      }
+
+      if (
+        guarantorsToCreate.length === 0 &&
+        dto.guarantorName &&
+        dto.guarantorName.trim() &&
+        dto.guarantorNidNumber &&
+        dto.guarantorNidNumber.trim()
+      ) {
+        guarantorsToCreate.push({
+          name: dto.guarantorName.trim(),
+          relationship: dto.guarantorRelationship?.trim(),
+          mobileNumber: dto.guarantorMobileNumber?.trim(),
+          phoneNumbersJson: dto.guarantorPhoneNumbersJson,
+          nidNumber: dto.guarantorNidNumber.trim(),
+          fatherName: dto.guarantorFatherName?.trim(),
+          motherName: dto.guarantorMotherName?.trim(),
+          address: dto.guarantorAddress?.trim() || dto.address,
+        });
+      }
+
+      // Track created guarantors with their index for file upload
+      const createdGuarantors: Array<{ index: number; guarantor: any }> = [];
+      for (let gi = 0; gi < guarantorsToCreate.length; gi++) {
+        const gDto = guarantorsToCreate[gi];
+        try {
+          const guarantor = await this.commandBus.execute(
+            new CreateGuarantorCommand(
+              user.companyId,
+              customer.id,
+              gDto,
+              `${user.sub || user.companyId}|${user.role || 'SUPER_ADMIN'}`,
+            ),
+          );
+          createdGuarantors.push({ index: gi, guarantor });
+        } catch (gErr: any) {
+          console.warn(`Failed to create initial guarantor for customer ${customer.id}:`, gErr?.message);
+        }
+      }
+
+      // Upload per-guarantor documents (guarantorFiles_0, guarantorFiles_1, ...)
+      for (const { index, guarantor } of createdGuarantors) {
+        const gFiles = (files || []).filter((f: any) => f.fieldname === `guarantorFiles_${index}`);
+        if (gFiles.length > 0) {
+          try {
+            const uploadedDocs = await this.fileService.uploadFiles(
+              gFiles,
+              'guarantors',
+              'GENERAL',
+              user.name || user.email,
+            );
+            for (const doc of uploadedDocs) {
+              guarantor.addDocument(doc);
+            }
+            await this.guarantorRepo.updateAsync(guarantor);
+          } catch (docErr: any) {
+            console.warn(`Failed to upload docs for guarantor index ${index}:`, docErr?.message);
+          }
+        }
+      }
+
 
       await this.auditLogService.record({
         companyId: user.companyId,
@@ -227,7 +322,7 @@ export class CustomerController {
         action: 'CREATE',
         entityType: 'CUSTOMER',
         entityName: dto.name,
-        details: `Registered customer ${dto.name} (${dto.customerCode || 'auto-ID'}) with advance ৳${dto.advanceMoney}`,
+        details: `Registered customer ${dto.name} (${dto.customerCode || 'auto-ID'}) with advance ৳${dto.advanceMoney}${guarantorsToCreate.length > 0 ? ` and ${guarantorsToCreate.length} guarantor(s)` : ''}`,
         req,
       });
 

@@ -380,4 +380,70 @@ export class FileController {
       return res.redirect(`/customers/${customerId}?error=${encodeURIComponent(err.message || 'Failed to remove guarantor document')}`);
     }
   }
+
+  // --- EMPLOYEE GUARANTOR DOCUMENTS ---
+
+  @Post('employees/:employeeId/guarantors/:guarantorId/documents')
+  @UseInterceptors(FilesInterceptor('files', 10, { limits: { fileSize: 25 * 1024 * 1024 } }))
+  async uploadEmployeeGuarantorDocuments(
+    @Param('employeeId') employeeId: string,
+    @Param('guarantorId') guarantorId: string,
+    @UploadedFiles() files: any[],
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    const user = (req as any).user;
+    try {
+      const guarantor = await this.guarantorRepo.getByIdAsync(guarantorId);
+      if (!guarantor || guarantor.companyId !== user.companyId || guarantor.employeeId !== employeeId) {
+        throw new NotFoundException('Employee guarantor not found.');
+      }
+
+      if (files && files.length > 0) {
+        const bodyTag = (req.body?.tag || 'OTHER').trim();
+        const uploadedDocs = await this.fileService.uploadFiles(
+          files,
+          'guarantors',
+          files.map(() => bodyTag),
+          user.name || user.email,
+        );
+
+        for (const doc of uploadedDocs) {
+          guarantor.addDocument(doc);
+        }
+        await this.guarantorRepo.updateAsync(guarantor);
+      }
+
+      return res.redirect(`/employees/${employeeId}?success=msg.documentsUploaded`);
+    } catch (err: any) {
+      return res.redirect(`/employees/${employeeId}?error=${encodeURIComponent(err.message || 'Failed to upload guarantor documents')}`);
+    }
+  }
+
+  @Post('employees/:employeeId/guarantors/:guarantorId/documents/:docId/delete')
+  async deleteEmployeeGuarantorDocument(
+    @Param('employeeId') employeeId: string,
+    @Param('guarantorId') guarantorId: string,
+    @Param('docId') docId: string,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    const user = (req as any).user;
+    try {
+      const guarantor = await this.guarantorRepo.getByIdAsync(guarantorId);
+      if (!guarantor || guarantor.companyId !== user.companyId || guarantor.employeeId !== employeeId) {
+        throw new NotFoundException('Employee guarantor not found.');
+      }
+
+      const removed = guarantor.removeDocument(docId);
+      if (removed) {
+        await this.fileService.deleteFile(removed.filePath);
+        await this.guarantorRepo.updateAsync(guarantor);
+      }
+
+      return res.redirect(`/employees/${employeeId}?success=msg.documentDeleted`);
+    } catch (err: any) {
+      return res.redirect(`/employees/${employeeId}?error=${encodeURIComponent(err.message || 'Failed to remove guarantor document')}`);
+    }
+  }
 }
