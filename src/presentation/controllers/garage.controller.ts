@@ -14,6 +14,7 @@ import { Request, Response } from 'express';
 import { CreateGarageDto, UpdateGarageDto } from '@application/dtos/garage.dto';
 import { CreateGarageCommand } from '@application/commands/impl/create-garage.command';
 import { UpdateGarageCommand } from '@application/commands/impl/update-garage.command';
+import { ToggleGarageStatusCommand } from '@application/commands/impl/toggle-garage-status.command';
 import { GetGaragesByCompanyQuery } from '@application/queries/impl/get-garages-by-company.query';
 import { GetGarageByIdQuery } from '@application/queries/impl/get-garage-by-id.query';
 import { GetGarageDashboardQuery } from '@application/queries/impl/get-garage-dashboard.query';
@@ -270,6 +271,83 @@ export class GarageController {
         garage: { id, ...dto },
         error: err.message || 'Failed to update garage',
       });
+    }
+  }
+
+  // --- TOGGLE STATUS (SUSPEND / REACTIVATE) (SUPER_ADMIN only) ---
+  @Post(':id/toggle-status')
+  async handleToggleStatus(
+    @Param('id') id: string,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    const user = (req as any).user;
+    const isSuperAdmin = user.role === 'SUPER_ADMIN' || user.isSuperAdmin;
+
+    if (!isSuperAdmin) {
+      const returnUrl = req.headers.referer || `/garages/${id}`;
+      return res.redirect(
+        `${returnUrl}${returnUrl.includes('?') ? '&' : '?'}error=msg.superAdminRequired`,
+      );
+    }
+
+    try {
+      const result = await this.commandBus.execute(
+        new ToggleGarageStatusCommand(
+          id,
+          user.companyId,
+          `${user.sub || user.companyId}|${user.role || 'SUPER_ADMIN'}`,
+        ),
+      );
+
+      const garage = result.garage;
+      const isSuspended = !result.isActive;
+
+      await this.auditLogService.record({
+        companyId: user.companyId,
+        userId: user.sub || user.companyId,
+        userName: user.name,
+        userRole: user.role,
+        action: 'UPDATE',
+        entityType: 'GARAGE',
+        entityId: id,
+        entityName: garage.garageName,
+        details: isSuspended
+          ? `Suspended garage facility ${garage.garageName}`
+          : `Reactivated garage facility ${garage.garageName}`,
+        req,
+      });
+
+      const referer = req.headers.referer || '';
+      let returnUrl = `/garages/${id}`;
+      if (referer) {
+        try {
+          const urlObj = new URL(referer);
+          urlObj.searchParams.delete('error');
+          urlObj.searchParams.delete('success');
+          returnUrl =
+            urlObj.pathname +
+            (urlObj.searchParams.toString()
+              ? `?${urlObj.searchParams.toString()}`
+              : '');
+        } catch {
+          returnUrl = referer.split('?')[0];
+        }
+      }
+
+      const msgKey = isSuspended
+        ? 'msg.garageSuspended'
+        : 'msg.garageReactivated';
+      const separator = returnUrl.includes('?') ? '&' : '?';
+      return res.redirect(`${returnUrl}${separator}success=${msgKey}`);
+    } catch (err: any) {
+      const returnUrl = req.headers.referer || `/garages/${id}`;
+      const separator = returnUrl.includes('?') ? '&' : '?';
+      return res.redirect(
+        `${returnUrl}${separator}error=${encodeURIComponent(
+          err.message || 'Operation failed',
+        )}`,
+      );
     }
   }
 }

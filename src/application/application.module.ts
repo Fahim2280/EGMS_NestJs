@@ -14,6 +14,7 @@ import { FileService } from '../infrastructure/services/file.service';
 import { RegisterCompanyHandler } from './commands/handlers/register-company.handler';
 import { CreateGarageHandler } from './commands/handlers/create-garage.handler';
 import { UpdateGarageHandler } from './commands/handlers/update-garage.handler';
+import { ToggleGarageStatusHandler } from './commands/handlers/toggle-garage-status.handler';
 import { CreateEmployeeHandler } from './commands/handlers/create-employee.handler';
 import { UpdateEmployeeHandler } from './commands/handlers/update-employee.handler';
 import { DeleteEmployeeHandler } from './commands/handlers/delete-employee.handler';
@@ -65,6 +66,7 @@ const CommandHandlers = [
   RegisterCompanyHandler,
   CreateGarageHandler,
   UpdateGarageHandler,
+  ToggleGarageStatusHandler,
   CreateEmployeeHandler,
   UpdateEmployeeHandler,
   DeleteEmployeeHandler,

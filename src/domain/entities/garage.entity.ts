@@ -43,6 +43,16 @@ export class Garage extends AuditableEntity {
     }
   }
 
+  public toggleStatus(byStamp?: string): boolean {
+    this.isActive = !this.isActive;
+    if (byStamp) {
+      this.markModified(byStamp);
+    } else {
+      this.modifiedDate = new Date();
+    }
+    return this.isActive;
+  }
+
   private validate(props: CreateGarageProps): void {
     if (!props.id) throw new Error('Garage ID is required.');
     if (!props.companyId) throw new Error('Company ID is required.');

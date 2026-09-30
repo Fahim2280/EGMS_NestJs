@@ -1,5 +1,5 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { ConflictException, Inject, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Inject, NotFoundException } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import { CreateCustomerCommand } from '../impl/create-customer.command';
 import {
@@ -30,6 +30,9 @@ export class CreateCustomerHandler implements ICommandHandler<CreateCustomerComm
       const garage = await this.garageRepo.getByIdAsync(dto.garageId);
       if (!garage || garage.companyId !== companyId) {
         throw new NotFoundException('The selected garage does not exist or does not belong to your company.');
+      }
+      if (garage.isActive === false) {
+        throw new BadRequestException('msg.garageSuspendedCustomerBlocked');
       }
     }
 

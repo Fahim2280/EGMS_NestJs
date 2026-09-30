@@ -55,4 +55,25 @@ describe('Garage Entity', () => {
     expect(garage.editByName).toBe('comp-101|SUPER_ADMIN');
     expect(garage.modifiedDate).toBeInstanceOf(Date);
   });
+
+  it('should toggle status and record audit stamp', () => {
+    const garage = Garage.create({
+      id: 'gar-105',
+      companyId: 'comp-101',
+      garageName: 'Apex Central',
+      address: 'Industrial Area',
+    });
+
+    expect(garage.isActive).toBe(true);
+
+    const suspended = garage.toggleStatus('comp-101|SUPER_ADMIN');
+    expect(suspended).toBe(false);
+    expect(garage.isActive).toBe(false);
+    expect(garage.editByName).toBe('comp-101|SUPER_ADMIN');
+    expect(garage.modifiedDate).toBeInstanceOf(Date);
+
+    const reactivated = garage.toggleStatus('comp-101|SUPER_ADMIN');
+    expect(reactivated).toBe(true);
+    expect(garage.isActive).toBe(true);
+  });
 });

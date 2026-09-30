@@ -126,6 +126,7 @@ export class GetGarageDashboardHandler implements IQueryHandler<GetGarageDashboa
         hasBills: !!latestBill,
         garageId: c.garageId,
         garageName: garage.garageName,
+        documents: c.documents || [],
       };
     });
 

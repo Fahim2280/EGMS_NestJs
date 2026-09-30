@@ -43,8 +43,8 @@
           <select id="garageId" name="garageId" class="form-input" required>
             <option value="" disabled {{#unless selectedGarageId}}selected{{/unless}}>{{t 'common.selectGarage'}}</option>
             {{#each garages}}
-              <option value="{{this.id}}" data-subtext="{{this.address}}" {{#if (eq this.id ../selectedGarageId)}}selected{{/if}}>
-                🏢 {{this.garageName}}
+              <option value="{{this.id}}" data-subtext="{{this.address}}" {{#if (eq this.id ../selectedGarageId)}}selected{{/if}} {{#unless this.isActive}}disabled style="color: #ef4444;"{{/unless}}>
+                🏢 {{this.garageName}} {{#unless this.isActive}}({{t 'garages.suspended'}}){{/unless}}
               </option>
             {{/each}}
           </select>

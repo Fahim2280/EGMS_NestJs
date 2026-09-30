@@ -7560,7 +7560,7 @@ select.filter-select {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 135px;
+  max-width: 240px;
 }
 
 .customer-name-link:hover {
