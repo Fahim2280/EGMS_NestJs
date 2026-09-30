@@ -168,12 +168,25 @@ export class CustomerController {
       new GetCustomersByCompanyQuery(user.companyId, null),
     );
     const nextNum = String((Array.isArray(customerCount) ? customerCount.length : 0) + 1).padStart(3, '0');
+
+    let isGarageSuspended = false;
+    let errorMsg: string | undefined = undefined;
+    if (garageId) {
+      const selectedGarage = (garages || []).find((g: any) => g.id === garageId);
+      if (selectedGarage && selectedGarage.isActive === false) {
+        isGarageSuspended = true;
+        errorMsg = 'msg.garageSuspendedCustomerBlocked';
+      }
+    }
+
     return res.render('customers/create', {
       title: 'Register New Customer - EGMS Portal',
       activeNav: 'customers',
       user,
       garages,
       selectedGarageId: garageId || '',
+      isGarageSuspended,
+      error: errorMsg,
       nextCustomerCode: `CUST-${nextNum}`,
     });
   }
@@ -206,6 +219,26 @@ export class CustomerController {
         error: 'You do not have permission to register a customer in this garage.',
         formData: dto,
       });
+    }
+
+    // Validate garage active status immediately
+    if (dto.garageId) {
+      const garages = await this.queryBus.execute(
+        new GetGaragesByCompanyQuery(user.companyId, allowedGarageIds),
+      );
+      const targetGarage = (garages || []).find((g: any) => g.id === dto.garageId);
+      if (targetGarage && targetGarage.isActive === false) {
+        return res.render('customers/create', {
+          title: 'Register New Customer - EGMS Portal',
+          activeNav: 'customers',
+          user,
+          garages,
+          selectedGarageId: dto.garageId || '',
+          isGarageSuspended: true,
+          error: 'msg.garageSuspendedCustomerBlocked',
+          formData: dto,
+        });
+      }
     }
 
     try {
@@ -404,6 +437,7 @@ export class CustomerController {
         user,
         garages,
         selectedGarageId: dto.garageId || '',
+        isGarageSuspended: err.message === 'msg.garageSuspendedCustomerBlocked',
         error: err.message || 'Failed to create customer.',
         formData: dto,
       });

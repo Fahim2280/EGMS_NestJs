@@ -185,12 +185,12 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                   </a>
                   {{#if (or ../isSuperAdmin ../currentUser.canCreate)}}
-                    {{#if this.isActive}}
+                    {{#if (and this.isActive (not this.isGarageSuspended))}}
                       <a href="/bills/new?customerId={{this.id}}" class="btn btn-icon-action btn-action-bill" title="{{t 'bills.newBill'}}" aria-label="{{t 'bills.newBill'}}">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
                       </a>
                     {{else}}
-                      <button type="button" class="btn btn-secondary btn-icon-action" style="opacity: 0.35; cursor: not-allowed;" title="{{t 'customers.suspendedNoticeShort'}}" disabled>
+                      <button type="button" class="btn btn-secondary btn-icon-action" style="opacity: 0.35; cursor: not-allowed;" title="{{#if this.isGarageSuspended}}{{t 'bills.garageSuspendedNotice'}}{{else}}{{t 'customers.suspendedNoticeShort'}}{{/if}}" disabled>
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
                       </button>
                     {{/if}}
@@ -343,7 +343,7 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
               </a>
               {{#if (or ../isSuperAdmin ../currentUser.canCreate)}}
-                {{#if this.isActive}}
+                {{#if (and this.isActive (not this.isGarageSuspended))}}
                   <a href="/bills/new?customerId={{this.id}}" class="btn btn-icon-action btn-action-bill" title="{{t 'bills.newBill'}}">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
                   </a>

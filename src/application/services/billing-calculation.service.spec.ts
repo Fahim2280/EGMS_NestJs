@@ -172,4 +172,40 @@ describe('BillingCalculationService', () => {
     expect(preview.electricBill).toBe(1000);
     expect(preview.totalBill).toBe(2700);
   });
+
+  it('should throw BadRequestException when customer garage is suspended', async () => {
+    const mockGarageRepo = {
+      getByIdAsync: jest.fn().mockResolvedValue({ id: 'gar-1', isActive: false }),
+    };
+    const custInGarage = Customer.create({
+      id: 'cust-2',
+      companyId: 'comp-1',
+      name: 'Rahim 2',
+      address: 'Dhaka',
+      mobileNumber: '01711000001',
+      nidNumber: '1234567891',
+      previousUnit: 100,
+      advanceMoney: 0,
+      garageId: 'gar-1',
+    });
+    mockCustomerRepo.getByIdAsync.mockResolvedValue(custInGarage);
+
+    const serviceWithGarage = new BillingCalculationService(
+      mockCustomerRepo,
+      mockBillRepo,
+      mockGarageRepo as any,
+    );
+
+    await expect(
+      serviceWithGarage.calculateBillValues(
+        'cust-2',
+        'comp-1',
+        150,
+        0,
+        0,
+        0,
+        new Date(),
+      ),
+    ).rejects.toThrow('msg.garageSuspendedBillingBlocked');
+  });
 });

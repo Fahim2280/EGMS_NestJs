@@ -288,10 +288,14 @@
                 <td style="text-align: right;">
                   <div class="table-actions-group">
                     {{#if ../canCreate}}
-                      {{#if this.isActive}}
+                      {{#if (and this.isActive (not this.isGarageSuspended))}}
                       <a href="/bills/new?customerId={{this.id}}" class="btn btn-primary btn-icon-action" style="background: #10b981; border-color: #10b981;" title="{{t 'bills.newBill'}}" aria-label="{{t 'bills.newBill'}}">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
                       </a>
+                      {{else}}
+                      <button type="button" class="btn btn-secondary btn-icon-action" style="opacity: 0.35; cursor: not-allowed;" title="{{#if this.isGarageSuspended}}{{t 'bills.garageSuspendedNotice'}}{{else}}{{t 'customers.suspendedNoticeShort'}}{{/if}}" disabled>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                      </button>
                       {{/if}}
                     {{/if}}
                     <a href="/customers/{{this.id}}" class="btn btn-secondary btn-icon-action" title="{{t 'common.view'}}" aria-label="{{t 'common.view'}}">

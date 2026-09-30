@@ -4,6 +4,8 @@ import {
   ICustomerRepository,
   ELECTRIC_BILL_REPOSITORY_TOKEN,
   IElectricBillRepository,
+  GARAGE_REPOSITORY_TOKEN,
+  IGarageRepository,
   ElectricBill,
 } from '@domain/index';
 import {
@@ -20,6 +22,8 @@ export class BillingCalculationService {
     private readonly customerRepo: ICustomerRepository,
     @Inject(ELECTRIC_BILL_REPOSITORY_TOKEN)
     private readonly billRepo: IElectricBillRepository,
+    @Inject(GARAGE_REPOSITORY_TOKEN)
+    private readonly garageRepo?: IGarageRepository,
   ) {}
 
   async getCustomerBillSummary(
@@ -31,6 +35,12 @@ export class BillingCalculationService {
       throw new NotFoundException('Customer not found.');
     }
 
+    let isGarageSuspended = false;
+    if (customer.garageId && this.garageRepo) {
+      const garage = await this.garageRepo.getByIdAsync(customer.garageId);
+      isGarageSuspended = garage ? garage.isActive === false : false;
+    }
+
     const lastBill = await this.billRepo.findLatestByCustomerId(customerId);
     if (!lastBill) {
       return {
@@ -40,6 +50,7 @@ export class BillingCalculationService {
         previousDues: customer.advanceMoney,
         lastBillDate: null,
         isActive: customer.isActive,
+        isGarageSuspended,
       };
     }
 
@@ -50,6 +61,7 @@ export class BillingCalculationService {
       previousDues: lastBill.presentDues,
       lastBillDate: lastBill.date,
       isActive: customer.isActive,
+      isGarageSuspended,
     };
   }
 
@@ -103,6 +115,13 @@ export class BillingCalculationService {
 
     if (!customer.isActive && !excludeBillId) {
       throw new BadRequestException('msg.customerSuspendedBillingBlocked');
+    }
+
+    if (customer.garageId && !excludeBillId && this.garageRepo) {
+      const garage = await this.garageRepo.getByIdAsync(customer.garageId);
+      if (garage && garage.isActive === false) {
+        throw new BadRequestException('msg.garageSuspendedBillingBlocked');
+      }
     }
 
     const previousBill = await this.billRepo.findPreviousBill(

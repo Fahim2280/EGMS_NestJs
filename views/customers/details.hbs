@@ -67,7 +67,7 @@
       {{/if}}
     {{/if}}
     {{#if (or isSuperAdmin currentUser.canCreate)}}
-      {{#if customer.isActive}}
+      {{#if (and customer.isActive (not customer.isGarageSuspended))}}
       <a href="/bills/new?customerId={{customer.id}}" class="btn btn-primary" style="background: #10b981; border-color: #10b981;">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
           <line x1="12" y1="5" x2="12" y2="19"/>
@@ -75,6 +75,14 @@
         </svg>
         {{t 'bills.newBill'}}
       </a>
+      {{else if customer.isGarageSuspended}}
+      <button type="button" class="btn btn-secondary" style="opacity: 0.5; cursor: not-allowed;" title="{{t 'bills.garageSuspendedNotice'}}" disabled>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="12" y1="5" x2="12" y2="19"/>
+          <line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        {{t 'bills.newBill'}} ({{t 'bills.garageSuspendedNoticeShort'}})
+      </button>
       {{else}}
       <button type="button" class="btn btn-secondary" style="opacity: 0.5; cursor: not-allowed;" title="{{t 'customers.suspendedNoticeShort'}}" disabled>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -114,6 +122,25 @@
   </div>
 </div>
 {{/unless}}
+
+{{#if customer.isGarageSuspended}}
+<div class="card" style="margin-bottom: 1.5rem; background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.25); border-left: 4px solid #ef4444; padding: 1rem 1.25rem;">
+  <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+    <div style="display: flex; align-items: center; gap: 0.75rem;">
+      <div style="font-size: 1.75rem; line-height: 1;">🏪🚫</div>
+      <div>
+        <div style="font-weight: 700; color: #ef4444; font-size: 1.05rem;">{{t 'bills.garageSuspendedNoticeShort'}}</div>
+        <div style="color: var(--color-text-secondary); font-size: 0.9rem; margin-top: 0.15rem;">{{t 'bills.garageSuspendedNotice'}}</div>
+      </div>
+    </div>
+    {{#if customer.garageId}}
+    <a href="/garages/{{customer.garageId}}" class="btn btn-secondary" style="font-size: 0.85rem; padding: 0.4rem 0.75rem;">
+      {{t 'garages.viewGarage'}}
+    </a>
+    {{/if}}
+  </div>
+</div>
+{{/if}}
 
 <!-- Profile Info Grid -->
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
@@ -480,11 +507,16 @@
     </div>
     <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
       {{#if (or isSuperAdmin currentUser.canCreate)}}
-        {{#if customer.isActive}}
+        {{#if (and customer.isActive (not customer.isGarageSuspended))}}
           <a href="/bills/new?customerId={{customer.id}}" class="btn btn-primary btn-sm" style="background: #10b981; border-color: #10b981; display: inline-flex; align-items: center; gap: 0.35rem; font-weight: 600;">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             {{t 'bills.newBill'}}
           </a>
+        {{else}}
+          <button type="button" class="btn btn-secondary btn-sm" style="opacity: 0.5; cursor: not-allowed; display: inline-flex; align-items: center; gap: 0.35rem;" title="{{#if customer.isGarageSuspended}}{{t 'bills.garageSuspendedNotice'}}{{else}}{{t 'customers.suspendedNoticeShort'}}{{/if}}" disabled>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            {{t 'bills.newBill'}}
+          </button>
         {{/if}}
       {{/if}}
     </div>
@@ -730,7 +762,7 @@
       <h3 style="color: var(--color-text-primary); font-size: 1.1rem; font-weight: 600; margin-bottom: 0.35rem;">{{t 'bills.noBills'}}</h3>
       <p style="color: var(--color-text-muted); font-size: 0.88rem; max-width: 420px; margin: 0 auto 1.25rem;">{{t 'bills.noBillsSub'}}</p>
       {{#if (or isSuperAdmin currentUser.canCreate)}}
-        {{#if customer.isActive}}
+        {{#if (and customer.isActive (not customer.isGarageSuspended))}}
           <a href="/bills/new?customerId={{customer.id}}" class="btn btn-primary" style="background: #10b981; border-color: #10b981;">
             + {{t 'bills.newBill'}}
           </a>

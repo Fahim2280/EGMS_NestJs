@@ -8,6 +8,8 @@ import {
   IElectricBillRepository,
   GUARANTOR_REPOSITORY_TOKEN,
   IGuarantorRepository,
+  GARAGE_REPOSITORY_TOKEN,
+  IGarageRepository,
 } from '@domain/index';
 import { CustomerResponseDto } from '../../dtos/customer.dto';
 
@@ -22,6 +24,8 @@ export class GetCustomerByIdHandler
     private readonly billRepo: IElectricBillRepository,
     @Inject(GUARANTOR_REPOSITORY_TOKEN)
     private readonly guarantorRepo: IGuarantorRepository,
+    @Inject(GARAGE_REPOSITORY_TOKEN)
+    private readonly garageRepo?: IGarageRepository,
   ) {}
 
   async execute(query: GetCustomerByIdQuery): Promise<CustomerResponseDto> {
@@ -30,9 +34,10 @@ export class GetCustomerByIdHandler
       throw new NotFoundException('Customer not found.');
     }
 
-    const [bills, guarantors] = await Promise.all([
+    const [bills, guarantors, garage] = await Promise.all([
       this.billRepo.findByCustomerId(customer.id),
       this.guarantorRepo.findByCustomerId(customer.id),
+      customer.garageId && this.garageRepo ? this.garageRepo.getByIdAsync(customer.garageId) : Promise.resolve(null),
     ]);
 
     return {
@@ -51,8 +56,9 @@ export class GetCustomerByIdHandler
       previousUnit: customer.previousUnit,
       advanceMoney: customer.advanceMoney,
       garageId: customer.garageId,
-      garageName: customer.garageName,
+      garageName: customer.garageName || garage?.garageName,
       isActive: customer.isActive,
+      isGarageSuspended: garage ? garage.isActive === false : false,
       createdDate: customer.createdDate,
       bills: bills.map((b) => ({
         id: b.id,

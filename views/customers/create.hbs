@@ -15,9 +15,9 @@
 </div>
 
 {{#if error}}
-  <div style="background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 10px; padding: 1rem 1.25rem; margin-bottom: 1.5rem; color: #f87171; font-size: 0.9rem; display: flex; align-items: center; gap: 0.75rem;">
+  <div id="topErrorAlert" {{#if isGarageSuspended}}data-garage-error="true"{{/if}} style="background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 10px; padding: 1rem 1.25rem; margin-bottom: 1.5rem; color: #f87171; font-size: 0.9rem; display: flex; align-items: center; gap: 0.75rem;">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-    <span>{{error}}</span>
+    <span>{{t error}}</span>
   </div>
 {{/if}}
 
@@ -40,15 +40,21 @@
           <label class="form-label" for="garageId">
             <span>{{t 'customers.garage'}} <span style="color: #f43f5e;">*</span></span>
           </label>
-          <select id="garageId" name="garageId" class="form-input" required>
+          <select id="garageId" name="garageId" class="form-input" required onchange="handleGarageChange()">
             <option value="" disabled {{#unless selectedGarageId}}selected{{/unless}}>{{t 'common.selectGarage'}}</option>
             {{#each garages}}
-              <option value="{{this.id}}" data-subtext="{{this.address}}" {{#if (eq this.id ../selectedGarageId)}}selected{{/if}} {{#unless this.isActive}}disabled style="color: #ef4444;"{{/unless}}>
-                🏢 {{this.garageName}} {{#unless this.isActive}}({{t 'garages.suspended'}}){{/unless}}
+              <option value="{{this.id}}" data-subtext="{{this.address}}" data-active="{{this.isActive}}" {{#if (eq this.id ../selectedGarageId)}}selected{{/if}} {{#unless this.isActive}}disabled style="color: #ef4444; background: rgba(239, 68, 68, 0.08);"{{/unless}}>
+                🏢 {{this.garageName}} {{#unless this.isActive}} [🚫 {{t 'garages.suspended'}}]{{/unless}}
               </option>
             {{/each}}
           </select>
-          <span class="form-hint">{{t 'customers.garageBranchHint'}}</span>
+          <div id="garageSuspendedWarning" style="display: {{#if isGarageSuspended}}flex{{else}}none{{/if}}; margin-top: 0.75rem; background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; padding: 0.75rem 1rem; color: #f87171; font-size: 0.88rem; align-items: center; gap: 0.5rem;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink: 0;"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+            <div>
+              <strong>{{t 'garages.suspendedNoticeShort'}}:</strong> {{t 'msg.garageSuspendedCustomerBlocked'}}
+            </div>
+          </div>
+          <span class="form-hint" id="garageBranchHint">{{t 'customers.garageBranchHint'}}</span>
         </div>
 
         <div class="form-group" style="margin-bottom: 1.25rem;">
@@ -135,7 +141,7 @@
 
       <div class="form-actions" style="margin-top: 2rem; display: flex; gap: 0.75rem; justify-content: flex-end; align-items: center;">
         <a href="/customers" class="btn btn-secondary" style="padding: 0.65rem 1.25rem;">{{t 'common.cancel'}}</a>
-        <button type="submit" class="btn btn-primary" style="padding: 0.65rem 1.5rem; display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 700; box-shadow: 0 4px 16px rgba(99, 102, 241, 0.35);">
+        <button type="submit" id="saveCustomerBtn" class="btn btn-primary" style="padding: 0.65rem 1.5rem; display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 700; box-shadow: 0 4px 16px rgba(99, 102, 241, 0.35);">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
           {{t 'customers.saveCustomer'}}
         </button>
@@ -189,6 +195,44 @@
 </div>
 
 <script>
+  function handleGarageChange() {
+    const select = document.getElementById('garageId');
+    const warning = document.getElementById('garageSuspendedWarning');
+    const topAlert = document.getElementById('topErrorAlert');
+    const submitBtn = document.getElementById('saveCustomerBtn');
+    if (!select) return;
+    const selectedOption = select.options[select.selectedIndex];
+    const isSuspended = selectedOption && (selectedOption.getAttribute('data-active') === 'false' || selectedOption.disabled);
+
+    if (isSuspended && select.value) {
+      if (warning) warning.style.display = 'flex';
+      if (topAlert && topAlert.getAttribute('data-garage-error') === 'true') {
+        topAlert.style.display = 'flex';
+      }
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.style.opacity = '0.5';
+        submitBtn.style.cursor = 'not-allowed';
+        submitBtn.title = "{{t 'msg.garageSuspendedCustomerBlocked'}}";
+      }
+    } else {
+      if (warning) warning.style.display = 'none';
+      if (topAlert && topAlert.getAttribute('data-garage-error') === 'true') {
+        topAlert.style.display = 'none';
+      }
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.style.opacity = '1';
+        submitBtn.style.cursor = 'pointer';
+        submitBtn.title = '';
+      }
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    handleGarageChange();
+  });
+
   (function() {
     const input = document.getElementById('customerCode');
     const status = document.getElementById('codeStatus');

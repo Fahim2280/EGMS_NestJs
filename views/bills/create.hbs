@@ -47,13 +47,16 @@
           <select id="customerId" name="customerId" class="form-input" required>
             <option value="">{{t 'bills.chooseCustomer'}}</option>
             {{#each customers}}
-              <option value="{{this.id}}" data-subtext="📱 {{this.mobileNumber}}" data-active="{{this.isActive}}" {{#unless this.isActive}}disabled style="color: #ef4444; background: rgba(239, 68, 68, 0.06);"{{/unless}} {{#if (eq ../preselectedCustomerId this.id)}}selected{{/if}}>
-                {{this.name}}{{#if this.customerCode}} ({{this.customerCode}}){{/if}}{{#unless this.isActive}} [🚫 {{t 'customers.suspended'}}]{{/unless}}
+              <option value="{{this.id}}" data-subtext="📱 {{this.mobileNumber}}" data-active="{{this.isActive}}" data-garage-suspended="{{this.isGarageSuspended}}" {{#if (or (not this.isActive) this.isGarageSuspended)}}disabled style="color: #ef4444; background: rgba(239, 68, 68, 0.06);"{{/if}} {{#if (eq ../preselectedCustomerId this.id)}}selected{{/if}}>
+                {{this.name}}{{#if this.customerCode}} ({{this.customerCode}}){{/if}}{{#unless this.isActive}} [🚫 {{t 'customers.suspended'}}]{{else}}{{#if this.isGarageSuspended}} [🚫 {{t 'garages.suspended'}}]{{/if}}{{/unless}}
               </option>
             {{/each}}
           </select>
           <div id="customerSuspendedWarning" style="display: none; margin-top: 0.75rem; background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; padding: 0.75rem 1rem; color: #f87171; font-size: 0.88rem;">
             🚫 <strong>{{t 'customers.suspendedNoticeShort'}}:</strong> {{t 'customers.suspendedNotice'}}
+          </div>
+          <div id="garageSuspendedWarning" style="display: none; margin-top: 0.75rem; background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; padding: 0.75rem 1rem; color: #f87171; font-size: 0.88rem;">
+            🚫 <strong>{{t 'bills.garageSuspendedNoticeShort'}}:</strong> {{t 'bills.garageSuspendedNotice'}}
           </div>
         </div>
 
@@ -296,6 +299,7 @@
 
     async function fetchCustomerSummary(id) {
       const warningEl = document.getElementById('customerSuspendedWarning');
+      const garageWarningEl = document.getElementById('garageSuspendedWarning');
 
       if (!id) {
         previousUnit = 0;
@@ -304,6 +308,7 @@
         const custNameEl = document.getElementById('previewCustomerName');
         if (custNameEl) custNameEl.textContent = '{{t "bills.chooseCustomer"}}';
         if (warningEl) warningEl.style.display = 'none';
+        if (garageWarningEl) garageWarningEl.style.display = 'none';
         if (submitBtn) {
           submitBtn.disabled = false;
           submitBtn.style.opacity = '1';
@@ -318,13 +323,29 @@
         const json = await res.json();
         if (json.success) {
           const isSuspended = json.data.isActive === false;
+          const isGarageSuspended = json.data.isGarageSuspended === true;
           if (warningEl) warningEl.style.display = isSuspended ? 'block' : 'none';
+          if (garageWarningEl) garageWarningEl.style.display = isGarageSuspended ? 'block' : 'none';
+
+          if ((isSuspended || isGarageSuspended) && submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.style.opacity = '0.5';
+            submitBtn.style.cursor = 'not-allowed';
+          } else if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.style.opacity = '1';
+            submitBtn.style.cursor = 'pointer';
+          }
+
           previousUnit = Number(json.data.lastMeterReading) || 0;
           previousDues = Number(json.data.previousDues) || 0;
           customerName = json.data.customerName || '';
           if (displayPreviousUnit) displayPreviousUnit.value = previousUnit.toFixed(2);
           const custNameEl = document.getElementById('previewCustomerName');
-          if (custNameEl) custNameEl.textContent = customerName + (isSuspended ? ' [🚫 {{t "customers.suspended"}}]' : '');
+          let statusSuffix = '';
+          if (isSuspended) statusSuffix = ' [🚫 {{t "customers.suspended"}}]';
+          else if (isGarageSuspended) statusSuffix = ' [🚫 {{t "garages.suspended"}}]';
+          if (custNameEl) custNameEl.textContent = customerName + statusSuffix;
           recalc();
         }
       } catch (err) {

@@ -9,6 +9,8 @@ import {
   IElectricBillRepository,
   COMPANY_REPOSITORY_TOKEN,
   ICompanyRepository,
+  GARAGE_REPOSITORY_TOKEN,
+  IGarageRepository,
   ElectricBill,
 } from '@domain/index';
 import { BillingCalculationService } from '../../services/billing-calculation.service';
@@ -25,16 +27,22 @@ export class GenerateMonthlyBillsHandler
     @Inject(COMPANY_REPOSITORY_TOKEN)
     private readonly companyRepo: ICompanyRepository,
     private readonly billingService: BillingCalculationService,
+    @Inject(GARAGE_REPOSITORY_TOKEN)
+    private readonly garageRepo?: IGarageRepository,
   ) {}
 
   async execute(
     command: GenerateMonthlyBillsCommand,
   ): Promise<{ successCount: number; failCount: number; totalCustomers: number }> {
     const { companyId, targetDate, actorStamp, fromDate } = command;
-    const [customers, company] = await Promise.all([
+    const [customers, company, garages] = await Promise.all([
       this.customerRepo.findByCompanyId(companyId),
       this.companyRepo.getByIdAsync(companyId),
+      this.garageRepo ? this.garageRepo.findByCompanyId(companyId) : Promise.resolve([]),
     ]);
+    const inactiveGarageIds = new Set(
+      (garages || []).filter((g) => g.isActive === false).map((g) => g.id),
+    );
 
     const defaultUnitRate = company?.unitRate || 15;
 
@@ -47,6 +55,9 @@ export class GenerateMonthlyBillsHandler
 
     for (const customer of customers) {
       if (!customer.isActive) {
+        continue;
+      }
+      if (customer.garageId && inactiveGarageIds.has(customer.garageId)) {
         continue;
       }
       try {

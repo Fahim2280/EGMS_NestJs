@@ -121,6 +121,7 @@ export class CustomerBillSummaryDto {
   previousDues: number;
   lastBillDate: Date | null;
   isActive?: boolean;
+  isGarageSuspended?: boolean;
 }
 
 export class PreviewBillRequestDto {

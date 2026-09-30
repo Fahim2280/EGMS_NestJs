@@ -81,12 +81,23 @@
       </button>
       {{/if}}
     {{/if}}
-    <a href="/bills/new" class="btn btn-secondary" style="color: #38bdf8;">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
-      </svg>
-      {{t 'bills.newBill'}}
-    </a>
+    {{#if (or isSuperAdmin canCreate)}}
+      {{#if garage.isActive}}
+      <a href="/bills/new" class="btn btn-secondary" style="color: #38bdf8;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+        </svg>
+        {{t 'bills.newBill'}}
+      </a>
+      {{else}}
+      <button type="button" class="btn btn-secondary" style="opacity: 0.5; cursor: not-allowed;" title="{{t 'garages.suspendedNoticeShort'}}" disabled>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+        </svg>
+        {{t 'bills.newBill'}} ({{t 'garages.suspended'}})
+      </button>
+      {{/if}}
+    {{/if}}
     {{#if isSuperAdmin}}
       <a href="/garages/{{garage.id}}/edit" class="btn btn-secondary">
         {{t 'garages.editGarage'}}
@@ -437,12 +448,12 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                   </a>
                   {{#if (or ../isSuperAdmin ../currentUser.canCreate)}}
-                    {{#if (ne this.isActive false)}}
+                    {{#if (and (ne this.isActive false) ../garage.isActive)}}
                       <a href="/bills/new?customerId={{this.id}}" class="btn btn-icon-action btn-action-bill" title="{{t 'bills.newBill'}}" aria-label="{{t 'bills.newBill'}}">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
                       </a>
                     {{else}}
-                      <button type="button" class="btn btn-secondary btn-icon-action" style="opacity: 0.35; cursor: not-allowed;" title="{{t 'customers.suspendedNoticeShort'}}" disabled>
+                      <button type="button" class="btn btn-secondary btn-icon-action" style="opacity: 0.35; cursor: not-allowed;" title="{{#unless ../garage.isActive}}{{t 'garages.suspendedNoticeShort'}}{{else}}{{t 'customers.suspendedNoticeShort'}}{{/unless}}" disabled>
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
                       </button>
                     {{/if}}
@@ -552,7 +563,7 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
               </a>
               {{#if (or ../isSuperAdmin ../currentUser.canCreate)}}
-                {{#if this.isActive}}
+                {{#if (and this.isActive ../garage.isActive)}}
                   <a href="/bills/new?customerId={{this.id}}" class="btn btn-icon-action btn-action-bill" title="{{t 'bills.newBill'}}">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
                   </a>
@@ -604,10 +615,17 @@
       </div>
     </div>
     <div>
+      {{#if garage.isActive}}
       <a href="/bills/new" class="btn btn-primary btn-sm" style="background: #10b981; border-color: #10b981; display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 600;">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         {{t 'bills.newBill'}}
       </a>
+      {{else}}
+      <button type="button" class="btn btn-secondary btn-sm" style="opacity: 0.5; cursor: not-allowed; display: inline-flex; align-items: center; gap: 0.4rem;" title="{{t 'garages.suspendedNoticeShort'}}" disabled>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        {{t 'bills.newBill'}} ({{t 'garages.suspended'}})
+      </button>
+      {{/if}}
     </div>
   </div>
 
@@ -774,7 +792,13 @@
       <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">⚡</div>
       <h3 style="color: var(--color-text-primary); font-size: 1.15rem; font-weight: 600; margin-bottom: 0.5rem;">{{t 'garages.noBills'}}</h3>
       <p style="color: var(--color-text-muted); margin-bottom: 1.5rem;">{{garage.garageName}}</p>
+      {{#if garage.isActive}}
       <a href="/bills/new" class="btn btn-primary" style="background: #10b981; border-color: #10b981;">{{t 'bills.newBill'}}</a>
+      {{else}}
+      <button type="button" class="btn btn-secondary" style="opacity: 0.5; cursor: not-allowed;" title="{{t 'garages.suspendedNoticeShort'}}" disabled>
+        {{t 'bills.newBill'}} ({{t 'garages.suspended'}})
+      </button>
+      {{/if}}
     </div>
   {{/if}}
 </div>

@@ -133,6 +133,7 @@ export class CustomerResponseDto {
   garageId?: string;
   garageName?: string;
   isActive: boolean;
+  isGarageSuspended?: boolean;
   createdDate: Date;
   bills?: any[];
   guarantors?: GuarantorResponseDto[];
@@ -149,6 +150,7 @@ export class CustomerDashboardItemDto {
   garageId?: string;
   garageName?: string;
   isActive: boolean;
+  isGarageSuspended?: boolean;
   lastBillDate: Date;
   hasBills: boolean;
 }

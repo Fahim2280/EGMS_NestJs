@@ -1,11 +1,13 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
-import { Inject } from '@nestjs/common';
+import { Inject, Optional } from '@nestjs/common';
 import { GetExecutiveDashboardQuery } from '../impl/get-executive-dashboard.query';
 import {
   CUSTOMER_REPOSITORY_TOKEN,
   ICustomerRepository,
   ELECTRIC_BILL_REPOSITORY_TOKEN,
   IElectricBillRepository,
+  GARAGE_REPOSITORY_TOKEN,
+  IGarageRepository,
 } from '@domain/index';
 import { CustomerDashboardItemDto } from '../../dtos/customer.dto';
 
@@ -28,6 +30,9 @@ export class GetExecutiveDashboardHandler
     private readonly customerRepo: ICustomerRepository,
     @Inject(ELECTRIC_BILL_REPOSITORY_TOKEN)
     private readonly billRepo: IElectricBillRepository,
+    @Optional()
+    @Inject(GARAGE_REPOSITORY_TOKEN)
+    private readonly garageRepo?: IGarageRepository,
   ) {}
 
   async execute(
@@ -38,6 +43,14 @@ export class GetExecutiveDashboardHandler
     if (query.allowedGarageIds !== undefined && query.allowedGarageIds !== null) {
       const allowedSet = new Set(query.allowedGarageIds);
       customers = customers.filter((c) => c.garageId && allowedSet.has(c.garageId));
+    }
+
+    const garageStatusMap = new Map<string, boolean>();
+    if (this.garageRepo) {
+      const garages = await this.garageRepo.findByCompanyId(query.companyId);
+      for (const g of garages) {
+        garageStatusMap.set(g.id, g.isActive === false);
+      }
     }
 
     let totalAdvanceMoney = 0;
@@ -71,6 +84,9 @@ export class GetExecutiveDashboardHandler
         garageId: customer.garageId,
         garageName: customer.garageName,
         isActive: customer.isActive,
+        isGarageSuspended: customer.garageId
+          ? garageStatusMap.get(customer.garageId) ?? false
+          : false,
         lastBillDate: latestBill ? latestBill.date : customer.createdDate,
         hasBills: Boolean(latestBill),
       });
