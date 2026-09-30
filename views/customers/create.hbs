@@ -14,12 +14,7 @@
   </div>
 </div>
 
-{{#if error}}
-  <div id="topErrorAlert" {{#if isGarageSuspended}}data-garage-error="true"{{/if}} style="background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 10px; padding: 1rem 1.25rem; margin-bottom: 1.5rem; color: #f87171; font-size: 0.9rem; display: flex; align-items: center; gap: 0.75rem;">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-    <span>{{t error}}</span>
-  </div>
-{{/if}}
+
 
 <div class="customer-create-grid" style="display: grid; grid-template-columns: 1.25fr 0.75fr; gap: 1.75rem; align-items: start; max-width: 1100px; margin: 0 auto;">
   <!-- Form Column -->
@@ -198,7 +193,7 @@
   function handleGarageChange() {
     const select = document.getElementById('garageId');
     const warning = document.getElementById('garageSuspendedWarning');
-    const topAlert = document.getElementById('topErrorAlert');
+    const inPageAlert = document.getElementById('inPageAlertBanner');
     const submitBtn = document.getElementById('saveCustomerBtn');
     if (!select) return;
     const selectedOption = select.options[select.selectedIndex];
@@ -206,9 +201,7 @@
 
     if (isSuspended && select.value) {
       if (warning) warning.style.display = 'flex';
-      if (topAlert && topAlert.getAttribute('data-garage-error') === 'true') {
-        topAlert.style.display = 'flex';
-      }
+      if (inPageAlert) inPageAlert.style.display = 'flex';
       if (submitBtn) {
         submitBtn.disabled = true;
         submitBtn.style.opacity = '0.5';
@@ -217,9 +210,7 @@
       }
     } else {
       if (warning) warning.style.display = 'none';
-      if (topAlert && topAlert.getAttribute('data-garage-error') === 'true') {
-        topAlert.style.display = 'none';
-      }
+      if (inPageAlert) inPageAlert.style.display = 'none';
       if (submitBtn) {
         submitBtn.disabled = false;
         submitBtn.style.opacity = '1';

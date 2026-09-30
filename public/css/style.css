@@ -1482,6 +1482,13 @@ textarea.form-control {
   .detail-layout {
     grid-template-columns: 1fr;
   }
+
+  .detail-layout > * {
+    min-width: 0;
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
+  }
 }
 
 /* Mobile Screens (<= 768px) */
@@ -3752,6 +3759,18 @@ html[lang="bn"] button {
     gap: 1.25rem !important;
   }
 
+  /* CRITICAL: Grid children must have min-width: 0 to actually shrink */
+  .customer-create-grid > *,
+  .bill-create-grid > *,
+  .employee-details-grid > *,
+  .bill-details-grid > *,
+  .bill-receipt-info-grid > * {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
   .customer-create-sidebar,
   .bill-create-preview {
     position: static !important;
@@ -3891,6 +3910,13 @@ html[lang="bn"] button {
     font-size: 16px !important;
     min-height: 44px;
     border-radius: var(--radius-md) !important;
+    /* Prevent long content (e.g. garage names in select) from stretching the card */
+    max-width: 100% !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    text-overflow: ellipsis;
+    overflow: hidden;
   }
 
   .btn {
@@ -3903,11 +3929,13 @@ html[lang="bn"] button {
   }
 
   .card {
-    padding: 1rem !important;
+    padding: 1rem 0.85rem !important;
     border-radius: var(--radius-md) !important;
     margin-bottom: 1rem !important;
     max-width: 100% !important;
+    width: 100% !important;
     box-sizing: border-box !important;
+    overflow: hidden !important;
   }
 
   .card-header {
@@ -4192,6 +4220,28 @@ html[lang="bn"] button {
   [style*="grid-template-columns:1fr 1fr"] {
     grid-template-columns: 1fr !important;
     gap: 0.75rem !important;
+  }
+
+  /* Children of collapsed form grids must not create new overflow */
+  .form-grid-2 > *,
+  [style*="grid-template-columns: 1fr 1fr"] > * {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Customer code row: don't let status span push content off-screen */
+  [style*="display: flex; gap: 0.5rem; align-items: center"] {
+    flex-wrap: wrap !important;
+    gap: 0.35rem !important;
+  }
+  [style*="display: flex; gap: 0.5rem; align-items: center"] input {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+  }
+  [style*="display: flex; gap: 0.5rem; align-items: center"] span {
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
   }
 
   /* Garage cards grid */
