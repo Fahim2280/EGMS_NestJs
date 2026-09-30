@@ -119,7 +119,7 @@
           {{{roleBadge user.role}}}
         </div>
         <p style="color: var(--color-text-muted); margin: 0; font-size: 0.9rem;">
-          Logged in as <strong>{{user.name}}</strong> &bull; Electric Garage Management Portal
+          {{t 'common.loggedInAs'}} <strong>{{user.name}}</strong> &bull; {{t 'common.portalTitle'}}
         </p>
       </div>
       <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; width: auto;" class="header-actions">
@@ -149,9 +149,9 @@
   <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: var(--radius-md); padding: 1.25rem 1.5rem; margin-bottom: 1.5rem; display: flex; align-items: flex-start; gap: 1rem;">
     <div style="color: #f59e0b; font-size: 1.5rem; line-height: 1;">⚠️</div>
     <div>
-      <h4 style="color: #fbbf24; font-size: 1rem; font-weight: 600; margin: 0 0 0.25rem 0;">No Garages Assigned</h4>
+      <h4 style="color: #fbbf24; font-size: 1rem; font-weight: 600; margin: 0 0 0.25rem 0;">{{t 'garages.noGaragesAssigned'}}</h4>
       <p style="color: var(--color-text-muted); font-size: 0.875rem; margin: 0;">
-        You do not currently have access permissions to any garage facilities. Statistics and customer rosters are empty. Please contact your company administrator to grant garage permissions to your account.
+        {{t 'garages.noGaragesAssignedDesc'}}
       </p>
     </div>
   </div>
@@ -170,7 +170,7 @@
           </svg>
         </div>
       </div>
-      <div class="stat-value" style="color: #10b981;">৳{{bnNum totalAdvanceMoney}}</div>
+      <div class="stat-value" style="color: #10b981;">৳{{bnMoney totalAdvanceMoney}}</div>
       <div class="stat-footer">
         <span class="stat-trend positive" style="line-height: 1.4;">{{t 'dashboard.totalAdvanceSub'}}</span>
       </div>
@@ -188,7 +188,7 @@
           </svg>
         </div>
       </div>
-      <div class="stat-value" style="color: #ef4444;">৳{{bnNum totalPresentDues}}</div>
+      <div class="stat-value" style="color: #ef4444;">৳{{bnMoney totalPresentDues}}</div>
       <div class="stat-footer">
         <span style="color: #ef4444; line-height: 1.4;">{{t 'dashboard.totalDuesSub'}}</span>
       </div>
@@ -279,9 +279,9 @@
                     </span>
                   {{else}}
                     {{#if this.hasBills}}
-                      <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">Billed</span>
+                      <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">{{t 'common.billed'}}</span>
                     {{else}}
-                      <span class="badge" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24;">No Bills</span>
+                      <span class="badge" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24;">{{t 'common.noBills'}}</span>
                     {{/if}}
                   {{/unless}}
                 </td>
@@ -308,7 +308,7 @@
       <div style="text-align: center; padding: 3rem 1rem;">
         <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🚗⚡</div>
         <h3 style="font-size: 1.15rem; font-weight: 600; margin-bottom: 0.5rem;">{{t 'customers.noCustomers'}}</h3>
-        <p style="color: #94a3b8; margin-bottom: 1.5rem;">Add your first customer to begin managing electricity meters, bills, and payments.</p>
+        <p style="color: #94a3b8; margin-bottom: 1.5rem;">{{t 'customers.noCustomersSub'}}</p>
         {{#if canCreate}}
         <a href="/customers/new" class="btn btn-primary">{{t 'customers.addCustomer'}}</a>
         {{/if}}
@@ -321,9 +321,9 @@
     <!-- Garages Quick Card -->
     <div class="card" style="padding: 1.5rem;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-        <h3 class="dash-card-heading">Garages ({{garages.length}})</h3>
+        <h3 class="dash-card-heading">{{t 'garages.title'}} ({{bnNum garages.length}})</h3>
         {{#if (or isSuperAdmin hasAssignedGarages)}}
-        <a href="/garages" class="btn btn-secondary btn-sm">{{#if isSuperAdmin}}Manage{{else}}View{{/if}}</a>
+        <a href="/garages" class="btn btn-secondary btn-sm">{{#if isSuperAdmin}}{{t 'common.manage'}}{{else}}{{t 'common.view'}}{{/if}}</a>
         {{/if}}
       </div>
       {{#if garages.length}}
@@ -336,16 +336,16 @@
           {{/each}}
         </div>
       {{else}}
-        <p style="color: var(--color-text-muted); font-size: 0.85rem;">No garage facilities registered.</p>
+        <p style="color: var(--color-text-muted); font-size: 0.85rem;">{{t 'garages.noGaragesRegistered'}}</p>
       {{/if}}
     </div>
 
     <!-- Employees Quick Card -->
     <div class="card" style="padding: 1.5rem;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-        <h3 class="dash-card-heading">Staff &amp; Technicians ({{employees.length}})</h3>
+        <h3 class="dash-card-heading">{{t 'common.staffAndTechnicians'}} ({{bnNum employees.length}})</h3>
         {{#if isSuperAdmin}}
-        <a href="/employees" class="btn btn-secondary btn-sm">Manage</a>
+        <a href="/employees" class="btn btn-secondary btn-sm">{{t 'common.manage'}}</a>
         {{/if}}
       </div>
       {{#if employees.length}}
@@ -361,7 +361,7 @@
           {{/each}}
         </div>
       {{else}}
-        <p style="color: var(--color-text-muted); font-size: 0.85rem;">No employees registered.</p>
+        <p style="color: var(--color-text-muted); font-size: 0.85rem;">{{t 'common.noEmployeesRegistered'}}</p>
       {{/if}}
     </div>
 
@@ -373,7 +373,7 @@
         <a href="/audit-logs" class="btn btn-secondary btn-sm">{{t 'common.view'}}</a>
       </div>
       <p style="color: var(--color-text-muted); font-size: 0.85rem; margin-bottom: 1.25rem;">
-        Monitor real-time system activities, user authentications, data updates, and security logs.
+        {{t 'common.auditCardDesc'}}
       </p>
       <a href="/audit-logs" class="btn btn-primary dash-audit-btn" style="width: 100%; text-decoration: none;">
         <span>📜</span> <span>{{t 'audit.viewLogs'}} &rarr;</span>

@@ -15,7 +15,7 @@
     </div>
   {{/if}}
 
-  <form action="/employees/{{employee.id}}/guarantors/{{guarantor.id}}" method="POST" enctype="multipart/form-data">
+  <form id="empGuarantorEditForm" action="/employees/{{employee.id}}/guarantors/{{guarantor.id}}" method="POST" enctype="multipart/form-data">
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
       <div class="form-group">
         <label class="form-label" for="name">{{t 'guarantors.name'}} *</label>
@@ -28,7 +28,7 @@
       </div>
 
       <div class="form-group" style="grid-column: 1 / -1;">
-        {{> phone-repeater containerId="empGuarantorEditPhones" primaryFieldName="mobileNumber" jsonFieldName="phoneNumbersJson" initialPhones=(or guarantor.phoneNumbers guarantor.mobileNumber) required=true}}
+        {{> phone-repeater containerId="empGuarantorEditPhones" primaryFieldName="mobileNumber" primaryValue=guarantor.mobileNumber jsonFieldName="phoneNumbersJson" initialPhones=(resolvePhones guarantor.phoneNumbers guarantor.mobileNumber) required=true}}
       </div>
 
       <div class="form-group">
@@ -62,24 +62,13 @@
           </div>
         {{/if}}
 
-        <div style="margin-bottom: 1rem;">
-          <label class="form-label" for="gEditDocType">{{t 'documents.documentType'}}</label>
-          <select id="gEditDocType" name="documentType" class="form-input">
-            <option value="GENERAL">{{t 'documents.typeGeneral'}}</option>
-            <option value="NID">{{t 'documents.typeNid'}}</option>
-            <option value="PASSPORT">{{t 'documents.typePassport'}}</option>
-            <option value="PHOTO">{{t 'documents.typePhoto'}}</option>
-            <option value="OTHER">{{t 'documents.typeOther'}}</option>
-          </select>
-        </div>
-
-        {{> file-uploader uploaderId="empGuarantorEditDocs" fieldName="files" maxFiles=10 label=(t 'documents.uploadNew')}}
+        {{> documents-multi-uploader targetType="guarantor" fieldPrefix="guarantorDoc" label=(t 'documents.uploadNew')}}
       </div>
     </div>
 
     <div class="form-actions" style="margin-top: 2rem; display: flex; gap: 0.75rem; justify-content: flex-end; flex-wrap: wrap;">
       <a href="/employees/{{employee.id}}" class="btn btn-secondary">{{t 'common.cancel'}}</a>
-      <button type="submit" class="btn btn-primary">{{t 'guarantors.update'}}</button>
+      <button type="submit" form="empGuarantorEditForm" class="btn btn-primary">{{t 'guarantors.update'}}</button>
     </div>
   </form>
 </div>

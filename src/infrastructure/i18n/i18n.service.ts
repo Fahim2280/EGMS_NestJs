@@ -77,12 +77,29 @@ export function toBengaliDigits(input: any): string {
 }
 
 export function formatNumberWithLang(val: any, lang: 'en' | 'bn' = 'en'): string {
-  if (val === null || val === undefined || val === '') return '0';
-  const numStr = String(val);
+  if (val === null || val === undefined || val === '') return lang === 'bn' ? '০' : '0';
+  const str = String(val).trim();
+  const num = parseFloat(str);
+  if (isNaN(num)) return lang === 'bn' ? '০' : '0';
+  // Show 2 decimal places if the value has a fractional part OR original string contained a dot
+  const hasDecimal = str.includes('.') || num !== Math.floor(num);
+  const formatted = hasDecimal ? num.toFixed(2) : String(Math.round(num));
   if (lang === 'bn') {
-    return toBengaliDigits(numStr);
+    return toBengaliDigits(formatted);
   }
-  return numStr;
+  return formatted;
+}
+
+/** Always formats with 2 decimal places – use for currency, meter readings, unit amounts. */
+export function formatMoneyWithLang(val: any, lang: 'en' | 'bn' = 'en'): string {
+  if (val === null || val === undefined || val === '') return lang === 'bn' ? '০.০০' : '0.00';
+  const num = parseFloat(String(val));
+  if (isNaN(num)) return lang === 'bn' ? '০.০০' : '0.00';
+  const formatted = num.toFixed(2);
+  if (lang === 'bn') {
+    return toBengaliDigits(formatted);
+  }
+  return formatted;
 }
 
 export function formatDateWithLang(date: any, lang: 'en' | 'bn' = 'en'): string {
@@ -90,11 +107,15 @@ export function formatDateWithLang(date: any, lang: 'en' | 'bn' = 'en'): string 
   try {
     const d = new Date(date);
     if (isNaN(d.getTime())) return String(date);
-    const isoDate = d.toISOString().split('T')[0]; // YYYY-MM-DD
+    const day = String(d.getDate()).padStart(2, '0');
+    const monthNamesEn = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const monthNamesBn = ['জানু', 'ফেব্রু', 'মার্চ', 'এপ্রিল', 'মে', 'জুন', 'জুলাই', 'আগস্ট', 'সেপ্টে', 'অক্টো', 'নভে', 'ডিসে'];
+    const month = lang === 'bn' ? monthNamesBn[d.getMonth()] : monthNamesEn[d.getMonth()];
+    const year = d.getFullYear();
     if (lang === 'bn') {
-      return toBengaliDigits(isoDate);
+      return `${toBengaliDigits(day)} ${month}, ${toBengaliDigits(String(year))}`;
     }
-    return isoDate;
+    return `${day} ${month}, ${year}`;
   } catch {
     return String(date);
   }
@@ -195,10 +216,12 @@ export function translateAuditDetails(details?: string | null, lang: 'en' | 'bn'
     return `কর্মী ${empDelMatch[1]} এর অ্যাকাউন্ট অপসারণ করা হয়েছে`;
   }
 
-  // 5. Electric Bills
   const billGenMatch = text.match(/^Generated\s+electric\s+bill\s+for\s+customer\s+(.+?)\s+\(meter\s+reading:\s*(.+?)\)$/i);
   if (billGenMatch) {
-    return `গ্রাহক ${billGenMatch[1]} এর বিদ্যুৎ বিল তৈরি করা হয়েছে (মিটার রিডিং: ${toBengaliDigits(billGenMatch[2])})`;
+    const custDisplay = /^[0-9a-fA-F-]{36}$/.test(billGenMatch[1])
+      ? `#${billGenMatch[1].slice(0, 8)}`
+      : billGenMatch[1];
+    return `গ্রাহক ${custDisplay} এর বিদ্যুৎ বিল তৈরি করা হয়েছে (মিটার রিডিং: ${toBengaliDigits(billGenMatch[2])})`;
   }
   const billUpdMatch = text.match(/^Updated\s+electric\s+bill\s+#?([0-9a-zA-Z-]+)$/i);
   if (billUpdMatch) {

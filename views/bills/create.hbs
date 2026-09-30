@@ -83,25 +83,53 @@
 
       <!-- Section 2: Meter Readings -->
       <div style="background: rgba(15, 23, 42, 0.4); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 1.25rem;">
-        <div style="font-size: 0.76rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #94a3b8; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.4rem;">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-          {{t 'bills.electricityMeterReadings'}}
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+          <div style="font-size: 0.76rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #94a3b8; display: flex; align-items: center; gap: 0.4rem;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            {{t 'bills.electricityMeterReadings'}}
+          </div>
+          <span style="font-size: 0.72rem; color: #38bdf8; background: rgba(56, 189, 248, 0.1); padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(56, 189, 248, 0.25);">
+            {{#if isBn}}💡 বর্তমান রিডিং বা ব্যবহৃত ইউনিট যেকোনো একটি লিখুন{{else}}💡 Enter current reading or consumed units{{/if}}
+          </span>
         </div>
 
-        <div class="form-grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <div class="form-grid-3" style="display: grid; grid-template-columns: 1fr 1.15fr 1fr; gap: 1rem;">
           <div class="form-group" style="margin-bottom: 0;">
             <label class="form-label">
-              <span>{{t 'bills.prevUnit'}}</span>
+              <span>{{#if isBn}}পূর্ববর্তী রিডিং{{else}}{{t 'bills.prevUnit'}}{{/if}}</span>
               <span style="font-size: 0.7rem; color: var(--color-text-dim);">{{t 'bills.autoLoaded'}}</span>
             </label>
-            <input type="text" id="displayPreviousUnit" class="form-input" readonly value="0.00">
+            <input type="text" id="displayPreviousUnit" class="form-input" readonly value="0.00" style="background: rgba(15, 23, 42, 0.6); font-family: monospace; font-weight: 600;">
           </div>
 
           <div class="form-group" style="margin-bottom: 0;">
             <label class="form-label" for="currentUnit">
-              <span>{{t 'bills.currUnit'}} <span style="color: #f43f5e;">*</span></span>
+              <span>{{#if isBn}}বর্তমান মিটার রিডিং{{else}}{{t 'bills.currUnit'}}{{/if}} <span style="color: #f43f5e;">*</span></span>
             </label>
-            <input type="number" step="0.01" min="0" id="currentUnit" name="currentUnit" class="form-input" required placeholder="0.00" value="{{formData.currentUnit}}">
+            <input type="number" step="0.01" min="0" id="currentUnit" name="currentUnit" class="form-input" required placeholder="0.00" value="{{formData.currentUnit}}" style="font-family: monospace; font-weight: 700;">
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label" for="consumedUnitInput">
+              <span style="color: #38bdf8;">{{#if isBn}}ব্যবহৃত ইউনিট{{else}}{{t 'bills.consumedUnits'}}{{/if}}</span>
+              <span style="font-size: 0.7rem; color: #34d399;">{{#if isBn}}স্বয়ংক্রিয়{{else}}Auto{{/if}}</span>
+            </label>
+            <input type="number" step="0.01" min="0" id="consumedUnitInput" class="form-input" placeholder="0.00" style="border-color: rgba(56, 189, 248, 0.35); background: rgba(56, 189, 248, 0.05); color: #38bdf8; font-family: monospace; font-weight: 700;">
+          </div>
+        </div>
+
+        <!-- Real-time Warning & 1-Click Fix Suggestion Card -->
+        <div id="unitReadingWarning" style="display: none; margin-top: 0.85rem; background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; padding: 0.85rem 1rem; color: #f87171; font-size: 0.86rem;">
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap;">
+            <div>
+              <div style="font-weight: 700; margin-bottom: 0.25rem;">
+                ⚠️ {{#if isBn}}বর্তমান মিটার রিডিং পূর্ববর্তী রিডিংয়ের চেয়ে কম হতে পারে না!{{else}}Current reading cannot be less than previous reading!{{/if}}
+              </div>
+              <div style="font-size: 0.82rem; color: #fca5a5;" id="unitWarningSuggestion"></div>
+            </div>
+            <button type="button" id="btnFixReading" class="btn btn-sm" style="background: #10b981; color: #fff; border: none; padding: 0.4rem 0.85rem; border-radius: 6px; font-size: 0.82rem; font-weight: 700; cursor: pointer; white-space: nowrap; display: none; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);">
+              {{#if isBn}}✓ এটি মিটার রিডিং হিসেবে সেট করুন{{else}}Apply as Reading{{/if}}
+            </button>
           </div>
         </div>
       </div>
@@ -113,21 +141,22 @@
           {{t 'bills.chargesAndSettlement'}}
         </div>
 
+        <!-- Rent & Loan row -->
         <div class="form-grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
           <div class="form-group" style="margin-bottom: 0;">
             <label class="form-label" for="rentBill">{{t 'bills.rent'}} ({{t 'common.currency'}})</label>
             <input type="number" step="0.01" min="0" id="rentBill" name="rentBill" class="form-input" required value="{{#if formData.rentBill}}{{formData.rentBill}}{{else}}0.00{{/if}}">
           </div>
-
           <div class="form-group" style="margin-bottom: 0;">
             <label class="form-label" for="loan">{{t 'bills.loan'}} ({{t 'common.currency'}})</label>
             <input type="number" step="0.01" min="0" id="loan" name="loan" class="form-input" required value="{{#if formData.loan}}{{formData.loan}}{{else}}0.00{{/if}}">
           </div>
         </div>
 
+        <!-- Payment row -->
         <div class="form-group" style="margin-bottom: 0;">
           <label class="form-label" for="clearMoney">
-            <span>{{t 'bills.paid'}} ({{t 'common.currency'}}) <span style="color: #f43f5e;">*</span></span>
+            <span>{{#if isBn}}পরিশোধিত টাকা{{else}}{{t 'bills.paid'}}{{/if}} ({{t 'common.currency'}}) <span style="color: #f43f5e;">*</span></span>
             <span style="font-size: 0.7rem; color: #10b981;">{{t 'bills.customerHandover'}}</span>
           </label>
           <input type="number" step="0.01" min="0" id="clearMoney" name="clearMoney" class="form-input" required placeholder="0.00" value="{{#if formData.clearMoney}}{{formData.clearMoney}}{{else}}0.00{{/if}}" style="font-size: 1.05rem; font-weight: 700; color: #34d399;">
@@ -169,14 +198,25 @@
 
       <!-- Meter Reading Bar -->
       <div style="background: var(--color-bg-subtle); border: 1px solid var(--color-border); border-radius: 8px; padding: 0.85rem 1rem; margin-bottom: 1.25rem;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
-          <span style="font-size: 0.76rem; font-weight: 600; text-transform: uppercase; color: var(--color-text-muted);">{{t 'bills.meterReadings'}}</span>
-          <span style="font-size: 0.76rem; color: #0284c7; font-weight: 700;" id="previewConsumedUnits">{{bnNum '0.00'}} {{t 'common.units'}}</span>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+          <span style="font-size: 0.76rem; font-weight: 700; text-transform: uppercase; color: var(--color-text-muted);">
+            {{#if isBn}}ব্যবহৃত বিদ্যুৎ ইউনিট{{else}}{{t 'bills.consumedUnits'}}{{/if}}
+          </span>
+          <span style="font-size: 0.85rem; color: #0284c7; font-weight: 800;" id="previewConsumedUnits">{{bnNum '0.00'}} {{t 'common.units'}}</span>
         </div>
-        <div style="display: flex; align-items: center; justify-content: space-between; font-family: monospace; font-size: 1rem; font-weight: 700; color: var(--color-text-primary);">
-          <span id="previewPrevUnit" style="color: var(--color-text-muted);">{{bnNum '0.00'}}</span>
+        <div style="display: flex; align-items: center; justify-content: space-between; font-family: monospace; font-size: 0.95rem; font-weight: 700; color: var(--color-text-primary);">
+          <div>
+            <span style="font-size: 0.68rem; color: var(--color-text-muted); display: block; font-weight: 500; font-family: inherit;">{{#if isBn}}পূর্ববর্তী রিডিং{{else}}Previous{{/if}}</span>
+            <span id="previewPrevUnit" style="color: var(--color-text-muted);">{{bnNum '0.00'}}</span>
+          </div>
           <span style="color: #0284c7; font-size: 1.15rem;">&rarr;</span>
-          <span id="previewCurrUnit" style="color: #38bdf8;">{{bnNum '0.00'}}</span>
+          <div style="text-align: right;">
+            <span style="font-size: 0.68rem; color: var(--color-text-muted); display: block; font-weight: 500; font-family: inherit;">{{#if isBn}}বর্তমান রিডিং{{else}}Current{{/if}}</span>
+            <span id="previewCurrUnit" style="color: #38bdf8;">{{bnNum '0.00'}}</span>
+          </div>
+        </div>
+        <div id="previewReadingError" style="display: none; margin-top: 0.5rem; padding-top: 0.45rem; border-top: 1px dashed rgba(239, 68, 68, 0.3); color: #f87171; font-size: 0.76rem; font-weight: 600;">
+          ⚠️ {{#if isBn}}বর্তমান রিডিং পূর্ববর্তী রিডিংয়ের চেয়ে কম হতে পারে না{{else}}Current reading cannot be lower than previous reading{{/if}}
         </div>
       </div>
 
@@ -208,13 +248,13 @@
       </div>
 
       <!-- Paid Amount Row -->
-      <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.65rem 0.85rem; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 8px; margin-bottom: 0.85rem;">
-        <span style="font-size: 0.82rem; font-weight: 600; color: #34d399;">{{t 'bills.paid'}}</span>
-        <strong id="previewPaidAmount" style="font-size: 1.1rem; color: #34d399; font-weight: 800;">{{t 'common.currency'}}{{bnNum '0.00'}}</strong>
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.55rem 0.85rem; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 8px; margin-bottom: 0.85rem;">
+        <span style="font-size: 0.82rem; font-weight: 600; color: #34d399;">{{#if isBn}}পরিশোধিত টাকা{{else}}{{t 'bills.paid'}}{{/if}}</span>
+        <strong id="previewPaidAmount" style="font-size: 1.05rem; color: #34d399; font-weight: 800; font-family: monospace;">{{t 'common.currency'}}{{bnNum '0.00'}}</strong>
       </div>
 
       <!-- Present Net Dues Alert -->
-      <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.85rem 1rem; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 10px;">
+      <div id="presentDuesCard" style="display: flex; justify-content: space-between; align-items: center; padding: 0.85rem 1rem; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 10px;">
         <div>
           <div style="font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #f87171;">{{t 'bills.presentDues'}}</div>
           <div style="font-size: 0.7rem; color: #fca5a5;">{{t 'bills.outstandingCarryover'}}</div>
@@ -230,20 +270,32 @@
     const customerSelect = document.getElementById('customerId');
     const displayPreviousUnit = document.getElementById('displayPreviousUnit');
     const currentUnitInput = document.getElementById('currentUnit');
+    const consumedUnitInput = document.getElementById('consumedUnitInput');
+    const unitReadingWarning = document.getElementById('unitReadingWarning');
+    const unitWarningSuggestion = document.getElementById('unitWarningSuggestion');
+    const btnFixReading = document.getElementById('btnFixReading');
+    const previewReadingError = document.getElementById('previewReadingError');
     const unitRateInput = document.getElementById('unitRate');
     const rentBillInput = document.getElementById('rentBill');
     const loanInput = document.getElementById('loan');
     const clearMoneyInput = document.getElementById('clearMoney');
     const previewRateBadge = document.getElementById('previewRateBadge');
     const previewElectricLabel = document.getElementById('previewElectricLabel');
+    const submitBtn = document.querySelector('#billForm button[type="submit"]');
 
     let previousUnit = 0;
     let previousDues = 0;
     let customerName = '';
 
+    const isBn = {{#if isBn}}true{{else}}false{{/if}};
+    const bnDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+    function toBn(val) {
+      if (!isBn) return String(val);
+      return String(val).replace(/[0-9]/g, (d) => bnDigits[d]);
+    }
+
     async function fetchCustomerSummary(id) {
       const warningEl = document.getElementById('customerSuspendedWarning');
-      const submitBtn = document.querySelector('#billForm button[type="submit"]');
 
       if (!id) {
         previousUnit = 0;
@@ -267,11 +319,6 @@
         if (json.success) {
           const isSuspended = json.data.isActive === false;
           if (warningEl) warningEl.style.display = isSuspended ? 'block' : 'none';
-          if (submitBtn) {
-            submitBtn.disabled = isSuspended;
-            submitBtn.style.opacity = isSuspended ? '0.5' : '1';
-            submitBtn.style.cursor = isSuspended ? 'not-allowed' : 'pointer';
-          }
           previousUnit = Number(json.data.lastMeterReading) || 0;
           previousDues = Number(json.data.previousDues) || 0;
           customerName = json.data.customerName || '';
@@ -285,21 +332,98 @@
       }
     }
 
-    const isBn = {{#if isBn}}true{{else}}false{{/if}};
-    const bnDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
-    function toBn(val) {
-      if (!isBn) return String(val);
-      return String(val).replace(/[0-9]/g, (d) => bnDigits[d]);
+    // Bidirectional sync: when user enters consumed units directly
+    if (consumedUnitInput) {
+      consumedUnitInput.addEventListener('input', () => {
+        const valStr = consumedUnitInput.value.trim();
+        if (valStr !== '') {
+          const consumedVal = parseFloat(valStr);
+          if (!isNaN(consumedVal) && consumedVal >= 0) {
+            const calculatedReading = previousUnit + consumedVal;
+            if (currentUnitInput) {
+              currentUnitInput.value = calculatedReading.toFixed(2);
+            }
+          }
+        }
+        recalc(false); // don't sync back to consumedUnitInput while user is typing in it
+      });
     }
 
-    function recalc() {
-      const currentUnit = Number(currentUnitInput ? currentUnitInput.value : 0) || 0;
+    // 1-Click Auto-Fix reading button handler
+    if (btnFixReading) {
+      btnFixReading.addEventListener('click', () => {
+        const currentVal = parseFloat(currentUnitInput ? currentUnitInput.value : '0');
+        if (!isNaN(currentVal) && currentVal > 0 && currentVal < previousUnit) {
+          const corrected = (previousUnit + currentVal).toFixed(2);
+          if (currentUnitInput) currentUnitInput.value = corrected;
+          if (consumedUnitInput) consumedUnitInput.value = currentVal.toFixed(2);
+          recalc(false);
+        }
+      });
+    }
+
+    function recalc(syncConsumedInput = true) {
+      const currentValStr = currentUnitInput ? currentUnitInput.value.trim() : '';
+      const currentUnit = parseFloat(currentValStr || '0') || 0;
       const rent = Number(rentBillInput ? rentBillInput.value : 0) || 0;
       const loan = Number(loanInput ? loanInput.value : 0) || 0;
       const clearMoney = Number(clearMoneyInput ? clearMoneyInput.value : 0) || 0;
       const rate = Number(unitRateInput ? unitRateInput.value : 15) || 15;
 
-      const consumed = Math.max(0, currentUnit - previousUnit);
+      const hasValue = currentValStr !== '';
+      const isUnderPrevious = hasValue && (currentUnit < previousUnit);
+      const consumed = isUnderPrevious ? 0 : Math.max(0, currentUnit - previousUnit);
+
+      // Sync Consumed Units field if valid
+      if (syncConsumedInput && consumedUnitInput) {
+        if (hasValue && !isUnderPrevious) {
+          consumedUnitInput.value = (currentUnit - previousUnit).toFixed(2);
+        } else if (!hasValue || isUnderPrevious) {
+          consumedUnitInput.value = '';
+        }
+      }
+
+      // Warning & suggestion
+      if (unitReadingWarning && unitWarningSuggestion && btnFixReading) {
+        if (isUnderPrevious && currentUnit > 0) {
+          const suggestedReading = (previousUnit + currentUnit).toFixed(2);
+          unitReadingWarning.style.display = 'block';
+          unitWarningSuggestion.innerHTML = isBn 
+            ? `আপনি কি <strong>${toBn(currentUnit.toFixed(2))}</strong> ইউনিট বিদ্যুৎ ব্যবহার বুঝিয়েছেন? তাহলে বর্তমান মিটার রিডিং হবে: <strong>${toBn(suggestedReading)}</strong> (${toBn(previousUnit.toFixed(2))} + ${toBn(currentUnit.toFixed(2))})।`
+            : `Did you mean <strong>${currentUnit.toFixed(2)}</strong> units consumed? Then current meter reading should be: <strong>${suggestedReading}</strong> (${previousUnit.toFixed(2)} + ${currentUnit.toFixed(2)}).`;
+          btnFixReading.textContent = isBn ? `✓ রিডিং ${toBn(suggestedReading)} সেট করুন` : `✓ Set Reading to ${suggestedReading}`;
+          btnFixReading.style.display = 'inline-block';
+          if (currentUnitInput) currentUnitInput.style.borderColor = '#f43f5e';
+        } else {
+          unitReadingWarning.style.display = 'none';
+          btnFixReading.style.display = 'none';
+          if (currentUnitInput) currentUnitInput.style.borderColor = '';
+        }
+      }
+
+      if (previewReadingError) {
+        previewReadingError.style.display = isUnderPrevious ? 'block' : 'none';
+      }
+
+      // Check suspension and negative constraint for submit button
+      const selectedOpt = customerSelect && customerSelect.selectedOptions[0];
+      const isSuspended = selectedOpt && selectedOpt.dataset.active === 'false';
+      if (submitBtn) {
+        if (isUnderPrevious || isSuspended) {
+          submitBtn.disabled = true;
+          submitBtn.style.opacity = '0.5';
+          submitBtn.style.cursor = 'not-allowed';
+          submitBtn.title = isUnderPrevious 
+            ? (isBn ? 'বর্তমান মিটার রিডিং অবশ্যই পূর্ববর্তী রিডিংয়ের চেয়ে বড় বা সমান হতে হবে' : 'Current reading cannot be lower than previous reading')
+            : (isBn ? 'স্থগিত গ্রাহকের জন্য বিল তৈরি সম্ভব নয়' : 'Billing blocked for suspended customer');
+        } else {
+          submitBtn.disabled = false;
+          submitBtn.style.opacity = '1';
+          submitBtn.style.cursor = 'pointer';
+          submitBtn.title = '';
+        }
+      }
+
       const electric = consumed * rate;
       const total = previousDues + electric + rent + loan;
       const presentDues = total - clearMoney;
@@ -307,8 +431,13 @@
       if (previewRateBadge) {
         previewRateBadge.textContent = (isBn ? 'রেট: ৳' : 'Rate: ৳') + toBn(rate.toFixed(2)) + (isBn ? '/ইউনিট' : '/Unit');
       }
+
       if (previewElectricLabel) {
-        previewElectricLabel.innerHTML = (isBn ? 'বিদ্যুৎ বিল (' : 'Electric Bill (') + toBn(consumed.toFixed(1)) + (isBn ? ' ইউ &times; ৳' : 'u &times; ৳') + toBn(rate.toFixed(2)) + '):';
+        if (isUnderPrevious) {
+          previewElectricLabel.innerHTML = `<span style="color: #f87171;">⚠️ ${isBn ? 'অকার্যকর রিডিং' : 'Invalid Reading'}:</span>`;
+        } else {
+          previewElectricLabel.innerHTML = (isBn ? 'বিদ্যুৎ বিল (' : 'Electric Bill (') + toBn(consumed.toFixed(1)) + (isBn ? ' ইউ &times; ৳' : 'u &times; ৳') + toBn(rate.toFixed(2)) + '):';
+        }
       }
 
       const prevUnitEl = document.getElementById('previewPrevUnit');
@@ -323,8 +452,23 @@
 
       if (prevUnitEl) prevUnitEl.textContent = toBn(previousUnit.toFixed(2));
       if (currUnitEl) currUnitEl.textContent = toBn(currentUnit.toFixed(2));
-      if (consumedEl) consumedEl.textContent = toBn(consumed.toFixed(2)) + (isBn ? ' ইউনিট' : ' Units');
-      if (elecBillEl) elecBillEl.textContent = '৳' + toBn(electric.toFixed(2));
+      
+      if (consumedEl) {
+        if (isUnderPrevious) {
+          consumedEl.innerHTML = `<span style="color: #f87171;">⚠️ ${isBn ? 'রিডিং কম' : 'Invalid'} (${toBn((currentUnit - previousUnit).toFixed(2))})</span>`;
+        } else {
+          consumedEl.textContent = toBn(consumed.toFixed(2)) + (isBn ? ' ইউনিট' : ' Units');
+        }
+      }
+
+      if (elecBillEl) {
+        if (isUnderPrevious) {
+          elecBillEl.innerHTML = `<span style="color: #f87171;">${isBn ? 'সংশোধন করুন' : 'Fix Reading'}</span>`;
+        } else {
+          elecBillEl.textContent = '৳' + toBn(electric.toFixed(2));
+        }
+      }
+
       if (prevDuesEl) prevDuesEl.textContent = '৳' + toBn(previousDues.toFixed(2));
       if (rentLoanEl) rentLoanEl.textContent = '৳' + toBn((rent + loan).toFixed(2));
       if (totalBillEl) totalBillEl.textContent = '৳' + toBn(total.toFixed(2));
@@ -349,11 +493,11 @@
     }
 
     if (customerSelect) customerSelect.addEventListener('change', () => fetchCustomerSummary(customerSelect.value));
-    if (currentUnitInput) currentUnitInput.addEventListener('input', recalc);
-    if (unitRateInput) unitRateInput.addEventListener('input', recalc);
-    if (rentBillInput) rentBillInput.addEventListener('input', recalc);
-    if (loanInput) loanInput.addEventListener('input', recalc);
-    if (clearMoneyInput) clearMoneyInput.addEventListener('input', recalc);
+    if (currentUnitInput) currentUnitInput.addEventListener('input', () => recalc(true));
+    if (unitRateInput) unitRateInput.addEventListener('input', () => recalc(false));
+    if (rentBillInput) rentBillInput.addEventListener('input', () => recalc(false));
+    if (loanInput) loanInput.addEventListener('input', () => recalc(false));
+    if (clearMoneyInput) clearMoneyInput.addEventListener('input', () => recalc(false));
 
     if (customerSelect && customerSelect.value) {
       fetchCustomerSummary(customerSelect.value);

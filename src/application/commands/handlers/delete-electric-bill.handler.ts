@@ -1,5 +1,5 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { Inject, NotFoundException } from '@nestjs/common';
+import { Inject, NotFoundException, BadRequestException } from '@nestjs/common';
 import { DeleteElectricBillCommand } from '../impl/delete-electric-bill.command';
 import {
   ELECTRIC_BILL_REPOSITORY_TOKEN,
@@ -21,6 +21,14 @@ export class DeleteElectricBillHandler implements ICommandHandler<DeleteElectric
     const bill = await this.billRepo.getByIdAsync(id);
     if (!bill || bill.companyId !== companyId) {
       throw new NotFoundException('Electric bill not found.');
+    }
+
+    // Ledger Rule: Only the latest bill of a customer can be deleted
+    const latestBill = await this.billRepo.findLatestByCustomerId(bill.customerId);
+    if (latestBill && latestBill.id !== bill.id) {
+      throw new BadRequestException(
+        'শুধুমাত্র গ্রাহকের সর্বশেষ বিল মুছে ফেলা সম্ভব। পরবর্তী বিল বিদ্যমান থাকায় এটি অপরিবর্তনীয়।',
+      );
     }
 
     const customerId = bill.customerId;

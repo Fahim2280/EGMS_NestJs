@@ -60,7 +60,7 @@ export class GetElectricBillsByCompanyHandler
       bills = bills.filter((b) => new Date(b.date).getTime() <= toTime);
     }
 
-    // Filter by search query (customer name, customer code, bill number)
+    // Filter by search query (customer name, customer code, cId, NID, phone, bill number)
     if (query.search && query.search.trim()) {
       const q = query.search.trim().toLowerCase();
       bills = bills.filter((b) => {
@@ -69,15 +69,29 @@ export class GetElectricBillsByCompanyHandler
         const codeMatch = cust?.customerCode?.toLowerCase().includes(q);
         const phoneMatch = cust?.mobileNumber?.includes(q);
         const billNumMatch = String(b.billNumber || '').includes(q);
-        return nameMatch || codeMatch || phoneMatch || billNumMatch;
+        const cIdMatch = cust?.cId !== undefined && String(cust.cId).includes(q);
+        const nidMatch = cust?.nidNumber?.toLowerCase().includes(q);
+        const uuidMatch = b.customerId?.toLowerCase().includes(q);
+        return nameMatch || codeMatch || phoneMatch || billNumMatch || cIdMatch || nidMatch || uuidMatch;
       });
     }
 
-    // Sort descending by date (newest first)
-    bills.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    // Sort descending by date (newest first), then by createdDate
+    bills.sort((a, b) => {
+      const dateDiff = new Date(b.date).getTime() - new Date(a.date).getTime();
+      if (dateDiff !== 0) return dateDiff;
+      const createdA = (a as any).createdDate ? new Date((a as any).createdDate).getTime() : 0;
+      const createdB = (b as any).createdDate ? new Date((b as any).createdDate).getTime() : 0;
+      return createdB - createdA;
+    });
+
+    const seenCustomerIds = new Set<string>();
 
     return bills.map((b) => {
       const cust = customerMap.get(b.customerId);
+      const isLatest = !seenCustomerIds.has(b.customerId);
+      seenCustomerIds.add(b.customerId);
+
       return {
         id: b.id,
         billNumber: b.billNumber,
@@ -86,7 +100,7 @@ export class GetElectricBillsByCompanyHandler
         customerCode: cust?.customerCode || null,
         customerCId: cust?.cId,
         garageId: cust?.garageId,
-        garageName: cust?.garageName,
+        garageName: cust?.garageName || null,
         companyId: b.companyId,
         date: b.date,
         previousUnit: b.previousUnit,
@@ -99,6 +113,7 @@ export class GetElectricBillsByCompanyHandler
         totalBill: b.totalBill,
         clearMoney: b.clearMoney,
         presentDues: b.presentDues,
+        isLatestBill: isLatest,
       };
     });
   }

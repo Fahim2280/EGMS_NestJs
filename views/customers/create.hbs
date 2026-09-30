@@ -34,6 +34,8 @@
           {{t 'customers.facilityAndProfile'}}
         </div>
 
+        {{> profile-avatar-uploader avatarId="customerAvatar" fieldName="avatarFile" title=(t 'profile.picture') hint=(t 'profile.pictureHint')}}
+
         <div class="form-group" style="margin-bottom: 1.25rem;">
           <label class="form-label" for="garageId">
             <span>{{t 'customers.garage'}} <span style="color: #f43f5e;">*</span></span>
@@ -56,7 +58,7 @@
           <input type="text" id="name" name="name" class="form-input" required placeholder="e.g. Mohammad Rahim" value="{{formData.name}}">
         </div>
 
-        {{> phone-repeater containerId="customerPhones" primaryFieldName="mobileNumber" jsonFieldName="phoneNumbersJson" initialPhones=(or formData.phoneNumbers formData.mobileNumber) required=true}}
+        {{> phone-repeater containerId="customerPhones" primaryFieldName="mobileNumber" primaryValue=formData.mobileNumber jsonFieldName="phoneNumbersJson" initialPhones=(resolvePhones formData.phoneNumbers formData.mobileNumber) required=true}}
 
         <div class="form-grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
           <div class="form-group" style="margin-bottom: 0;">
@@ -129,30 +131,7 @@
       {{> guarantor-create-section targetType="customer" formData=formData}}
 
       <!-- Section 4: Documents & Identity Attachments -->
-      <div style="margin-bottom: 1.5rem;">
-        <div class="form-section-title" style="margin-bottom: 1.25rem;">
-          <span class="section-icon-badge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
-          </span>
-          {{t 'documents.title'}}
-        </div>
-
-        <div class="form-group" style="margin-bottom: 1.25rem;">
-          <label class="form-label" for="docType">{{t 'documents.documentType'}}</label>
-          <select id="docType" name="documentType" class="form-input">
-            <option value="GENERAL">{{t 'documents.typeGeneral'}}</option>
-            <option value="NID">{{t 'documents.typeNid'}}</option>
-            <option value="PASSPORT">{{t 'documents.typePassport'}}</option>
-            <option value="AGREEMENT">{{t 'documents.typeAgreement'}}</option>
-            <option value="ELECTRICITY_BILL">{{t 'documents.typeElectricityBill'}}</option>
-            <option value="TRADE_LICENSE">{{t 'documents.typeTradeLicense'}}</option>
-            <option value="PHOTO">{{t 'documents.typePhoto'}}</option>
-            <option value="OTHER">{{t 'documents.typeOther'}}</option>
-          </select>
-        </div>
-
-        {{> file-uploader uploaderId="custCreateDocs" fieldName="files" maxFiles=10}}
-      </div>
+      {{> documents-multi-uploader targetType="customer" fieldPrefix="customerDoc"}}
 
       <div class="form-actions" style="margin-top: 2rem; display: flex; gap: 0.75rem; justify-content: flex-end; align-items: center;">
         <a href="/customers" class="btn btn-secondary" style="padding: 0.65rem 1.25rem;">{{t 'common.cancel'}}</a>

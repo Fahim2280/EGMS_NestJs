@@ -466,9 +466,8 @@ export class ElectricBillController {
         req,
       });
 
-      return res.redirect('/bills?success=msg.billDeleted');
-    } catch {
-      return res.redirect('/bills?error=msg.genericError');
+    } catch (err: any) {
+      return res.redirect(`/bills?error=${encodeURIComponent(err.message || 'Failed to delete electric bill.')}`);
     }
   }
 

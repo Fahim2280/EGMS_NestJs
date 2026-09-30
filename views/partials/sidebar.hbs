@@ -65,7 +65,7 @@
 
       <!-- Section: Operations -->
       <div class="nav-section-label">{{t 'nav.operations'}}</div>
-      {{#if (or (eq currentUser.role 'SUPER_ADMIN') currentUser.isSuperAdmin isSuperAdmin currentUser.garageIds.length)}}
+      {{#if (or (eq currentUser.role 'SUPER_ADMIN') currentUser.isSuperAdmin isSuperAdmin hasAssignedGarages currentUser.garageIds.length (and currentUser.garageIds (gt currentUser.garageIds.length 0)))}}
       <a href="/garages" class="sidebar-link {{#if (eq activeNav 'garages')}}active{{/if}}">
         <span class="link-icon">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

@@ -452,7 +452,7 @@
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="8 18 2 12 8 6"/><polyline points="16 6 22 12 16 18"/></svg>
         <span>{{#if isBn}}সম্পূর্ণ বিবরণ দেখতে ডানে স্ক্রোল করুন{{else}}Scroll right to view all columns{{/if}}</span>
       </div>
-      <div class="table-responsive" style="border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow-x: auto;">
+      <div class="table-responsive desktop-audit-table" style="border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow-x: auto;">
         <table class="data-table audit-table" style="table-layout: auto; width: 100%; margin: 0;">
           <colgroup>
             <col style="width: 14%;">
@@ -526,18 +526,13 @@
                   </div>
                 </td>
 
-                <!-- Details / Description (Bilingual: Bengali Primary + English Subtitle) -->
+                <!-- Details / Description -->
                 <td style="padding: 0.8rem 1rem; vertical-align: middle; min-width: 0;">
                   {{#if this.details}}
                     <div class="audit-details-cell" title="{{this.details}}">
                       <div style="font-weight: 500; color: var(--color-text-primary); font-size: 0.86rem; line-height: 1.45;">
                         {{tAuditDetail this.details}}
                       </div>
-                      {{#if @root.isBn}}
-                        <div style="font-size: 0.72rem; color: var(--color-text-muted); margin-top: 3px; font-weight: 400; opacity: 0.85;">
-                          {{this.details}}
-                        </div>
-                      {{/if}}
                     </div>
                   {{else}}
                     <span style="color: var(--color-text-muted);">—</span>
@@ -563,6 +558,61 @@
             {{/each}}
           </tbody>
         </table>
+      </div>
+
+      <!-- Mobile Audit Cards (<= 768px) -->
+      <div class="mobile-audit-cards">
+        {{#each logs}}
+          <div class="mobile-audit-card">
+            <div class="mac-header">
+              <div class="mac-user">
+                <div style="width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; flex-shrink: 0;">
+                  {{this.userName.[0]}}
+                </div>
+                <div>
+                  <div class="mac-username">{{this.userName}}</div>
+                  <div style="margin-top: 2px;">{{{roleBadge this.userRole}}}</div>
+                </div>
+              </div>
+              <div style="text-align: right;">
+                <div style="font-weight: 600; font-size: 0.8rem; color: var(--color-text-primary);">{{tDate this.createdDate}}</div>
+                <div style="font-size: 0.72rem; color: var(--color-text-muted); display: inline-flex; align-items: center; gap: 3px; justify-content: flex-end;">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  {{tTime this.createdDate}}
+                </div>
+              </div>
+            </div>
+
+            <div class="mac-badges">
+              {{{auditActionBadge this.action}}}
+              {{{auditEntityBadge this.entityType}}}
+              {{#if this.entityName}}
+                <span class="mac-entity-name">{{this.entityName}}</span>
+              {{else if this.entityId}}
+                <span style="font-size: 0.72rem; color: var(--color-text-muted); font-family: monospace;">#{{this.entityId}}</span>
+              {{/if}}
+            </div>
+
+            {{#if this.details}}
+              <div class="mac-details">
+                {{tAuditDetail this.details}}
+              </div>
+            {{/if}}
+
+            <div class="mac-footer">
+              {{#if this.ipAddress}}
+                <span class="audit-ip-chip" title="IP: {{this.ipAddress}}">
+                  🌐 {{#if (eq this.ipAddress '::1')}}127.0.0.1{{else}}{{this.ipAddress}}{{/if}}
+                </span>
+              {{/if}}
+              {{#if this.userAgent}}
+                <span class="audit-device-chip" title="{{this.userAgent}}">
+                  {{deviceChip this.userAgent}}
+                </span>
+              {{/if}}
+            </div>
+          </div>
+        {{/each}}
       </div>
 
       <!-- Pagination Footer -->

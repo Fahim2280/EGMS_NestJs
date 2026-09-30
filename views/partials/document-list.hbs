@@ -87,12 +87,6 @@
     text-transform: uppercase;
     letter-spacing: 0.03em;
   }
-  .doc-delete-form {
-    margin: 0;
-    display: inline-flex;
-    flex-shrink: 0;
-    margin-left: 0.25rem;
-  }
   .doc-btn-delete {
     display: inline-flex;
     align-items: center;
@@ -109,6 +103,9 @@
     line-height: 1;
     transition: all 0.2s ease;
     padding: 0;
+    margin: 0;
+    margin-left: 0.25rem;
+    flex-shrink: 0;
   }
   .doc-btn-delete:hover {
     background: rgba(239, 68, 68, 0.25);
@@ -312,11 +309,15 @@
           </div>
           {{#if ../canDelete}}
             {{#if ../deleteUrlPrefix}}
-              <form action="{{../deleteUrlPrefix}}/{{this.id}}/delete" method="POST" class="doc-delete-form" onsubmit="return confirm('{{t 'documents.confirmDelete'}}');">
-                <button type="submit" class="doc-btn-delete" title="{{t 'common.delete'}}" aria-label="{{t 'common.delete'}}">
-                  ✕
-                </button>
-              </form>
+              <button 
+                type="button" 
+                class="doc-btn-delete" 
+                data-delete-url="{{../deleteUrlPrefix}}/{{this.id}}/delete" 
+                onclick="submitDocDelete(this)"
+                title="{{t 'common.delete'}}" 
+                aria-label="{{t 'common.delete'}}">
+                ✕
+              </button>
             {{/if}}
           {{/if}}
         </div>
@@ -345,3 +346,21 @@
     </div>
   </div>
 {{/if}}
+
+<script>
+  if (typeof window.submitDocDelete !== 'function') {
+    window.submitDocDelete = function(btn) {
+      var confirmMsg = '{{t "documents.confirmDelete"}}';
+      if (confirm(confirmMsg && confirmMsg !== 'documents.confirmDelete' ? confirmMsg : 'Are you sure you want to delete this document?')) {
+        var url = btn.getAttribute('data-delete-url');
+        if (!url) return;
+        var form = document.createElement('form');
+        form.method = 'POST';
+        form.action = url;
+        form.style.display = 'none';
+        document.body.appendChild(form);
+        form.submit();
+      }
+    };
+  }
+</script>

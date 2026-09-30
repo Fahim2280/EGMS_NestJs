@@ -36,6 +36,10 @@ export class CreateGuarantorDto {
   documentsJson?: string;
 
   @IsString()
+  @IsOptional()
+  documentType?: string;
+
+  @IsString()
   @IsNotEmpty({ message: 'NID number is required.' })
   @MinLength(6, { message: 'NID number must be at least 6 characters.' })
   nidNumber: string;

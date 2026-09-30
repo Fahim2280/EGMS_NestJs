@@ -24,11 +24,11 @@ export class GuarantorOrmEntity extends BaseAuditableOrmEntity {
   @PrimaryColumn('varchar', { length: 100 })
   id: string;
 
-  @AutoMap()
+  @AutoMap(() => String)
   @Column('varchar', { length: 100, nullable: true })
   customerId?: string | null;
 
-  @AutoMap()
+  @AutoMap(() => String)
   @Column('varchar', { length: 100, nullable: true })
   employeeId?: string | null;
 

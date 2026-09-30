@@ -63,11 +63,11 @@
       </thead>
       <tbody>
         <tr>
-          <td>{{bnNum bill.previousUnit}} {{t 'common.units'}}</td>
-          <td><strong>{{bnNum bill.currentUnit}} {{t 'common.units'}}</strong></td>
-          <td><span class="badge" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8;">{{bnNum bill.totalUnit}} {{t 'common.units'}}</span></td>
-          <td>{{t 'common.currency'}}{{#if bill.unitRate}}{{bnNum bill.unitRate}}{{else}}{{bnNum '15.00'}}{{/if}}</td>
-          <td style="text-align: right; font-weight: 700; color: #f8fafc;">{{t 'common.currency'}}{{bnNum bill.electricBill}}</td>
+          <td>{{bnMoney bill.previousUnit}} {{t 'common.units'}}</td>
+          <td><strong>{{bnMoney bill.currentUnit}} {{t 'common.units'}}</strong></td>
+          <td><span class="badge" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8;">{{bnMoney bill.totalUnit}} {{t 'common.units'}}</span></td>
+          <td>{{t 'common.currency'}}{{#if bill.unitRate}}{{bnMoney bill.unitRate}}{{else}}{{bnMoney '15.00'}}{{/if}}</td>
+          <td style="text-align: right; font-weight: 700; color: #f8fafc;">{{t 'common.currency'}}{{bnMoney bill.electricBill}}</td>
         </tr>
       </tbody>
     </table>
@@ -76,33 +76,33 @@
   <!-- Financial Calculation Ledger Breakdown -->
   <div style="background: rgba(0,0,0,0.15); border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem;">
     <div style="display: flex; justify-content: space-between; margin-bottom: 0.75rem;">
-      <span style="color: #94a3b8;">{{t 'bills.electricCharge'}} ({{bnNum bill.totalUnit}} {{t 'common.units'}} &times; {{t 'common.currency'}}{{#if bill.unitRate}}{{bnNum bill.unitRate}}{{else}}{{bnNum '15.00'}}{{/if}}):</span>
-      <span style="color: #f8fafc; font-weight: 600;">{{t 'common.currency'}}{{bnNum bill.electricBill}}</span>
+      <span style="color: #94a3b8;">{{t 'bills.electricCharge'}} ({{bnMoney bill.totalUnit}} {{t 'common.units'}} &times; {{t 'common.currency'}}{{#if bill.unitRate}}{{bnMoney bill.unitRate}}{{else}}{{bnMoney '15.00'}}{{/if}}):</span>
+      <span style="color: #f8fafc; font-weight: 600;">{{t 'common.currency'}}{{bnMoney bill.electricBill}}</span>
     </div>
     <div style="display: flex; justify-content: space-between; margin-bottom: 0.75rem;">
       <span style="color: #94a3b8;">{{t 'bills.previousDuesLabel'}}</span>
-      <span style="color: #fbbf24; font-weight: 600;">{{t 'common.currency'}}{{bnNum bill.previousDues}}</span>
+      <span style="color: #fbbf24; font-weight: 600;">{{t 'common.currency'}}{{bnMoney bill.previousDues}}</span>
     </div>
     <div style="display: flex; justify-content: space-between; margin-bottom: 0.75rem;">
       <span style="color: #94a3b8;">{{t 'bills.rentBillLabel'}}</span>
-      <span style="color: #f8fafc;">{{t 'common.currency'}}{{bnNum bill.rentBill}}</span>
+      <span style="color: #f8fafc;">{{t 'common.currency'}}{{bnMoney bill.rentBill}}</span>
     </div>
     <div style="display: flex; justify-content: space-between; margin-bottom: 0.75rem;">
       <span style="color: #94a3b8;">{{t 'bills.loanAdjustmentLabel'}}</span>
-      <span style="color: #f8fafc;">{{t 'common.currency'}}{{bnNum bill.loan}}</span>
+      <span style="color: #f8fafc;">{{t 'common.currency'}}{{bnMoney bill.loan}}</span>
     </div>
     <div style="display: flex; justify-content: space-between; padding-top: 0.75rem; border-top: 1px solid rgba(255,255,255,0.1); margin-bottom: 0.75rem;">
       <span style="font-weight: 700; color: #f8fafc;">{{t 'bills.totalBillAmount'}}</span>
-      <strong style="font-size: 1.2rem; color: #f8fafc;">{{t 'common.currency'}}{{bnNum bill.totalBill}}</strong>
+      <strong style="font-size: 1.2rem; color: #f8fafc;">{{t 'common.currency'}}{{bnMoney bill.totalBill}}</strong>
     </div>
     <div style="display: flex; justify-content: space-between; margin-bottom: 0.75rem;">
       <span style="color: #94a3b8;">{{t 'bills.amountPaidLabel'}}</span>
-      <strong style="color: #10b981; font-weight: 700;">{{t 'common.currency'}}{{bnNum bill.clearMoney}}</strong>
+      <strong style="color: #10b981; font-weight: 700;">{{t 'common.currency'}}{{bnMoney bill.clearMoney}}</strong>
     </div>
     <div style="display: flex; justify-content: space-between; padding-top: 0.75rem; border-top: 2px solid rgba(255,255,255,0.15);">
       <span style="font-size: 1.1rem; font-weight: 800; color: #f8fafc;">{{t 'bills.presentOutstandingDues'}}</span>
       <strong style="font-size: 1.35rem; color: {{#if (ne bill.presentDues 0)}}#ef4444{{else}}#10b981{{/if}};">
-        {{t 'common.currency'}}{{bnNum bill.presentDues}}
+        {{t 'common.currency'}}{{bnMoney bill.presentDues}}
       </strong>
     </div>
   </div>

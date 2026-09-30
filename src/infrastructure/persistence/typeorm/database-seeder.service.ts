@@ -46,7 +46,6 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
       if (companyCount > 0) {
         // Seed customers and bills if missing
         await this.seedCustomersAndBills('comp-apex-001');
-        await this.syncDemoGaragesAndPermissions('comp-apex-001');
         return;
       }
 
@@ -320,19 +319,19 @@ export class DatabaseSeederService implements OnApplicationBootstrap {
       // 2. Ensure Garage 1 exists
       const garage1 = await this.garageRepo.findOne({ where: { id: 'gar-apex-001' } });
 
-      // 3. Ensure Employee 1 has permissions and only Garage 1 assigned
+      // 3. Ensure Employee 1 has permissions and initial Garage 1 assigned if not already assigned
       const employee = await this.employeeRepo.findOne({
         where: { id: 'emp-apex-001' },
         relations: { permittedGarages: true },
       });
-      if (employee && garage1) {
+      if (employee && (!employee.permittedGarages || employee.permittedGarages.length === 0) && garage1) {
         employee.canCreate = true;
         employee.canEdit = false;
         employee.canDelete = false;
         employee.canView = true;
         employee.permittedGarages = [garage1];
         await this.employeeRepo.save(employee);
-        this.logger.log(`✅ Synced demo permissions for employee ${employee.name}`);
+        this.logger.log(`✅ Initialized demo permissions for employee ${employee.name}`);
       }
 
       // 4. Ensure Customer 3 in Garage 2 exists

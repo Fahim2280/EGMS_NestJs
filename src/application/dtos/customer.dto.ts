@@ -63,6 +63,10 @@ export class CreateCustomerDto {
   @IsOptional()
   customerCode?: string;
 
+  @IsString()
+  @IsOptional()
+  removeAvatar?: string;
+
   // Optional initial guarantor(s) support
   @IsString()
   @IsOptional()
@@ -103,6 +107,10 @@ export class CreateCustomerDto {
   @IsString()
   @IsOptional()
   guarantorAddress?: string;
+
+  @IsString()
+  @IsOptional()
+  guarantorDocumentType?: string;
 }
 
 export class UpdateCustomerDto extends CreateCustomerDto {}

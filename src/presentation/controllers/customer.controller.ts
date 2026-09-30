@@ -209,15 +209,55 @@ export class CustomerController {
     }
 
     try {
-      // Upload customer's own documents (files field only)
-      const customerFiles = (files || []).filter((f: any) => f.fieldname === 'files');
-      if (customerFiles.length > 0) {
+      // Process multi-category document slots (customerDocFiles_0, customerDocFiles_1, ...) + legacy 'files'
+      const customerUploadedDocs: any[] = [];
+      const MAX_DOC_SLOTS = 15;
+      for (let i = 0; i < MAX_DOC_SLOTS; i++) {
+        const slotFieldName = `customerDocFiles_${i}`;
+        const slotFiles = (files || []).filter((f: any) => f.fieldname === slotFieldName);
+        if (slotFiles.length > 0) {
+          const rawTag = (dto as any)[`customerDocType_${i}`] || (req.body && req.body[`customerDocType_${i}`]) || 'GENERAL';
+          const tags = slotFiles.map(() => rawTag);
+          const uploaded = await this.fileService.uploadFiles(
+            slotFiles,
+            'customers',
+            tags,
+            `${user.sub || user.companyId}|${user.role || 'SUPER_ADMIN'}`,
+          );
+          customerUploadedDocs.push(...uploaded);
+        }
+      }
+
+      // Legacy fallback: single 'files' field upload
+      const legacyCustomerFiles = (files || []).filter((f: any) => f.fieldname === 'files');
+      if (legacyCustomerFiles.length > 0) {
         const uploadedDocs = await this.fileService.uploadFiles(
-          customerFiles,
+          legacyCustomerFiles,
           'customers',
           (dto as any).documentType || 'GENERAL',
+          `${user.sub || user.companyId}|${user.role || 'SUPER_ADMIN'}`,
         );
-        dto.documents = uploadedDocs;
+        customerUploadedDocs.push(...uploadedDocs);
+      }
+
+      // Process dedicated profile picture avatar upload (avatarFile)
+      const avatarFile = (files || []).find((f: any) => f.fieldname === 'avatarFile' || f.fieldname === 'profilePicture');
+      if (avatarFile && avatarFile.buffer && avatarFile.buffer.length > 0) {
+        try {
+          const uploadedPhoto = await this.fileService.uploadFile(
+            avatarFile,
+            'customers',
+            'PHOTO',
+            `${user.sub || user.companyId}|${user.role || 'SUPER_ADMIN'}`,
+          );
+          customerUploadedDocs.unshift(uploadedPhoto);
+        } catch (photoErr: any) {
+          console.warn('Customer avatar upload failed:', photoErr?.message);
+        }
+      }
+
+      if (customerUploadedDocs.length > 0) {
+        dto.documents = customerUploadedDocs;
       }
 
       const customer = await this.commandBus.execute(
@@ -240,7 +280,9 @@ export class CustomerController {
                   name: g.name.trim(),
                   relationship: g.relationship?.trim(),
                   mobileNumber: g.mobileNumber?.trim() || g.phoneNumber?.trim(),
-                  phoneNumbersJson: g.phoneNumbersJson,
+                  phoneNumbers: g.phoneNumbers,
+                  phoneNumbersJson: g.phoneNumbersJson || (g.phoneNumbers ? JSON.stringify(g.phoneNumbers) : undefined),
+                  documentType: g.documentType,
                   nidNumber: g.nidNumber.trim(),
                   fatherName: g.fatherName?.trim(),
                   motherName: g.motherName?.trim(),
@@ -266,6 +308,7 @@ export class CustomerController {
           relationship: dto.guarantorRelationship?.trim(),
           mobileNumber: dto.guarantorMobileNumber?.trim(),
           phoneNumbersJson: dto.guarantorPhoneNumbersJson,
+          documentType: dto.guarantorDocumentType || (req.body as any)?.guarantorDocType_0 || (req.body as any)?.guarantorDocumentType || 'GENERAL',
           nidNumber: dto.guarantorNidNumber.trim(),
           fatherName: dto.guarantorFatherName?.trim(),
           motherName: dto.guarantorMotherName?.trim(),
@@ -292,15 +335,39 @@ export class CustomerController {
         }
       }
 
-      // Upload per-guarantor documents (guarantorFiles_0, guarantorFiles_1, ...)
+      // Upload per-guarantor documents (both multi-slot guarantor_${index}_docFiles_${slot} and legacy guarantorFiles_${index})
       for (const { index, guarantor } of createdGuarantors) {
-        const gFiles = (files || []).filter((f: any) => f.fieldname === `guarantorFiles_${index}`);
-        if (gFiles.length > 0) {
+        const gFilesToUpload: any[] = [];
+        const gFileCategories: string[] = [];
+
+        // Check categorized slots for this guarantor (slots 0..15)
+        for (let s = 0; s < 15; s++) {
+          const slotFiles = (files || []).filter((f: any) => f.fieldname === `guarantor_${index}_docFiles_${s}`);
+          if (slotFiles.length > 0) {
+            const slotCat = ((req.body as any)?.[`guarantor_${index}_docType_${s}`] || 'GENERAL').trim();
+            for (const f of slotFiles) {
+              gFilesToUpload.push(f);
+              gFileCategories.push(slotCat);
+            }
+          }
+        }
+
+        // Legacy fallback: guarantorFiles_${index}
+        const legacyGFiles = (files || []).filter((f: any) => f.fieldname === `guarantorFiles_${index}`);
+        if (legacyGFiles.length > 0) {
+          const rawDocType = ((req.body as any)?.[`guarantorDocType_${index}`] || guarantorsToCreate[index]?.documentType || 'GENERAL').trim();
+          for (const f of legacyGFiles) {
+            gFilesToUpload.push(f);
+            gFileCategories.push(rawDocType);
+          }
+        }
+
+        if (gFilesToUpload.length > 0) {
           try {
             const uploadedDocs = await this.fileService.uploadFiles(
-              gFiles,
+              gFilesToUpload,
               'guarantors',
-              'GENERAL',
+              gFileCategories,
               user.name || user.email,
             );
             for (const doc of uploadedDocs) {
@@ -433,6 +500,12 @@ export class CustomerController {
         }
       }
 
+      // Find true latest bill ID across all customer bills (regardless of active date filter)
+      const sortedAllBills = [...(customer.bills || [])].sort(
+        (a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime()
+      );
+      const actualLatestBillId = sortedAllBills.length > 0 ? sortedAllBills[0].id : null;
+
       // Filter customer bills by date range
       if (effectiveFromDate) {
         const fromTime = new Date(`${effectiveFromDate}T00:00:00`).getTime();
@@ -445,6 +518,10 @@ export class CustomerController {
 
       // Sort descending
       bills.sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      bills = bills.map((b: any) => ({
+        ...b,
+        isLatestBill: b.id === actualLatestBillId,
+      }));
 
       let periodUnits = 0;
       let periodBilled = 0;
@@ -522,7 +599,7 @@ export class CustomerController {
   @Post(':id/edit')
   @UseGuards(PermissionsGuard)
   @RequirePermissions('canEdit')
-  @UseInterceptors(FilesInterceptor('files', 10, { limits: { fileSize: 25 * 1024 * 1024 } }))
+  @UseInterceptors(AnyFilesInterceptor({ limits: { fileSize: 25 * 1024 * 1024 } }))
   async handleUpdate(
     @Param('id') id: string,
     @Body() dto: UpdateCustomerDto,
@@ -543,15 +620,42 @@ export class CustomerController {
         return res.redirect('/customers?error=You+do+not+have+permission+to+edit+this+customer');
       }
 
-      if (files && files.length > 0) {
+      let existingDocs = existing.documents ? [...existing.documents] : [];
+
+      // Check if removeAvatar requested
+      if ((dto as any).removeAvatar === 'true' || (req.body && req.body.removeAvatar === 'true')) {
+        existingDocs = existingDocs.filter((d: any) => d.tag !== 'PHOTO' && d.tag !== 'AVATAR');
+      }
+
+      // Process dedicated profile picture avatar upload (avatarFile)
+      const avatarFile = (files || []).find((f: any) => f.fieldname === 'avatarFile' || f.fieldname === 'profilePicture');
+      if (avatarFile && avatarFile.buffer && avatarFile.buffer.length > 0) {
+        try {
+          const uploadedPhoto = await this.fileService.uploadFile(
+            avatarFile,
+            'customers',
+            'PHOTO',
+            `${user.sub || user.companyId}|${user.role || 'SUPER_ADMIN'}`,
+          );
+          // Remove old photo doc and prepend new one
+          existingDocs = existingDocs.filter((d: any) => d.tag !== 'PHOTO' && d.tag !== 'AVATAR');
+          existingDocs.unshift(uploadedPhoto);
+        } catch (photoErr: any) {
+          console.warn('Customer avatar update failed:', photoErr?.message);
+        }
+      }
+
+      const regularFiles = (files || []).filter((f: any) => f.fieldname === 'files');
+      if (regularFiles.length > 0) {
         const uploadedDocs = await this.fileService.uploadFiles(
-          files,
+          regularFiles,
           'customers',
           (dto as any).documentType || 'GENERAL',
         );
-        const existingDocs = existing.documents || [];
-        dto.documents = [...existingDocs, ...uploadedDocs];
+        existingDocs.push(...uploadedDocs);
       }
+
+      dto.documents = existingDocs;
 
       await this.commandBus.execute(
         new UpdateCustomerCommand(
@@ -713,7 +817,7 @@ export class CustomerController {
   @Post(':id/guarantors')
   @UseGuards(PermissionsGuard)
   @RequirePermissions('canCreate')
-  @UseInterceptors(FilesInterceptor('files', 10, { limits: { fileSize: 25 * 1024 * 1024 } }))
+  @UseInterceptors(AnyFilesInterceptor({ limits: { fileSize: 25 * 1024 * 1024 } }))
   async handleCreateGuarantor(
     @Param('id') customerId: string,
     @Body() dto: CreateGuarantorDto,
@@ -733,11 +837,38 @@ export class CustomerController {
         return res.redirect(`/customers/${customerId}?error=You+do+not+have+permission+to+manage+this+customer`);
       }
 
-      if (files && files.length > 0) {
+      const allFiles = files || [];
+      const filesToUpload: any[] = [];
+      const categories: string[] = [];
+
+      // Categorized slots (guarantorDocFiles_0, guarantorDocFiles_1, ...)
+      for (let s = 0; s < 15; s++) {
+        const slotFiles = allFiles.filter((f: any) => f.fieldname === `guarantorDocFiles_${s}`);
+        if (slotFiles.length > 0) {
+          const slotCat = ((req.body as any)?.[`guarantorDocType_${s}`] || 'GENERAL').trim();
+          for (const f of slotFiles) {
+            filesToUpload.push(f);
+            categories.push(slotCat);
+          }
+        }
+      }
+
+      // Legacy fallback (files)
+      const legacyFiles = allFiles.filter((f: any) => f.fieldname === 'files');
+      if (legacyFiles.length > 0) {
+        const legacyCat = (dto.documentType || (req.body as any)?.documentType || (req.body as any)?.type || 'GENERAL').trim();
+        for (const f of legacyFiles) {
+          filesToUpload.push(f);
+          categories.push(legacyCat);
+        }
+      }
+
+      if (filesToUpload.length > 0) {
         const uploadedDocs = await this.fileService.uploadFiles(
-          files,
+          filesToUpload,
           'guarantors',
-          (dto as any).documentType || 'GENERAL',
+          categories,
+          user.name || user.email,
         );
         dto.documents = uploadedDocs;
       }
@@ -806,7 +937,7 @@ export class CustomerController {
   @Post(':id/guarantors/:guarantorId')
   @UseGuards(PermissionsGuard)
   @RequirePermissions('canEdit')
-  @UseInterceptors(FilesInterceptor('files', 10, { limits: { fileSize: 25 * 1024 * 1024 } }))
+  @UseInterceptors(AnyFilesInterceptor({ limits: { fileSize: 25 * 1024 * 1024 } }))
   async handleUpdateGuarantor(
     @Param('id') customerId: string,
     @Param('guarantorId') guarantorId: string,
@@ -827,11 +958,38 @@ export class CustomerController {
         return res.redirect(`/customers/${customerId}?error=You+do+not+have+permission+to+edit+this+guarantor`);
       }
 
-      if (files && files.length > 0) {
+      const allFiles = files || [];
+      const filesToUpload: any[] = [];
+      const categories: string[] = [];
+
+      // Categorized slots (guarantorDocFiles_0, guarantorDocFiles_1, ...)
+      for (let s = 0; s < 15; s++) {
+        const slotFiles = allFiles.filter((f: any) => f.fieldname === `guarantorDocFiles_${s}`);
+        if (slotFiles.length > 0) {
+          const slotCat = ((req.body as any)?.[`guarantorDocType_${s}`] || 'GENERAL').trim();
+          for (const f of slotFiles) {
+            filesToUpload.push(f);
+            categories.push(slotCat);
+          }
+        }
+      }
+
+      // Legacy fallback (files)
+      const legacyFiles = allFiles.filter((f: any) => f.fieldname === 'files');
+      if (legacyFiles.length > 0) {
+        const legacyCat = ((dto as any).documentType || (req.body as any)?.documentType || 'GENERAL').trim();
+        for (const f of legacyFiles) {
+          filesToUpload.push(f);
+          categories.push(legacyCat);
+        }
+      }
+
+      if (filesToUpload.length > 0) {
         const uploadedDocs = await this.fileService.uploadFiles(
-          files,
+          filesToUpload,
           'guarantors',
-          (dto as any).documentType || 'GENERAL',
+          categories,
+          user.name || user.email,
         );
         const guarantors = await this.queryBus.execute(
           new GetGuarantorsByCustomerQuery(customerId, user.companyId),

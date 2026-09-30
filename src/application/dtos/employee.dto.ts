@@ -89,6 +89,10 @@ export class CreateEmployeeDto {
   @IsString()
   @IsOptional()
   guarantorAddress?: string;
+
+  @IsString()
+  @IsOptional()
+  guarantorDocumentType?: string;
 }
 
 export class UpdateEmployeeDto {
@@ -124,6 +128,10 @@ export class UpdateEmployeeDto {
   @IsOptional()
   @MinLength(5)
   nidNumber?: string;
+
+  @IsString()
+  @IsOptional()
+  removeAvatar?: string;
 }
 
 export class EmployeeResponseDto {

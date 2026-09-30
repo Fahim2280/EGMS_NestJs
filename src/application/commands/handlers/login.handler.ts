@@ -80,6 +80,12 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
           companyName: companyOfEmployee?.companyName || 'Associated Company',
           phoneNumber: employee.phoneNumber,
           nidNumber: employee.nidNumber,
+          isSuperAdmin: employee.role === 'SUPER_ADMIN',
+          canCreate: Boolean(employee.canCreate),
+          canEdit: Boolean(employee.canEdit),
+          canDelete: Boolean(employee.canDelete),
+          canView: Boolean(employee.canView),
+          garageIds: employee.permittedGarageIds || [],
         };
 
         const accessToken = this.jwtService.sign(payload);

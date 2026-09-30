@@ -27,6 +27,8 @@
       {{/if}}
 
       <form action="/employees" method="POST" enctype="multipart/form-data">
+        {{> profile-avatar-uploader avatarId="employeeAvatar" fieldName="avatarFile" title=(t 'profile.picture') hint=(t 'profile.pictureHint')}}
+
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; margin-bottom: 1.25rem;">
           <div class="form-group">
             <label class="form-label" for="empName" style="display: block; margin-bottom: 0.35rem; font-size: 0.85rem; font-weight: 600;">{{t 'employees.name'}} *</label>
@@ -97,7 +99,7 @@
           />
         </div>
 
-        {{> phone-repeater containerId="employeePhones" primaryFieldName="phoneNumber" jsonFieldName="phoneNumbersJson" initialPhones=(or formData.phoneNumbers formData.phoneNumber) required=true}}
+        {{> phone-repeater containerId="employeePhones" primaryFieldName="phoneNumber" primaryValue=formData.phoneNumber jsonFieldName="phoneNumbersJson" initialPhones=(resolvePhones formData.phoneNumbers formData.phoneNumber) required=true}}
 
         <div class="form-group" style="margin-bottom: 1.75rem;">
           <label class="form-label" for="empAddress" style="display: block; margin-bottom: 0.35rem; font-size: 0.85rem; font-weight: 600;">{{#if isBn}}আবাসিক ঠিকানা *{{else}}Residential Address *{{/if}}</label>
@@ -115,29 +117,15 @@
         <!-- Guarantor Section (Optional) -->
         {{> guarantor-create-section targetType="employee" formData=formData}}
 
+        <!-- Documents & Identity Attachments -->
         <div style="margin-bottom: 2rem; padding-top: 1.25rem; border-top: 1px solid rgba(255, 255, 255, 0.08);">
-          <label class="form-label" style="display: block; margin-bottom: 0.5rem; font-size: 0.95rem; font-weight: 700; color: #fff;">
-            📁 {{t 'documents.title'}}
-          </label>
-
-          <div class="form-group" style="margin-bottom: 1rem;">
-            <label class="form-label" for="empCreateDocType" style="display: block; margin-bottom: 0.35rem; font-size: 0.85rem; font-weight: 600;">{{t 'documents.documentType'}}</label>
-            <select id="empCreateDocType" name="documentType" class="form-control" style="width: 100%; padding: 0.7rem; border-radius: var(--radius-md); background: rgba(15, 23, 42, 0.8); border: 1px solid var(--color-border); color: #fff;">
-              <option value="GENERAL">{{t 'documents.typeGeneral'}}</option>
-              <option value="NID">{{t 'documents.typeNid'}}</option>
-              <option value="PASSPORT">{{t 'documents.typePassport'}}</option>
-              <option value="AGREEMENT">{{t 'documents.typeAgreement'}}</option>
-              <option value="PHOTO">{{t 'documents.typePhoto'}}</option>
-              <option value="OTHER">{{t 'documents.typeOther'}}</option>
-            </select>
-          </div>
-
-          {{> file-uploader uploaderId="empCreateDocs" fieldName="files" maxFiles=10}}
+          {{> documents-multi-uploader targetType="employee" fieldPrefix="employeeDoc"}}
         </div>
 
-        <div style="display: flex; gap: 1rem; justify-content: flex-end;">
-          <a href="/employees" class="btn btn-secondary">{{t 'common.cancel'}}</a>
-          <button type="submit" class="btn btn-primary" style="padding: 0.75rem 1.75rem; font-weight: 600;">
+        <div class="form-actions" style="margin-top: 2rem; display: flex; gap: 0.75rem; justify-content: flex-end; align-items: center;">
+          <a href="/employees" class="btn btn-secondary" style="padding: 0.65rem 1.25rem;">{{t 'common.cancel'}}</a>
+          <button type="submit" class="btn btn-primary" style="padding: 0.65rem 1.5rem; display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 700; box-shadow: 0 4px 16px rgba(99, 102, 241, 0.35);">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
             {{#if isBn}}কর্মী তালিকায় যোগ করুন{{else}}Add Employee to Roster{{/if}}
           </button>
         </div>

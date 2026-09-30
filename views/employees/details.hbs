@@ -27,8 +27,24 @@
   <!-- Profile Card -->
   <div class="card">
     <div class="card-body" style="text-align:center;padding:2rem;">
-      <div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:2rem;font-weight:800;color:#fff;margin:0 auto 1.25rem;">
-        {{employee.name.[0]}}
+      <div class="user-avatar-wrapper previewable-avatar"
+           data-preview-img="{{profilePicUrl employee}}"
+           data-preview-name="{{employee.name}}"
+           data-preview-code="UUID: {{employee.id}}"
+           data-preview-badge="{{#if isBn}}{{#if (eq employee.role 'SUPER_ADMIN')}}{{t 'employees.roleSuperAdmin'}}{{else}}{{t 'employees.roleGeneral'}}{{/if}}{{else}}{{employee.role}}{{/if}}"
+           data-preview-sub="{{employee.email}}{{#if employee.phoneNumber}} • 📞 {{employee.phoneNumber}}{{/if}}"
+           title="{{#if (profilePicUrl employee)}}{{t 'profile.clickToEnlarge'}}{{else}}{{employee.name}}{{/if}}"
+           style="width: 84px; height: 84px; border-radius: 50%; margin: 0 auto 1.25rem; cursor: {{#if (profilePicUrl employee)}}pointer{{else}}default{{/if}}; position: relative;">
+        {{#if (profilePicUrl employee)}}
+          <img src="{{profilePicUrl employee}}" alt="{{employee.name}}" class="table-avatar-img" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;" />
+          <span class="avatar-zoom-badge" style="width: 22px; height: 22px; bottom: 2px; right: 2px;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </span>
+        {{else}}
+          <div class="table-avatar-initials avatar-gradient-1" style="width: 100%; height: 100%; font-size: 2.2rem; font-weight: 800; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff;">
+            {{firstChar employee.name}}
+          </div>
+        {{/if}}
       </div>
       <h2 style="margin:0 0 0.25rem;color:#f1f5f9;font-size:1.2rem;font-weight:700;">{{employee.name}}</h2>
       <span class="badge {{#if (eq employee.role 'SUPER_ADMIN')}}badge-admin{{else}}badge-officer{{/if}}" style="margin-bottom:1.25rem;display:inline-block;">
@@ -300,53 +316,233 @@
 </div>
 
 <!-- Add Employee Guarantor Modal -->
-<div id="addEmpGuarantorModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(5px); z-index: 9999; align-items: center; justify-content: center; padding: 1.5rem 1rem; overflow-y: auto;">
-  <div class="card guarantor-modal-card" style="max-width: 650px; width: 100%; max-height: calc(100vh - 3.5rem); overflow-y: auto; padding: 1.75rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); border-top: 3px solid #6366f1; margin: auto;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; border-bottom: 1px solid var(--color-border); padding-bottom: 0.75rem; position: sticky; top: -1.75rem; background: inherit; z-index: 10; padding-top: 0.25rem;">
-      <h3 style="margin: 0; font-size: 1.25rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 0.5rem;">
-        <span>🛡️</span> + {{t 'guarantors.add'}}
-      </h3>
-      <button type="button" onclick="document.getElementById('addEmpGuarantorModal').style.display='none'" style="background: transparent; border: none; color: var(--color-text-muted); font-size: 1.5rem; cursor: pointer; line-height: 1;">&times;</button>
-    </div>
-    <form action="/employees/{{employee.id}}/guarantors" method="POST" enctype="multipart/form-data">
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
-        <div class="form-group">
-          <label class="form-label" for="egName">{{t 'guarantors.name'}} *</label>
-          <input type="text" id="egName" name="name" class="form-input" required placeholder="Full Name">
+<style>
+  #addEmpGuarantorModal .guarantor-modal-card {
+    max-width: 800px;
+    width: 100%;
+    max-height: calc(100vh - 3rem) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    border-radius: 16px !important;
+    background: #1e293b;
+    border: 1px solid rgba(99, 102, 241, 0.35) !important;
+    box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.6) !important;
+  }
+  [data-theme="light"] #addEmpGuarantorModal .guarantor-modal-card {
+    background: #ffffff !important;
+    border-color: #cbd5e1 !important;
+    box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.18) !important;
+  }
+  #addEmpGuarantorModal .g-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 1.75rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    background: #1e293b;
+    flex-shrink: 0;
+  }
+  [data-theme="light"] #addEmpGuarantorModal .g-modal-header {
+    background: #ffffff !important;
+    border-bottom-color: #e2e8f0 !important;
+  }
+  #addEmpGuarantorModal .g-modal-body {
+    padding: 1.5rem 1.75rem;
+    overflow-y: auto !important;
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    background: #0f172a;
+    box-sizing: border-box;
+  }
+  [data-theme="light"] #addEmpGuarantorModal .g-modal-body {
+    background: #f8fafc !important;
+  }
+  #addEmpGuarantorModal .g-form-section {
+    background: rgba(30, 41, 59, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 1.15rem;
+    transition: border-color 0.2s;
+  }
+  [data-theme="light"] #addEmpGuarantorModal .g-form-section {
+    background: #ffffff !important;
+    border-color: #e2e8f0 !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+  }
+  #addEmpGuarantorModal .g-section-badge {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #a5b4fc;
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin-bottom: 0.9rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }
+  [data-theme="light"] #addEmpGuarantorModal .g-section-badge {
+    color: #4338ca !important;
+    border-bottom-color: #f1f5f9 !important;
+  }
+  #addEmpGuarantorModal .g-modal-footer {
+    padding: 1rem 1.75rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    background: #1e293b;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.75rem;
+    flex-shrink: 0;
+  }
+  [data-theme="light"] #addEmpGuarantorModal .g-modal-footer {
+    background: #ffffff !important;
+    border-top-color: #e2e8f0 !important;
+  }
+  @media (max-width: 576px) {
+    #addEmpGuarantorModal {
+      padding: 0.35rem !important;
+    }
+    #addEmpGuarantorModal .guarantor-modal-card {
+      max-height: 96vh !important;
+      border-radius: 12px !important;
+    }
+    #addEmpGuarantorModal .g-modal-header,
+    #addEmpGuarantorModal .g-modal-footer {
+      padding: 0.85rem 0.85rem !important;
+    }
+    #addEmpGuarantorModal .g-modal-body {
+      padding: 0.85rem 0.65rem !important;
+      gap: 0.75rem !important;
+    }
+    #addEmpGuarantorModal .g-form-section {
+      padding: 0.75rem 0.55rem !important;
+      border-radius: 8px !important;
+    }
+    #addEmpGuarantorModal .g-form-section .multi-doc-wrapper {
+      background: transparent !important;
+      border: none !important;
+      padding: 0 !important;
+      margin-bottom: 0 !important;
+    }
+    #addEmpGuarantorModal .g-modal-footer {
+      flex-direction: column-reverse !important;
+      gap: 0.5rem !important;
+    }
+    #addEmpGuarantorModal .g-modal-footer .btn,
+    #addEmpGuarantorModal .g-modal-footer button {
+      width: 100% !important;
+      justify-content: center !important;
+      min-height: 44px !important;
+    }
+  }
+</style>
+
+<div id="addEmpGuarantorModal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; padding: 1.5rem 1rem; overflow-y: auto;">
+  <div class="card guarantor-modal-card">
+    <!-- Modal Header -->
+    <div class="g-modal-header">
+      <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <div style="width: 42px; height: 42px; border-radius: 10px; background: rgba(99, 102, 241, 0.15); border: 1px solid rgba(99, 102, 241, 0.3); display: flex; align-items: center; justify-content: center; font-size: 1.4rem;">
+          🛡️
         </div>
-        <div class="form-group">
-          <label class="form-label" for="egRelationship">{{t 'guarantors.empRelationship'}}</label>
-          <input type="text" id="egRelationship" name="relationship" class="form-input" placeholder="e.g. Father, Brother, Relative, Colleague, Friend">
-        </div>
-        <div class="form-group" style="grid-column: 1 / -1;">
-          {{> phone-repeater containerId="empGuarantorPhonesModal" primaryFieldName="mobileNumber" jsonFieldName="phoneNumbersJson" required=true}}
-        </div>
-        <div class="form-group">
-          <label class="form-label" for="egNid">{{t 'guarantors.nid'}} *</label>
-          <input type="text" id="egNid" name="nidNumber" class="form-input" required placeholder="National ID Number">
-        </div>
-        <div class="form-group">
-          <label class="form-label" for="egFather">{{t 'guarantors.fatherName'}}</label>
-          <input type="text" id="egFather" name="fatherName" class="form-input" placeholder="Father's Name">
-        </div>
-        <div class="form-group">
-          <label class="form-label" for="egMother">{{t 'guarantors.motherName'}}</label>
-          <input type="text" id="egMother" name="motherName" class="form-input" placeholder="Mother's Name">
-        </div>
-        <div class="form-group" style="grid-column: 1 / -1;">
-          <label class="form-label" for="egAddress">{{t 'guarantors.address'}} *</label>
-          <textarea id="egAddress" name="address" class="form-input" rows="2" required placeholder="Guarantor residential or business address..."></textarea>
-        </div>
-        <div class="form-group" style="grid-column: 1 / -1; border-top: 1px solid var(--color-border); padding-top: 0.75rem;">
-          <label class="form-label" style="font-weight: 600; margin-bottom: 0.5rem;">
-            📎 {{t 'documents.title'}} (NID, Photo, Documents)
-          </label>
-          {{> file-uploader uploaderId="empGuarantorCreateUploader" fieldName="files" maxFiles=10 label=(t 'documents.upload')}}
+        <div>
+          <h3 style="margin: 0; font-size: 1.2rem; font-weight: 700; color: var(--color-text-primary, #fff);">
+            + {{t 'guarantors.add'}}
+          </h3>
+          <p style="margin: 0.15rem 0 0; font-size: 0.8rem; color: var(--color-text-muted, #94a3b8);">
+            {{t 'guarantors.empSubtitle'}}
+          </p>
         </div>
       </div>
-      <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem; position: sticky; bottom: -1.75rem; background: inherit; padding-top: 1rem; padding-bottom: 0.25rem; border-top: 1px solid var(--color-border); z-index: 10;">
-        <button type="button" class="btn btn-secondary" onclick="document.getElementById('addEmpGuarantorModal').style.display='none'">{{t 'common.cancel'}}</button>
-        <button type="submit" class="btn btn-primary" style="background: #6366f1; border-color: #6366f1; font-weight: 700; box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);">{{t 'guarantors.save'}}</button>
+      <button type="button" onclick="document.getElementById('addEmpGuarantorModal').style.display='none'" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--color-text-muted, #94a3b8); font-size: 1.4rem; cursor: pointer; transition: all 0.2s; line-height: 1;" title="{{t 'common.cancel'}}">&times;</button>
+    </div>
+
+    <!-- Form with Multipart Upload -->
+    <form action="/employees/{{employee.id}}/guarantors" method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; overflow: hidden; margin: 0; flex: 1 1 auto;">
+      <div class="g-modal-body">
+        
+        <!-- SECTION 1: Primary Details -->
+        <div class="g-form-section">
+          <div class="g-section-badge">
+            <span>👤</span>
+            <span>{{t 'guarantors.basicInfo'}}</span>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 1rem;">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label" for="egName">{{t 'guarantors.name'}} <span style="color: #f43f5e;">*</span></label>
+              <input type="text" id="egName" name="name" class="form-input" required placeholder="{{#if isBn}}সম্পূর্ণ নাম লিখুন{{else}}Full Name{{/if}}">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label" for="egRelationship">{{t 'guarantors.empRelationship'}}</label>
+              <input type="text" id="egRelationship" name="relationship" class="form-input" placeholder="{{#if isBn}}যেমন: পিতা, ভাই, সহকর্মী, বন্ধু{{else}}e.g. Father, Brother, Relative, Colleague, Friend{{/if}}">
+            </div>
+            <div class="form-group" style="grid-column: 1 / -1; margin-bottom: 0;">
+              <label class="form-label" for="egNid">{{t 'guarantors.nid'}} <span style="color: #f43f5e;">*</span></label>
+              <input type="text" id="egNid" name="nidNumber" class="form-input" required placeholder="{{#if isBn}}জাতীয় পরিচয়পত্র নম্বর (NID){{else}}National ID Number{{/if}}">
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 2: Contact & Phone Numbers -->
+        <div class="g-form-section">
+          <div class="g-section-badge">
+            <span>📞</span>
+            <span>{{t 'guarantors.contactInfo'}}</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 1rem;">
+            <div style="width: 100%;">
+              {{> phone-repeater containerId="empGuarantorPhonesModal" primaryFieldName="mobileNumber" jsonFieldName="phoneNumbersJson" required=true label=(t 'phones.title')}}
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label" for="egAddress">{{t 'guarantors.address'}} <span style="color: #f43f5e;">*</span></label>
+              <textarea id="egAddress" name="address" class="form-input" rows="2" required placeholder="{{#if isBn}}জামিনদারের বর্তমান ও স্থায়ী ঠিকানা লিখুন...{{else}}Guarantor residential or business address...{{/if}}"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 3: Documents & Attachments (Multi-Category Slots) -->
+        <div class="g-form-section">
+          {{> documents-multi-uploader targetType="guarantor" fieldPrefix="guarantorDoc"}}
+        </div>
+
+        <!-- SECTION 4: Family Details (Optional) -->
+        <div class="g-form-section">
+          <div class="g-section-badge" style="justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 0.45rem;">
+              <span>👨‍👩‍👧</span>
+              <span>{{t 'guarantors.familyInfo'}}</span>
+            </div>
+            <span style="font-size: 0.7rem; font-weight: 600; padding: 2px 7px; border-radius: 9999px; background: rgba(100, 116, 139, 0.15); color: #94a3b8; border: 1px solid rgba(100, 116, 139, 0.2);">
+              {{t 'guarantors.optionalBadge'}}
+            </span>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 1rem;">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label" for="egFather">{{t 'guarantors.fatherName'}}</label>
+              <input type="text" id="egFather" name="fatherName" class="form-input" placeholder="{{#if isBn}}পিতার পূর্ণ নাম{{else}}Father's Full Name{{/if}}">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label" for="egMother">{{t 'guarantors.motherName'}}</label>
+              <input type="text" id="egMother" name="motherName" class="form-input" placeholder="{{#if isBn}}মাতার পূর্ণ নাম{{else}}Mother's Full Name{{/if}}">
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="g-modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="document.getElementById('addEmpGuarantorModal').style.display='none'">
+          {{t 'common.cancel'}}
+        </button>
+        <button type="submit" class="btn btn-primary" style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); border: none; font-weight: 700; box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4); display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1.4rem;">
+          <span>🛡️</span>
+          <span>{{t 'guarantors.save'}}</span>
+        </button>
       </div>
     </form>
   </div>
@@ -401,4 +597,27 @@
       modal.style.display = 'flex';
     }
   }
+
+  // Close modals on Escape key or backdrop click
+  window.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      ['addEmpGuarantorModal', 'uploadEmpGuarantorDocModal'].forEach(function(id) {
+        var m = document.getElementById(id);
+        if (m && m.style.display !== 'none') {
+          m.style.display = 'none';
+        }
+      });
+    }
+  });
+
+  ['addEmpGuarantorModal', 'uploadEmpGuarantorDocModal'].forEach(function(id) {
+    var modal = document.getElementById(id);
+    if (modal) {
+      modal.addEventListener('click', function(e) {
+        if (e.target === this) {
+          this.style.display = 'none';
+        }
+      });
+    }
+  });
 </script>

@@ -314,6 +314,18 @@
       width: auto !important;
       min-width: 0 !important;
     }
+    .phone-type-col .select-phone-type {
+      height: 38px !important;
+      min-height: 38px !important;
+    }
+    .primary-toggle-label {
+      height: 38px !important;
+      box-sizing: border-box !important;
+    }
+    .phone-action-col .btn-remove-row {
+      height: 38px !important;
+      width: 38px !important;
+    }
   }
 
   @media (max-width: 560px) {
@@ -339,6 +351,18 @@
       width: auto;
       min-width: 0;
     }
+    .phone-type-col .select-phone-type {
+      height: 38px !important;
+      min-height: 38px !important;
+    }
+    .primary-toggle-label {
+      height: 38px !important;
+      box-sizing: border-box !important;
+    }
+    .phone-action-col .btn-remove-row {
+      height: 38px !important;
+      width: 38px !important;
+    }
   }
 </style>
 
@@ -356,7 +380,7 @@
 
   {{!-- Hidden inputs for backend submission --}}
   <input type="hidden" name="{{#if jsonFieldName}}{{jsonFieldName}}{{else}}phoneNumbersJson{{/if}}" class="phone-json-hidden" value="">
-  <input type="hidden" name="{{#if primaryFieldName}}{{primaryFieldName}}{{else}}mobileNumber{{/if}}" class="phone-primary-hidden" value="">
+  <input type="hidden" name="{{#if primaryFieldName}}{{primaryFieldName}}{{else}}mobileNumber{{/if}}" class="phone-primary-hidden" value="{{#if primaryValue}}{{primaryValue}}{{/if}}">
 
   {{!-- Dynamic rows container --}}
   <div class="phone-rows-container">
@@ -394,18 +418,33 @@
     {{#if initialPhones}}
       var raw = {{{json initialPhones}}};
       if (Array.isArray(raw) && raw.length > 0) {
-        initialData = raw;
-      } else if (typeof raw === 'string' && raw.trim()) {
+        var valid = raw.filter(function(r) { return r && r.number && String(r.number).trim(); });
+        if (valid.length > 0) initialData = valid;
+      } else if (typeof raw === 'string' && raw.trim() && raw !== 'true' && raw !== 'false') {
         try {
           var parsed = JSON.parse(raw);
-          if (Array.isArray(parsed)) initialData = parsed;
-          else initialData = [{ number: raw, type: 'PRIMARY', isPrimary: true }];
+          if (Array.isArray(parsed)) {
+            var validP = parsed.filter(function(r) { return r && r.number && String(r.number).trim(); });
+            if (validP.length > 0) initialData = validP;
+          } else {
+            initialData = [{ number: raw.trim(), type: 'PRIMARY', isPrimary: true }];
+          }
         } catch(e) {
-          initialData = [{ number: raw, type: 'PRIMARY', isPrimary: true }];
+          initialData = [{ number: raw.trim(), type: 'PRIMARY', isPrimary: true }];
         }
       }
     {{/if}}
   } catch(e) {}
+
+  // Fallback to primaryValue if initialData is still empty
+  {{#if primaryValue}}
+    if (!initialData || initialData.length === 0) {
+      var pv = '{{primaryValue}}'.trim();
+      if (pv && pv !== 'undefined' && pv !== 'null' && pv !== 'true' && pv !== 'false') {
+        initialData = [{ number: pv, type: 'PRIMARY', isPrimary: true }];
+      }
+    }
+  {{/if}}
 
   if (!initialData || initialData.length === 0) {
     initialData = [{ number: '', type: 'PRIMARY', isPrimary: true }];
@@ -424,11 +463,13 @@
     var numberVal = (data && data.number) ? data.number : '';
     var typeVal = (data && data.type) ? data.type : (index === 0 ? 'PRIMARY' : 'PERSONAL');
     var isPrimaryVal = data ? Boolean(data.isPrimary) : (index === 0);
+    var isRequired = {{#if required}}true{{else}}false{{/if}};
+    var reqAttr = (index === 0 && isRequired) ? ' required' : '';
 
     row.innerHTML = 
       '<div class="phone-input-col">' +
         '<input type="tel" class="form-input form-control input-phone-num" ' +
-          'placeholder="01XXXXXXXXX" value="' + escapeHtml(numberVal) + '" required>' +
+          'placeholder="01XXXXXXXXX" value="' + escapeHtml(numberVal) + '"' + reqAttr + '>' +
       '</div>' +
       '<div class="phone-controls-row">' +
         '<div class="phone-type-col">' +

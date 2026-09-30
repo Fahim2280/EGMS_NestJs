@@ -86,7 +86,7 @@ export class EmployeeOrmEntity extends BaseAuditableOrmEntity {
   company: CompanyOrmEntity;
 
   @ManyToMany(() => GarageOrmEntity, (garage) => garage.employees, {
-    cascade: false,
+    cascade: true,
   })
   @JoinTable({
     name: 'employee_garages',

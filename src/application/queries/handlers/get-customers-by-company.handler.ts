@@ -35,6 +35,7 @@ export class GetCustomersByCompanyHandler
       address: c.address,
       mobileNumber: c.mobileNumber,
       phoneNumbers: c.phoneNumbers,
+      documents: c.documents,
       nidNumber: c.nidNumber,
       previousUnit: c.previousUnit,
       advanceMoney: c.advanceMoney,

@@ -31,6 +31,8 @@ export class GetEmployeesByCompanyHandler
     return employees.map((emp) => {
       const dto = this.mapper.map(emp, Employee, EmployeeResponseDto);
       dto.companyName = company?.companyName;
+      dto.phoneNumbers = emp.phoneNumbers;
+      dto.documents = emp.documents;
       return dto;
     });
   }

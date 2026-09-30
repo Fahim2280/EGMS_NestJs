@@ -11,6 +11,7 @@ import {
   translate,
   resolveMessage,
   formatNumberWithLang,
+  formatMoneyWithLang,
   formatDateWithLang,
   formatTimeWithLang,
   translateAuditDetails,
@@ -205,6 +206,11 @@ async function bootstrap() {
           decoded.canDelete = true;
           decoded.canView = true;
           decoded.garageIds = null;
+        } else {
+          decoded.isSuperAdmin = false;
+          if (!Array.isArray(decoded.garageIds)) {
+            decoded.garageIds = [];
+          }
         }
         req.user = decoded;
         res.locals.currentUser = decoded;
@@ -267,10 +273,85 @@ async function bootstrap() {
     }
     return false;
   });
+  hbs.registerHelper('add', (a: any, b: any) => Number(a || 0) + Number(b || 0));
   hbs.registerHelper('subtract', (a: any, b: any) => Number(a) - Number(b));
+  hbs.registerHelper('modulo', (a: any, b: any) => ((Math.abs(Number(a)) % Number(b)) + 1));
   hbs.registerHelper('concat', function (...args: any[]) {
     const values = args.slice(0, -1);
     return values.join('');
+  });
+  hbs.registerHelper('firstChar', function (str: any) {
+    if (!str || typeof str !== 'string') return '';
+    const trimmed = str.trim();
+    if (!trimmed) return '';
+    return trimmed.charAt(0).toUpperCase();
+  });
+  hbs.registerHelper('first', function (arr: any) {
+    if (!arr) return '';
+    if (Array.isArray(arr) && arr.length > 0) {
+      const item = arr[0];
+      if (item && typeof item === 'object') {
+        return item.number || item.value || item.name || '';
+      }
+      return item;
+    }
+    return arr;
+  });
+  hbs.registerHelper('resolvePhones', function (phones: any, fallbackNum?: any) {
+    if (Array.isArray(phones) && phones.length > 0) {
+      const valid = phones.filter((p: any) => p && p.number && String(p.number).trim());
+      if (valid.length > 0) return valid;
+    }
+    if (typeof phones === 'string' && phones.trim() && phones !== 'true' && phones !== 'false') {
+      try {
+        const parsed = JSON.parse(phones);
+        if (Array.isArray(parsed)) {
+          const valid = parsed.filter((p: any) => p && p.number && String(p.number).trim());
+          if (valid.length > 0) return valid;
+        }
+      } catch {}
+      return [{ number: phones.trim(), type: 'PRIMARY', isPrimary: true }];
+    }
+    if (fallbackNum && typeof fallbackNum === 'string' && fallbackNum.trim() && fallbackNum !== 'true' && fallbackNum !== 'false') {
+      return [{ number: fallbackNum.trim(), type: 'PRIMARY', isPrimary: true }];
+    }
+    return [];
+  });
+  hbs.registerHelper('profilePicUrl', function (entity: any) {
+    if (!entity) return null;
+    if (typeof entity === 'string') return entity.trim() ? entity : null;
+    if (entity.profilePicture) return entity.profilePicture;
+    if (entity.photoUrl) return entity.photoUrl;
+
+    const docs = Array.isArray(entity.documents) ? entity.documents : [];
+    if (!docs || docs.length === 0) return null;
+
+    // Look for document tagged as PHOTO or AVATAR or PROFILE
+    const photo = docs.slice().reverse().find((d: any) => {
+      if (!d) return false;
+      const tag = (d.tag || '').toUpperCase();
+      const isPhotoTag = tag === 'PHOTO' || tag === 'AVATAR' || tag === 'PROFILE';
+      const isImg = (d.mimeType && d.mimeType.startsWith('image/')) ||
+                    /\.(jpg|jpeg|png|webp|gif|avif)$/i.test(d.filePath || d.fileName || d.originalName || '');
+      return isPhotoTag && isImg;
+    });
+
+    if (photo && photo.filePath) {
+      return `/files/preview?path=${encodeURIComponent(photo.filePath)}&name=${encodeURIComponent(photo.fileName || photo.originalName || 'photo.jpg')}`;
+    }
+
+    // Fallback: any image document
+    const anyImg = docs.slice().reverse().find((d: any) => {
+      if (!d) return false;
+      return (d.mimeType && d.mimeType.startsWith('image/')) ||
+             /\.(jpg|jpeg|png|webp|gif|avif)$/i.test(d.filePath || d.fileName || d.originalName || '');
+    });
+
+    if (anyImg && anyImg.filePath) {
+      return `/files/preview?path=${encodeURIComponent(anyImg.filePath)}&name=${encodeURIComponent(anyImg.fileName || anyImg.originalName || 'photo.jpg')}`;
+    }
+
+    return null;
   });
   hbs.registerHelper('formatFileSize', function (bytes: any) {
     const num = Number(bytes);
@@ -303,6 +384,12 @@ async function bootstrap() {
   hbs.registerHelper('bnNum', function (val: any, options: any) {
     const lang = options?.data?.root?.lang || 'en';
     return formatNumberWithLang(val, lang);
+  });
+
+  // bnMoney: always 2 decimal places — use for money, meter readings, unit amounts
+  hbs.registerHelper('bnMoney', function (val: any, options: any) {
+    const lang = options?.data?.root?.lang || 'en';
+    return formatMoneyWithLang(val, lang);
   });
 
   hbs.registerHelper('tDate', function (date: any, options: any) {
@@ -375,11 +462,10 @@ async function bootstrap() {
     };
 
     const mainLabel = isBn ? item.labelBn : item.labelEn;
-    const subLabel = isBn ? `<span style="opacity:0.7;font-size:0.68rem;margin-left:4px;font-weight:600;">${item.labelEn}</span>` : '';
 
     return new (hbs as any).handlebars.SafeString(
-      `<span class="badge" style="background: ${item.bg}; color: ${item.color}; border: 1px solid ${item.border}; font-weight: 700; padding: 0.3rem 0.65rem; border-radius: 6px; font-size: 0.78rem; display: inline-flex; align-items: center; gap: 4px;">
-        <span>${item.icon}</span> <span>${mainLabel}</span>${subLabel}
+      `<span class="badge" style="background: ${item.bg}; color: ${item.color}; border: 1px solid ${item.border}; font-weight: 700; padding: 0.25rem 0.6rem; border-radius: 6px; font-size: 0.78rem; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;">
+        <span>${item.icon}</span> <span>${mainLabel}</span>
       </span>`,
     );
   });
@@ -389,21 +475,20 @@ async function bootstrap() {
     const isBn = lang === 'bn';
 
     const entities: Record<string, { labelBn: string; labelEn: string; icon: string }> = {
-      CUSTOMER: { labelBn: 'গ্রাহক', labelEn: 'CUSTOMER', icon: '👥' },
-      ELECTRIC_BILL: { labelBn: 'বিদ্যুৎ বিল', labelEn: 'BILL', icon: '⚡' },
-      GARAGE: { labelBn: 'গ্যারেজ', labelEn: 'GARAGE', icon: '🏢' },
-      EMPLOYEE: { labelBn: 'কর্মকর্তা', labelEn: 'EMPLOYEE', icon: '🧑‍💼' },
-      AUTH: { labelBn: 'নিরাপত্তা', labelEn: 'AUTH', icon: '🔐' },
-      COMPANY: { labelBn: 'কোম্পানি', labelEn: 'COMPANY', icon: '🏛️' },
+      CUSTOMER: { labelBn: 'গ্রাহক', labelEn: 'Customer', icon: '👥' },
+      ELECTRIC_BILL: { labelBn: 'বিদ্যুৎ বিল', labelEn: 'Electric Bill', icon: '⚡' },
+      GARAGE: { labelBn: 'গ্যারেজ', labelEn: 'Garage', icon: '🏢' },
+      EMPLOYEE: { labelBn: 'কর্মকর্তা', labelEn: 'Employee', icon: '🧑‍💼' },
+      AUTH: { labelBn: 'নিরাপত্তা', labelEn: 'Auth', icon: '🔐' },
+      COMPANY: { labelBn: 'কোম্পানি', labelEn: 'Company', icon: '🏛️' },
     };
 
     const item = entities[entityType] || { labelBn: entityType, labelEn: entityType, icon: '🏷️' };
     const mainLabel = isBn ? item.labelBn : item.labelEn;
-    const subLabel = isBn ? `<span style="opacity:0.7;font-size:0.65rem;margin-left:4px;font-weight:600;">${item.labelEn}</span>` : '';
 
     return new (hbs as any).handlebars.SafeString(
-      `<span class="badge" style="background: rgba(99, 102, 241, 0.12); color: #a5b4fc; border: 1px solid rgba(99, 102, 241, 0.25); font-size: 0.72rem; font-weight: 600; padding: 2px 7px; border-radius: 4px; display: inline-flex; align-items: center; gap: 3px;">
-        <span>${item.icon}</span> <span>${mainLabel}</span>${subLabel}
+      `<span class="badge" style="background: rgba(99, 102, 241, 0.12); color: #818cf8; border: 1px solid rgba(99, 102, 241, 0.25); font-size: 0.74rem; font-weight: 600; padding: 2px 7px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;">
+        <span>${item.icon}</span> <span>${mainLabel}</span>
       </span>`,
     );
   });

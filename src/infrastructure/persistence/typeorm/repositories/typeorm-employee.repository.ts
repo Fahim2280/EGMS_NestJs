@@ -59,19 +59,35 @@ export class TypeOrmEmployeeRepository
 
   async saveWithGarages(employee: Employee, garageIds: string[]): Promise<Employee> {
     const orm = this.toOrm(employee);
-    if (garageIds && Array.isArray(garageIds)) {
-      if (garageIds.length > 0) {
-        orm.permittedGarages = await this.garageRepo.findBy({
+
+    await this.employeeRepo.manager.transaction(async (manager) => {
+      // 1. Save core employee fields
+      await manager.getRepository(EmployeeOrmEntity).save(orm);
+
+      // 2. Clear previous associations in join table
+      await manager.query('DELETE FROM employee_garages WHERE employeeId = ?', [
+        employee.id,
+      ]);
+
+      // 3. Insert newly selected garage associations
+      if (garageIds && Array.isArray(garageIds) && garageIds.length > 0) {
+        const validGarages = await manager.getRepository(GarageOrmEntity).findBy({
           id: In(garageIds),
           companyId: employee.companyId,
           isDeleted: false,
         });
-      } else {
-        orm.permittedGarages = [];
+
+        for (const g of validGarages) {
+          await manager.query(
+            'INSERT INTO employee_garages (employeeId, garageId) VALUES (?, ?)',
+            [employee.id, g.id],
+          );
+        }
       }
-    }
-    const saved = await this.employeeRepo.save(orm);
-    return this.toDomain(saved);
+    });
+
+    const updated = await this.findById(employee.id);
+    return updated || employee;
   }
 
   protected toDomain(orm: EmployeeOrmEntity): Employee {

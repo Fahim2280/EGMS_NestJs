@@ -21,7 +21,9 @@
         <div class="alert alert-danger" style="margin-bottom:1.5rem;">{{error}}</div>
       {{/if}}
 
-      <form method="POST" action="/employees/{{employee.id}}/edit" enctype="multipart/form-data">
+      <form id="employeeEditForm" method="POST" action="/employees/{{employee.id}}/edit" enctype="multipart/form-data">
+        {{> profile-avatar-uploader avatarId="employeeAvatar" fieldName="avatarFile" initialPhotoUrl=(profilePicUrl employee) initialInitials=(firstChar employee.name) title=(t 'profile.picture') hint=(t 'profile.pictureHint')}}
+
         <div class="form-group">
           <label class="form-label">{{#if isBn}}পুরো নাম{{else}}Full Name{{/if}} <span class="required">*</span></label>
           <input type="text" name="name" class="form-control" value="{{employee.name}}" required minlength="2" placeholder="{{#if isBn}}পুরো নাম{{else}}Full name{{/if}}">
@@ -38,7 +40,7 @@
           <input type="text" name="nidNumber" class="form-control" value="{{employee.nidNumber}}" required placeholder="{{#if isBn}}জাতীয় পরিচয়পত্র নম্বর{{else}}National ID Number{{/if}}">
         </div>
 
-        {{> phone-repeater containerId="employeeEditPhones" primaryFieldName="phoneNumber" jsonFieldName="phoneNumbersJson" initialPhones=(or employee.phoneNumbers employee.phoneNumber) required=true}}
+        {{> phone-repeater containerId="employeeEditPhones" primaryFieldName="phoneNumber" primaryValue=employee.phoneNumber jsonFieldName="phoneNumbersJson" initialPhones=(resolvePhones employee.phoneNumbers employee.phoneNumber) required=true}}
 
         <div class="form-group">
           <label class="form-label">{{#if isBn}}ঠিকানা{{else}}Address{{/if}} <span class="required">*</span></label>
@@ -73,7 +75,7 @@
 
         <div style="display:flex;gap:1rem;justify-content:flex-end;margin-top:1.5rem;">
           <a href="/employees/{{employee.id}}" class="btn btn-outline">{{t 'common.cancel'}}</a>
-          <button type="submit" class="btn btn-primary">💾 {{t 'customers.saveChanges'}}</button>
+          <button type="submit" form="employeeEditForm" class="btn btn-primary">💾 {{t 'customers.saveChanges'}}</button>
         </div>
       </form>
     </div>

@@ -87,15 +87,55 @@ export class EmployeeController {
   ) {
     const user = (req as any).user;
     try {
-      // Upload employee's own documents (files field only)
-      const employeeFiles = (files || []).filter((f: any) => f.fieldname === 'files');
-      if (employeeFiles.length > 0) {
+      // Process multi-category document slots (employeeDocFiles_0, employeeDocFiles_1, ...) + legacy 'files'
+      const employeeUploadedDocs: any[] = [];
+      const MAX_DOC_SLOTS = 15;
+      for (let i = 0; i < MAX_DOC_SLOTS; i++) {
+        const slotFieldName = `employeeDocFiles_${i}`;
+        const slotFiles = (files || []).filter((f: any) => f.fieldname === slotFieldName);
+        if (slotFiles.length > 0) {
+          const rawTag = (dto as any)[`employeeDocType_${i}`] || (req.body && req.body[`employeeDocType_${i}`]) || 'GENERAL';
+          const tags = slotFiles.map(() => rawTag);
+          const uploaded = await this.fileService.uploadFiles(
+            slotFiles,
+            'employees',
+            tags,
+            `${user.sub || user.companyId}|${user.role || 'SUPER_ADMIN'}`,
+          );
+          employeeUploadedDocs.push(...uploaded);
+        }
+      }
+
+      // Legacy fallback: single 'files' field upload
+      const legacyEmployeeFiles = (files || []).filter((f: any) => f.fieldname === 'files');
+      if (legacyEmployeeFiles.length > 0) {
         const uploadedDocs = await this.fileService.uploadFiles(
-          employeeFiles,
+          legacyEmployeeFiles,
           'employees',
           (dto as any).documentType || 'GENERAL',
+          `${user.sub || user.companyId}|${user.role || 'SUPER_ADMIN'}`,
         );
-        dto.documents = uploadedDocs;
+        employeeUploadedDocs.push(...uploadedDocs);
+      }
+
+      // Process dedicated profile picture avatar upload (avatarFile)
+      const avatarFile = (files || []).find((f: any) => f.fieldname === 'avatarFile' || f.fieldname === 'profilePicture');
+      if (avatarFile && avatarFile.buffer && avatarFile.buffer.length > 0) {
+        try {
+          const uploadedPhoto = await this.fileService.uploadFile(
+            avatarFile,
+            'employees',
+            'PHOTO',
+            `${user.sub || user.companyId}|${user.role || 'SUPER_ADMIN'}`,
+          );
+          employeeUploadedDocs.unshift(uploadedPhoto);
+        } catch (photoErr: any) {
+          console.warn('Employee avatar upload failed:', photoErr?.message);
+        }
+      }
+
+      if (employeeUploadedDocs.length > 0) {
+        dto.documents = employeeUploadedDocs;
       }
 
       const createdEmployee = await this.commandBus.execute(
@@ -114,7 +154,9 @@ export class EmployeeController {
                   name: g.name.trim(),
                   relationship: g.relationship?.trim(),
                   mobileNumber: g.mobileNumber?.trim() || g.phoneNumber?.trim(),
-                  phoneNumbersJson: g.phoneNumbersJson,
+                  phoneNumbers: g.phoneNumbers,
+                  phoneNumbersJson: g.phoneNumbersJson || (g.phoneNumbers ? JSON.stringify(g.phoneNumbers) : undefined),
+                  documentType: g.documentType,
                   nidNumber: g.nidNumber.trim(),
                   fatherName: g.fatherName?.trim(),
                   motherName: g.motherName?.trim(),
@@ -140,6 +182,7 @@ export class EmployeeController {
           relationship: dto.guarantorRelationship?.trim(),
           mobileNumber: dto.guarantorMobileNumber?.trim(),
           phoneNumbersJson: dto.guarantorPhoneNumbersJson,
+          documentType: dto.guarantorDocumentType || (req.body as any)?.guarantorDocType_0 || (req.body as any)?.guarantorDocumentType || 'GENERAL',
           nidNumber: dto.guarantorNidNumber.trim(),
           fatherName: dto.guarantorFatherName?.trim(),
           motherName: dto.guarantorMotherName?.trim(),
@@ -166,15 +209,39 @@ export class EmployeeController {
         }
       }
 
-      // Upload per-guarantor documents (guarantorFiles_0, guarantorFiles_1, ...)
+      // Upload per-guarantor documents (both multi-slot guarantor_${index}_docFiles_${slot} and legacy guarantorFiles_${index})
       for (const { index, guarantor } of createdGuarantors) {
-        const gFiles = (files || []).filter((f: any) => f.fieldname === `guarantorFiles_${index}`);
-        if (gFiles.length > 0) {
+        const gFilesToUpload: any[] = [];
+        const gFileCategories: string[] = [];
+
+        // Check categorized slots for this guarantor (slots 0..15)
+        for (let s = 0; s < 15; s++) {
+          const slotFiles = (files || []).filter((f: any) => f.fieldname === `guarantor_${index}_docFiles_${s}`);
+          if (slotFiles.length > 0) {
+            const slotCat = ((req.body as any)?.[`guarantor_${index}_docType_${s}`] || 'GENERAL').trim();
+            for (const f of slotFiles) {
+              gFilesToUpload.push(f);
+              gFileCategories.push(slotCat);
+            }
+          }
+        }
+
+        // Legacy fallback: guarantorFiles_${index}
+        const legacyGFiles = (files || []).filter((f: any) => f.fieldname === `guarantorFiles_${index}`);
+        if (legacyGFiles.length > 0) {
+          const rawDocType = ((req.body as any)?.[`guarantorDocType_${index}`] || guarantorsToCreate[index]?.documentType || 'GENERAL').trim();
+          for (const f of legacyGFiles) {
+            gFilesToUpload.push(f);
+            gFileCategories.push(rawDocType);
+          }
+        }
+
+        if (gFilesToUpload.length > 0) {
           try {
             const uploadedDocs = await this.fileService.uploadFiles(
-              gFiles,
+              gFilesToUpload,
               'guarantors',
-              'GENERAL',
+              gFileCategories,
               user.name || user.email,
             );
             for (const doc of uploadedDocs) {
@@ -388,7 +455,7 @@ export class EmployeeController {
   }
 
   @Post(':id/edit')
-  @UseInterceptors(FilesInterceptor('files', 10, { limits: { fileSize: 25 * 1024 * 1024 } }))
+  @UseInterceptors(AnyFilesInterceptor({ limits: { fileSize: 25 * 1024 * 1024 } }))
   async handleEdit(
     @Param('id') id: string,
     @Body() body: any,
@@ -402,18 +469,51 @@ export class EmployeeController {
       const primaryPhone = phones.find((p) => p.isPrimary) || phones[0];
       const phoneToUse = primaryPhone ? primaryPhone.number : body.phoneNumber;
 
-      let documentsToSet = undefined;
-      if (files && files.length > 0) {
-        const existingEmployee = await this.queryBus.execute(
-          new GetEmployeeByIdQuery(id, user.companyId),
-        );
+      let documentsToSet: any[] | undefined = undefined;
+      const existingEmployee = await this.queryBus.execute(
+        new GetEmployeeByIdQuery(id, user.companyId),
+      );
+      let existingDocs = existingEmployee?.documents ? [...existingEmployee.documents] : [];
+      let docsModified = false;
+
+      // Check if removeAvatar requested
+      if (body.removeAvatar === 'true') {
+        existingDocs = existingDocs.filter((d: any) => d.tag !== 'PHOTO' && d.tag !== 'AVATAR');
+        docsModified = true;
+      }
+
+      // Process dedicated profile picture avatar upload (avatarFile)
+      const avatarFile = (files || []).find((f: any) => f.fieldname === 'avatarFile' || f.fieldname === 'profilePicture');
+      if (avatarFile && avatarFile.buffer && avatarFile.buffer.length > 0) {
+        try {
+          const uploadedPhoto = await this.fileService.uploadFile(
+            avatarFile,
+            'employees',
+            'PHOTO',
+            `${user.sub || user.companyId}|${user.role || 'SUPER_ADMIN'}`,
+          );
+          // Remove old photo doc and prepend new one
+          existingDocs = existingDocs.filter((d: any) => d.tag !== 'PHOTO' && d.tag !== 'AVATAR');
+          existingDocs.unshift(uploadedPhoto);
+          docsModified = true;
+        } catch (photoErr: any) {
+          console.warn('Employee avatar update failed:', photoErr?.message);
+        }
+      }
+
+      const regularFiles = (files || []).filter((f: any) => f.fieldname === 'files');
+      if (regularFiles.length > 0) {
         const uploadedDocs = await this.fileService.uploadFiles(
-          files,
+          regularFiles,
           'employees',
           body.documentType || 'GENERAL',
         );
-        const existingDocs = existingEmployee?.documents || [];
-        documentsToSet = [...existingDocs, ...uploadedDocs];
+        existingDocs.push(...uploadedDocs);
+        docsModified = true;
+      }
+
+      if (docsModified) {
+        documentsToSet = existingDocs;
       }
 
       await this.commandBus.execute(
@@ -500,7 +600,7 @@ export class EmployeeController {
 
   // --- CREATE EMPLOYEE GUARANTOR ---
   @Post(':id/guarantors')
-  @UseInterceptors(FilesInterceptor('files', 10, { limits: { fileSize: 25 * 1024 * 1024 } }))
+  @UseInterceptors(AnyFilesInterceptor({ limits: { fileSize: 25 * 1024 * 1024 } }))
   async handleCreateGuarantor(
     @Param('id') employeeId: string,
     @Body() dto: CreateGuarantorDto,
@@ -511,11 +611,38 @@ export class EmployeeController {
     const user = (req as any).user;
 
     try {
-      if (files && files.length > 0) {
+      const allFiles = files || [];
+      const filesToUpload: any[] = [];
+      const categories: string[] = [];
+
+      // Categorized slots (guarantorDocFiles_0, guarantorDocFiles_1, ...)
+      for (let s = 0; s < 15; s++) {
+        const slotFiles = allFiles.filter((f: any) => f.fieldname === `guarantorDocFiles_${s}`);
+        if (slotFiles.length > 0) {
+          const slotCat = ((req.body as any)?.[`guarantorDocType_${s}`] || 'GENERAL').trim();
+          for (const f of slotFiles) {
+            filesToUpload.push(f);
+            categories.push(slotCat);
+          }
+        }
+      }
+
+      // Legacy fallback (files)
+      const legacyFiles = allFiles.filter((f: any) => f.fieldname === 'files');
+      if (legacyFiles.length > 0) {
+        const legacyCat = (dto.documentType || (req.body as any)?.documentType || (req.body as any)?.type || 'GENERAL').trim();
+        for (const f of legacyFiles) {
+          filesToUpload.push(f);
+          categories.push(legacyCat);
+        }
+      }
+
+      if (filesToUpload.length > 0) {
         const uploadedDocs = await this.fileService.uploadFiles(
-          files,
+          filesToUpload,
           'guarantors',
-          (dto as any).documentType || 'GENERAL',
+          categories,
+          user.name || user.email,
         );
         dto.documents = uploadedDocs;
       }
@@ -588,7 +715,7 @@ export class EmployeeController {
 
   // --- UPDATE EMPLOYEE GUARANTOR ---
   @Post(':id/guarantors/:guarantorId')
-  @UseInterceptors(FilesInterceptor('files', 10, { limits: { fileSize: 25 * 1024 * 1024 } }))
+  @UseInterceptors(AnyFilesInterceptor({ limits: { fileSize: 25 * 1024 * 1024 } }))
   async handleUpdateGuarantor(
     @Param('id') employeeId: string,
     @Param('guarantorId') guarantorId: string,
@@ -600,11 +727,38 @@ export class EmployeeController {
     const user = (req as any).user;
 
     try {
-      if (files && files.length > 0) {
+      const allFiles = files || [];
+      const filesToUpload: any[] = [];
+      const categories: string[] = [];
+
+      // Categorized slots (guarantorDocFiles_0, guarantorDocFiles_1, ...)
+      for (let s = 0; s < 15; s++) {
+        const slotFiles = allFiles.filter((f: any) => f.fieldname === `guarantorDocFiles_${s}`);
+        if (slotFiles.length > 0) {
+          const slotCat = ((req.body as any)?.[`guarantorDocType_${s}`] || 'GENERAL').trim();
+          for (const f of slotFiles) {
+            filesToUpload.push(f);
+            categories.push(slotCat);
+          }
+        }
+      }
+
+      // Legacy fallback (files)
+      const legacyFiles = allFiles.filter((f: any) => f.fieldname === 'files');
+      if (legacyFiles.length > 0) {
+        const legacyCat = ((dto as any).documentType || (req.body as any)?.documentType || 'GENERAL').trim();
+        for (const f of legacyFiles) {
+          filesToUpload.push(f);
+          categories.push(legacyCat);
+        }
+      }
+
+      if (filesToUpload.length > 0) {
         const uploadedDocs = await this.fileService.uploadFiles(
-          files,
+          filesToUpload,
           'guarantors',
-          (dto as any).documentType || 'GENERAL',
+          categories,
+          user.name || user.email,
         );
         const guarantors = await this.queryBus.execute(
           new GetGuarantorsByEmployeeQuery(employeeId, user.companyId),

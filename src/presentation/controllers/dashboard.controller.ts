@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Req, Res } from '@nestjs/common';
+import { Controller, Get, Param, Req, Res, UseGuards } from '@nestjs/common';
 import { QueryBus } from '@nestjs/cqrs';
 import { Request, Response } from 'express';
 import { GetCompanyByIdQuery } from '@application/queries/impl/get-company-by-id.query';
@@ -6,12 +6,14 @@ import { GetGaragesByCompanyQuery } from '@application/queries/impl/get-garages-
 import { GetEmployeesByCompanyQuery } from '@application/queries/impl/get-employees-by-company.query';
 import { GetDashboardStatsQuery } from '@application/queries/impl/get-dashboard-stats.query';
 import { GetExecutiveDashboardQuery } from '@application/queries/impl/get-executive-dashboard.query';
+import { JwtAuthGuard } from '@infrastructure/auth/jwt-auth.guard';
 
 @Controller()
 export class DashboardController {
   constructor(private readonly queryBus: QueryBus) {}
 
   @Get()
+  @UseGuards(JwtAuthGuard)
   async renderDashboard(@Req() req: Request, @Res() res: Response) {
     const user = (req as any).user;
     if (!user) {

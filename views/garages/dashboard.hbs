@@ -202,73 +202,239 @@
 </div>
 
 <!-- Section 1: Facility Customer Roster -->
-<div class="card" style="margin-bottom: 2rem;">
-  <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
-    <div>
-      <h2 class="card-title" style="margin: 0;">{{t 'garages.assignedCustomers'}} ({{bnNum customers.length}})</h2>
-      <p style="color: var(--color-text-muted); font-size: 0.85rem; margin: 0.25rem 0 0 0;">{{garage.garageName}}</p>
+<div class="card" style="margin-bottom: 2rem; padding: 0; overflow: hidden; border-radius: var(--radius-lg); box-shadow: var(--shadow-sm);">
+  <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; padding: 1.15rem 1.4rem; border-bottom: 1px solid var(--color-border); background: rgba(15, 23, 42, 0.4);">
+    <div style="display: flex; align-items: center; gap: 0.65rem;">
+      <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; background: rgba(99, 102, 241, 0.15); color: #818cf8;">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </span>
+      <div>
+        <h2 style="margin: 0; font-size: 1.15rem; font-weight: 700; color: var(--color-text-primary); display: flex; align-items: center; gap: 0.45rem;">
+          {{t 'garages.assignedCustomers'}}
+          <span class="badge" style="background: rgba(99, 102, 241, 0.15); color: #818cf8; font-size: 0.8rem; padding: 2px 8px; border-radius: 9999px;">
+            {{bnNum customers.length}}
+          </span>
+        </h2>
+        <p style="color: var(--color-text-muted); font-size: 0.8rem; margin: 0.15rem 0 0 0;">{{garage.garageName}}</p>
+      </div>
     </div>
-    <a href="/customers/new?garageId={{garage.id}}" class="btn btn-primary btn-sm">
-      + {{t 'nav.addCustomer'}}
-    </a>
+    <div>
+      <a href="/customers/new?garageId={{garage.id}}" class="btn btn-primary btn-sm" style="display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 600;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        {{t 'nav.addCustomer'}}
+      </a>
+    </div>
   </div>
 
   {{#if customers.length}}
-    <div class="table-responsive">
-      <table class="data-table table-dense">
+    <!-- Desktop Customers Table (> 768px) -->
+    <div class="table-responsive desktop-customers-table">
+      <table class="data-table bills-ledger-table">
         <thead>
           <tr>
-            <th>{{t 'customers.id'}}</th>
+            <th style="width: 75px;">{{t 'customers.id'}}</th>
             <th>{{t 'customers.name'}}</th>
-            <th>{{t 'customers.mobile'}}</th>
+            <th style="width: 135px;">{{t 'customers.mobile'}}</th>
             <th>{{t 'customers.address'}}</th>
-            <th>{{t 'customers.baselineMeter'}}</th>
-            <th>{{t 'customers.advanceMoney'}}</th>
-            <th>{{t 'customers.presentDues'}}</th>
-            <th>{{t 'customers.lastBill'}}</th>
-            <th style="text-align: right;">{{t 'common.actions'}}</th>
+            <th class="th-num" style="width: 100px; text-align: right;">{{t 'customers.baselineMeter'}}</th>
+            <th class="th-num" style="width: 105px; text-align: right;">{{t 'customers.advanceMoney'}}</th>
+            <th class="th-num" style="width: 125px; text-align: right; white-space: nowrap;">{{t 'customers.presentDues'}}</th>
+            <th style="width: 110px; text-align: center; white-space: nowrap;">{{t 'customers.lastBill'}}</th>
+            <th style="width: 95px; text-align: right;">{{t 'common.actions'}}</th>
           </tr>
         </thead>
         <tbody>
           {{#each customers}}
-            <tr>
-              <td><span class="badge" style="background: rgba(99, 102, 241, 0.15); color: #818cf8;">#{{#if this.cId}}{{bnNum this.cId}}{{else}}{{bnNum this.id}}{{/if}}</span></td>
+            <tr class="{{#unless this.isActive}}row-suspended-customer{{/unless}}" style="border-bottom: 1px solid var(--color-border); transition: background 0.15s;">
               <td>
-                <div style="font-weight: 600; color: var(--color-text-primary);">{{this.name}}</div>
+                <span class="badge-cid">#{{#if this.cId}}{{bnNum this.cId}}{{else}}{{this.id}}{{/if}}</span>
               </td>
-              <td>{{this.mobileNumber}}</td>
-              <td style="color: var(--color-text-muted); font-size: 0.85rem; max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{this.address}}</td>
-              <td><strong>{{bnNum this.previousUnit}}</strong> {{t 'common.unitShort'}}</td>
-              <td><span style="color: #10b981; font-weight: 600;">{{t 'common.currency'}}{{bnNum this.advanceMoney}}</span></td>
               <td>
-                <span style="font-weight: 700; {{#if (ne this.presentDues 0)}}color: #ef4444;{{else}}color: #10b981;{{/if}}">
-                  {{t 'common.currency'}}{{bnNum this.presentDues}}
-                </span>
+                <div class="table-avatar-cell">
+                  <div class="table-avatar-initials avatar-gradient-{{modulo @index 5}}">
+                    {{firstChar this.name}}
+                  </div>
+                  <div class="table-cust-meta">
+                    <div class="cust-name-row">
+                      <a href="/customers/{{this.id}}" class="customer-name-link font-semibold">{{this.name}}</a>
+                      {{#if this.customerCode}}
+                        <span class="table-code-badge" style="font-size: 0.72rem;">{{this.customerCode}}</span>
+                      {{/if}}
+                      {{#unless this.isActive}}
+                        <span class="badge-mini-tag badge-suspended">🚫 {{t 'customers.suspended'}}</span>
+                      {{/unless}}
+                    </div>
+                  </div>
+                </div>
               </td>
-              <td style="color: var(--color-text-muted); font-size: 0.85rem;">
-                {{#if this.lastBillDate}}
-                  {{tDate this.lastBillDate}}
+              <td>
+                <div class="cell-phone-group">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--color-text-muted);"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                  <span style="font-family: monospace; font-size: 0.84rem;">{{this.mobileNumber}}</span>
+                </div>
+              </td>
+              <td>
+                <div style="color: var(--color-text-secondary); font-size: 0.82rem; max-width: 220px; white-space: normal; line-height: 1.35;">
+                  {{#if this.address}}
+                    <span title="{{this.address}}">{{this.address}}</span>
+                  {{else}}
+                    <span class="cell-dash">—</span>
+                  {{/if}}
+                </div>
+              </td>
+              <td class="cell-num" style="text-align: right;">
+                <span class="cell-meter-val"><strong>{{bnNum this.previousUnit}}</strong> <small class="text-muted">{{t 'common.unitShort'}}</small></span>
+              </td>
+              <td class="cell-num" style="text-align: right;">
+                {{#if (gt this.advanceMoney 0)}}
+                  <span class="dues-badge dues-advance">
+                    ৳{{bnMoney this.advanceMoney}}
+                  </span>
                 {{else}}
-                  <span style="color: var(--color-text-dim);">{{t 'common.na'}}</span>
+                  <span class="cell-dash">—</span>
                 {{/if}}
               </td>
-              <td style="text-align: right;">
+              <td class="cell-num" style="text-align: right; white-space: nowrap;">
+                {{#if (gt this.presentDues 0)}}
+                  <span class="dues-badge dues-has-due">
+                    ৳{{bnMoney this.presentDues}}
+                  </span>
+                {{else if (lt this.presentDues 0)}}
+                  <span class="dues-badge dues-advance">
+                    ৳{{bnMoney (subtract 0 this.presentDues)}} {{#if ../isBn}}অগ্রিম{{else}}Adv{{/if}}
+                  </span>
+                {{else}}
+                  <span class="dues-badge dues-cleared">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                    {{#if ../isBn}}পরিশোধিত{{else}}Cleared{{/if}}
+                  </span>
+                {{/if}}
+              </td>
+              <td style="text-align: center; white-space: nowrap;">
+                {{#if this.lastBillDate}}
+                  <span class="date-badge-pill">{{tDate this.lastBillDate}}</span>
+                {{else}}
+                  <span class="cell-dash" title="{{t 'common.na'}}">—</span>
+                {{/if}}
+              </td>
+              <td style="text-align: right; white-space: nowrap;">
                 <div class="table-actions-group">
                   <a href="/customers/{{this.id}}" class="btn btn-secondary btn-icon-action" title="{{t 'common.view'}}" aria-label="{{t 'common.view'}}">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                   </a>
-                  <a href="/bills/new?customerId={{this.id}}" class="btn btn-primary btn-icon-action" style="background: #10b981; border-color: #10b981;" title="{{t 'bills.newBill'}}" aria-label="{{t 'bills.newBill'}}">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-                  </a>
-                  <a href="/customers/{{this.id}}/edit" class="btn btn-secondary btn-icon-action" title="{{t 'common.edit'}}" aria-label="{{t 'common.edit'}}">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                  </a>
+                  {{#if (or ../isSuperAdmin ../currentUser.canCreate)}}
+                    {{#if (ne this.isActive false)}}
+                      <a href="/bills/new?customerId={{this.id}}" class="btn btn-icon-action btn-action-bill" title="{{t 'bills.newBill'}}" aria-label="{{t 'bills.newBill'}}">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                      </a>
+                    {{else}}
+                      <button type="button" class="btn btn-secondary btn-icon-action" style="opacity: 0.35; cursor: not-allowed;" title="{{t 'customers.suspendedNoticeShort'}}" disabled>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                      </button>
+                    {{/if}}
+                  {{/if}}
+                  {{#if (or ../isSuperAdmin ../currentUser.canEdit)}}
+                    <a href="/customers/{{this.id}}/edit" class="btn btn-secondary btn-icon-action btn-action-edit" title="{{t 'common.edit'}}" aria-label="{{t 'common.edit'}}">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </a>
+                  {{/if}}
                 </div>
               </td>
             </tr>
           {{/each}}
         </tbody>
       </table>
+    </div>
+
+    <!-- Mobile Customers Cards (<= 768px) -->
+    <div class="mobile-customers-cards" style="padding: 0.85rem;">
+      {{#each customers}}
+        <div class="mobile-customer-card {{#if this.isActive}}mcc-active{{else}}mcc-suspended{{/if}}" style="margin-bottom: 0.75rem;">
+          <!-- Card Header -->
+          <div class="mcc-header">
+            <div class="table-avatar-initials avatar-gradient-{{modulo @index 5}}" style="width: 36px; height: 36px; font-size: 0.85rem; flex-shrink: 0;">
+              {{firstChar this.name}}
+            </div>
+            <div class="mcc-info">
+              <div class="mcc-name-row">
+                <a href="/customers/{{this.id}}" class="mcc-name">{{this.name}}</a>
+              </div>
+              <div class="mcc-id-badges">
+                <span class="badge-cid">#{{#if this.cId}}{{bnNum this.cId}}{{else}}{{this.id}}{{/if}}</span>
+                {{#if this.customerCode}}
+                  <span class="table-code-badge">{{this.customerCode}}</span>
+                {{/if}}
+              </div>
+            </div>
+            <div class="mcc-status-col">
+              {{#if (gt this.presentDues 0)}}
+                <span class="dues-badge dues-has-due">৳{{bnMoney this.presentDues}}</span>
+              {{else if (lt this.presentDues 0)}}
+                <span class="dues-badge dues-advance">৳{{bnMoney (subtract 0 this.presentDues)}} {{#if ../isBn}}অগ্রিম{{else}}Adv{{/if}}</span>
+              {{else}}
+                <span class="dues-badge dues-cleared">✓ {{#if ../isBn}}পরিশোধিত{{else}}Cleared{{/if}}</span>
+              {{/if}}
+            </div>
+          </div>
+
+          <!-- Middle Meta Row: Phone & Address -->
+          <div class="mcc-middle-row">
+            <a href="tel:{{this.mobileNumber}}" class="mcc-phone-link">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              <span>{{this.mobileNumber}}</span>
+            </a>
+            {{#if this.lastBillDate}}
+              <span class="date-badge-pill" style="font-size: 0.73rem;">{{tDate this.lastBillDate}}</span>
+            {{/if}}
+          </div>
+
+          <!-- Stats Grid -->
+          <div class="mcc-grid">
+            <div class="mcc-stat-box">
+              <span class="mcc-stat-lbl">{{t 'customers.baselineMeter'}}</span>
+              <span class="mcc-stat-val"><strong>{{bnNum this.previousUnit}}</strong> {{t 'common.unitShort'}}</span>
+            </div>
+            <div class="mcc-stat-box">
+              <span class="mcc-stat-lbl">{{t 'customers.advanceMoney'}}</span>
+              <span class="mcc-stat-val {{#if (gt this.advanceMoney 0)}}text-success{{/if}} font-bold">
+                {{#if (gt this.advanceMoney 0)}}৳{{bnMoney this.advanceMoney}}{{else}}—{{/if}}
+              </span>
+            </div>
+            {{#if this.address}}
+              <div class="mcc-stat-box" style="grid-column: 1 / -1;">
+                <span class="mcc-stat-lbl">{{t 'customers.address'}}</span>
+                <span class="mcc-stat-val" style="font-size: 0.8rem; font-family: inherit; font-weight: normal; white-space: normal;">{{this.address}}</span>
+              </div>
+            {{/if}}
+          </div>
+
+          <!-- Footer Actions -->
+          <div class="mcc-footer" style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              {{#unless this.isActive}}
+                <span class="badge-mini-tag badge-suspended">🚫 {{t 'customers.suspended'}}</span>
+              {{/unless}}
+            </div>
+            <div class="table-actions-group">
+              <a href="/customers/{{this.id}}" class="btn btn-secondary btn-icon-action" title="{{t 'common.view'}}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </a>
+              {{#if (or ../isSuperAdmin ../currentUser.canCreate)}}
+                {{#if this.isActive}}
+                  <a href="/bills/new?customerId={{this.id}}" class="btn btn-icon-action btn-action-bill" title="{{t 'bills.newBill'}}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                  </a>
+                {{/if}}
+              {{/if}}
+              {{#if (or ../isSuperAdmin ../currentUser.canEdit)}}
+                <a href="/customers/{{this.id}}/edit" class="btn btn-secondary btn-icon-action btn-action-edit" title="{{t 'common.edit'}}">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                </a>
+              {{/if}}
+            </div>
+          </div>
+        </div>
+      {{/each}}
     </div>
   {{else}}
     <div style="text-align: center; padding: 3rem 1rem;">
@@ -283,68 +449,187 @@
 </div>
 
 <!-- Section 2: Recent Electric Billing Ledger -->
-<div class="card">
-  <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
-    <div>
-      <h2 class="card-title" style="margin: 0;">{{t 'garages.recentBills'}} ({{bnNum recentBills.length}})</h2>
-      <p style="color: var(--color-text-muted); font-size: 0.85rem; margin: 0.25rem 0 0 0;">{{garage.garageName}}</p>
+<div class="card" style="margin-bottom: 2rem; padding: 0; overflow: hidden; border-radius: var(--radius-lg); box-shadow: var(--shadow-sm);">
+  <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; padding: 1.15rem 1.4rem; border-bottom: 1px solid var(--color-border); background: rgba(15, 23, 42, 0.4);">
+    <div style="display: flex; align-items: center; gap: 0.65rem;">
+      <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; background: rgba(56, 189, 248, 0.15); color: #38bdf8;">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      </span>
+      <div>
+        <h2 style="margin: 0; font-size: 1.15rem; font-weight: 700; color: var(--color-text-primary); display: flex; align-items: center; gap: 0.45rem;">
+          {{t 'garages.recentBills'}}
+          <span class="badge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; font-size: 0.8rem; padding: 2px 8px; border-radius: 9999px;">
+            {{bnNum recentBills.length}}
+          </span>
+        </h2>
+        <p style="color: var(--color-text-muted); font-size: 0.8rem; margin: 0.15rem 0 0 0;">{{garage.garageName}}</p>
+      </div>
     </div>
-    <a href="/bills/new" class="btn btn-primary btn-sm" style="background: #10b981; border-color: #10b981;">
-      + {{t 'bills.newBill'}}
-    </a>
+    <div>
+      <a href="/bills/new" class="btn btn-primary btn-sm" style="background: #10b981; border-color: #10b981; display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 600;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        {{t 'bills.newBill'}}
+      </a>
+    </div>
   </div>
 
   {{#if recentBills.length}}
-    <div class="table-responsive">
-      <table class="data-table table-dense">
+    <!-- Desktop Bills Table (> 768px) -->
+    <div class="table-responsive desktop-bills-table">
+      <table class="data-table bills-ledger-table">
         <thead>
           <tr>
-            <th>{{t 'bills.billNo'}}</th>
+            <th style="width: 75px;">{{t 'bills.billNo'}}</th>
             <th>{{t 'bills.customer'}}</th>
-            <th>{{t 'bills.billingDate'}}</th>
-            <th>{{t 'bills.currUnit'}}</th>
-            <th>{{t 'bills.consumed'}}</th>
-            <th>{{t 'bills.electricBill'}} ({{t 'common.currency'}})</th>
-            <th>{{t 'bills.totalBill'}} ({{t 'common.currency'}})</th>
-            <th>{{t 'bills.paid'}} ({{t 'common.currency'}})</th>
-            <th>{{t 'bills.presentDues'}} ({{t 'common.currency'}})</th>
-            <th style="text-align: right;">{{t 'common.actions'}}</th>
+            <th style="width: 105px; text-align: center; white-space: nowrap;">{{t 'bills.billingDate'}}</th>
+            <th class="th-num" style="width: 85px; text-align: right; white-space: nowrap;">{{t 'bills.currUnit'}}</th>
+            <th style="width: 95px; text-align: center; white-space: nowrap;">{{t 'bills.consumed'}}</th>
+            <th class="th-num" style="width: 90px; text-align: right; white-space: nowrap;">{{t 'bills.electricBill'}}</th>
+            <th class="th-num" style="width: 95px; text-align: right; white-space: nowrap;">{{#if isBn}}সর্বমোট{{else}}Total{{/if}}</th>
+            <th class="th-num" style="width: 85px; text-align: right; white-space: nowrap;">{{#if isBn}}পরিশোধ{{else}}Paid{{/if}}</th>
+            <th class="th-num" style="width: 120px; text-align: right; white-space: nowrap;">{{t 'bills.presentDues'}}</th>
+            <th style="width: 85px; text-align: right; white-space: nowrap;">{{t 'common.actions'}}</th>
           </tr>
         </thead>
         <tbody>
           {{#each recentBills}}
-            <tr>
-              <td><span class="badge" style="background: rgba(99, 102, 241, 0.15); color: #818cf8;">#{{bnNum this.billNumber}}</span></td>
+            <tr class="{{#if this.isLatestBill}}row-latest-bill{{else}}row-archived-bill{{/if}}" style="border-bottom: 1px solid var(--color-border); transition: background 0.15s;">
               <td>
-                <a href="/customers/{{this.customerId}}" style="color: var(--color-text-primary); text-decoration: none; font-weight: 600;">
+                <span class="badge" style="background: rgba(99, 102, 241, 0.15); color: #818cf8; font-family: monospace; font-weight: 700;">#{{bnNum this.billNumber}}</span>
+              </td>
+              <td>
+                <a href="/customers/{{this.customerId}}" class="customer-name-link font-semibold" title="{{this.customerName}}">
                   {{this.customerName}}
                 </a>
               </td>
-              <td>{{tDate this.date}}</td>
-              <td><strong>{{bnNum this.currentUnit}}</strong> {{t 'common.unitShort'}}</td>
-              <td><span class="badge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8;">{{bnNum this.totalUnit}} {{t 'common.unitShort'}}</span></td>
-              <td>{{t 'common.currency'}}{{bnNum this.electricBill}}</td>
-              <td><strong>{{t 'common.currency'}}{{bnNum this.totalBill}}</strong></td>
-              <td style="color: #10b981; font-weight: 600;">{{t 'common.currency'}}{{bnNum this.clearMoney}}</td>
-              <td>
-                <span style="font-weight: 700; {{#if (ne this.presentDues 0)}}color: #ef4444;{{else}}color: #10b981;{{/if}}">
-                  {{t 'common.currency'}}{{bnNum this.presentDues}}
-                </span>
+              <td style="text-align: center; white-space: nowrap;">
+                <span class="date-badge-pill">{{tDate this.date}}</span>
               </td>
-              <td style="text-align: right;">
+              <td class="cell-num font-semibold" style="text-align: right;">{{bnMoney this.currentUnit}}</td>
+              <td style="text-align: center; white-space: nowrap;">
+                <span class="badge-consumed-units">{{bnMoney this.totalUnit}} {{t 'common.unitShort'}}</span>
+              </td>
+              <td class="cell-num" style="text-align: right;">{{bnMoney this.electricBill}}</td>
+              <td class="cell-num font-bold text-accent" style="text-align: right;">{{bnMoney this.totalBill}}</td>
+              <td class="cell-num" style="text-align: right;">
+                {{#if (gt this.clearMoney 0)}}
+                  <span class="text-success font-semibold">{{bnMoney this.clearMoney}}</span>
+                {{else}}
+                  <span class="cell-dash">—</span>
+                {{/if}}
+              </td>
+              <td class="cell-num" style="text-align: right; white-space: nowrap;">
+                {{#if (gt this.presentDues 0)}}
+                  <span class="dues-badge dues-has-due">
+                    ৳{{bnMoney this.presentDues}}
+                  </span>
+                {{else if (lt this.presentDues 0)}}
+                  <span class="dues-badge dues-advance">
+                    ৳{{bnMoney (subtract 0 this.presentDues)}} {{#if ../isBn}}অগ্রিম{{else}}Adv{{/if}}
+                  </span>
+                {{else}}
+                  <span class="dues-badge dues-cleared">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                    {{#if ../isBn}}পরিশোধিত{{else}}Cleared{{/if}}
+                  </span>
+                {{/if}}
+              </td>
+              <td style="text-align: right; white-space: nowrap;">
                 <div class="table-actions-group">
                   <a href="/bills/{{this.id}}" class="btn btn-secondary btn-icon-action" title="{{t 'bills.receipt'}}" aria-label="{{t 'bills.receipt'}}">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
                   </a>
-                  <a href="/bills/{{this.id}}/edit" class="btn btn-secondary btn-icon-action" title="{{t 'common.edit'}}" aria-label="{{t 'common.edit'}}">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                  </a>
+                  {{#if this.isLatestBill}}
+                    {{#if (or ../isSuperAdmin ../currentUser.canEdit)}}
+                      <a href="/bills/{{this.id}}/edit" class="btn btn-secondary btn-icon-action btn-action-edit" title="{{t 'common.edit'}}" aria-label="{{t 'common.edit'}}">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                      </a>
+                    {{/if}}
+                  {{else}}
+                    <span class="btn-icon-action action-locked-pill" title="{{#if ../isBn}}পূর্ববর্তী রেকর্ড - শুধুমাত্র সর্বশেষ বিল পরিবর্তন করা সম্ভব{{else}}Archived bill - only the latest bill can be edited{{/if}}">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    </span>
+                  {{/if}}
                 </div>
               </td>
             </tr>
           {{/each}}
         </tbody>
       </table>
+    </div>
+
+    <!-- Mobile Bills Cards (<= 768px) -->
+    <div class="mobile-bills-cards" style="padding: 0.85rem;">
+      {{#each recentBills}}
+        <div class="mobile-bill-card {{#if this.isLatestBill}}mbc-latest{{else}}mbc-archived{{/if}}" style="margin-bottom: 0.75rem;">
+          <div class="mbc-top">
+            <div class="mbc-cust-info">
+              <span class="badge" style="background: rgba(99, 102, 241, 0.15); color: #818cf8; font-family: monospace; font-size: 0.75rem; font-weight: 700;">#{{bnNum this.billNumber}}</span>
+              <a href="/customers/{{this.customerId}}" class="customer-name-link font-semibold" style="margin-left: 0.35rem;">
+                {{this.customerName}}
+              </a>
+            </div>
+            <div class="mbc-meta">
+              {{#if (gt this.presentDues 0)}}
+                <span class="dues-badge dues-has-due">৳{{bnMoney this.presentDues}}</span>
+              {{else if (lt this.presentDues 0)}}
+                <span class="dues-badge dues-advance">৳{{bnMoney (subtract 0 this.presentDues)}} {{#if ../isBn}}অগ্রিম{{else}}Adv{{/if}}</span>
+              {{else}}
+                <span class="dues-badge dues-cleared">✓ {{#if ../isBn}}পরিশোধিত{{else}}Cleared{{/if}}</span>
+              {{/if}}
+            </div>
+          </div>
+
+          <div class="mbc-reading-bar">
+            <span>{{#if ../isBn}}তারিখ{{else}}Date{{/if}}: <strong class="date-badge-pill" style="font-size: 0.75rem;">{{tDate this.date}}</strong></span>
+            <span class="badge badge-consumed-units">{{bnMoney this.totalUnit}} {{t 'common.unitShort'}}</span>
+          </div>
+
+          <div class="mbc-grid">
+            <div class="mbc-stat-box">
+              <span class="mbc-stat-lbl">{{t 'bills.currUnit'}}</span>
+              <span class="mbc-stat-val font-semibold">{{bnMoney this.currentUnit}}</span>
+            </div>
+            <div class="mbc-stat-box">
+              <span class="mbc-stat-lbl">{{t 'bills.electricBill'}}</span>
+              <span class="mbc-stat-val">৳{{bnMoney this.electricBill}}</span>
+            </div>
+            <div class="mbc-stat-box">
+              <span class="mbc-stat-lbl">{{t 'bills.totalBill'}}</span>
+              <span class="mbc-stat-val font-bold">৳{{bnMoney this.totalBill}}</span>
+            </div>
+            <div class="mbc-stat-box">
+              <span class="mbc-stat-lbl">{{t 'bills.paid'}}</span>
+              <span class="mbc-stat-val text-success font-bold">৳{{bnMoney this.clearMoney}}</span>
+            </div>
+          </div>
+
+          <div class="mbc-bottom">
+            <div class="mbc-dues">
+              <span class="mbc-due-label">{{t 'bills.presentDues'}}:</span>
+              <strong class="{{#if (gt this.presentDues 0)}}text-danger{{else}}text-success{{/if}}" style="font-size: 1.1rem; font-family: monospace;">
+                ৳{{bnMoney this.presentDues}}
+              </strong>
+            </div>
+            <div class="table-actions-group">
+              <a href="/bills/{{this.id}}" class="btn btn-secondary btn-icon-action" title="{{t 'bills.receipt'}}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+              </a>
+              {{#if this.isLatestBill}}
+                {{#if (or ../isSuperAdmin ../currentUser.canEdit)}}
+                  <a href="/bills/{{this.id}}/edit" class="btn btn-secondary btn-icon-action btn-action-edit" title="{{t 'common.edit'}}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                  </a>
+                {{/if}}
+              {{else}}
+                <span class="btn-icon-action action-locked-pill" title="{{#if ../isBn}}পূর্ববর্তী রেকর্ড - শুধুমাত্র সর্বশেষ বিল পরিবর্তন করা সম্ভব{{else}}Archived bill - only the latest bill can be edited{{/if}}">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </span>
+              {{/if}}
+            </div>
+          </div>
+        </div>
+      {{/each}}
     </div>
   {{else}}
     <div style="text-align: center; padding: 3rem 1rem;">

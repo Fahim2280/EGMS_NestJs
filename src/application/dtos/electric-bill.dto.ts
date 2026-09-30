@@ -82,8 +82,8 @@ export class ElectricBillResponseDto {
   customerName?: string;
   customerCode?: string | null;
   customerCId?: number;
-  garageId?: string;
-  garageName?: string;
+  garageId?: string | null;
+  garageName?: string | null;
   companyId: string;
   date: Date;
   previousUnit: number;
@@ -97,6 +97,7 @@ export class ElectricBillResponseDto {
   totalBill: number;
   clearMoney: number;
   presentDues: number;
+  isLatestBill?: boolean;
 }
 
 export class ElectricBillPreviewDto {

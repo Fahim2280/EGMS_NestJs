@@ -96,16 +96,27 @@ export class GetGarageDashboardHandler implements IQueryHandler<GetGarageDashboa
 
     const customerMap = new Map(customers.map((c) => [c.id, c]));
 
+    // Pre-calculate latest bill ID per customer across all lifetime garage bills
+    const latestBillIdByCustomer = new Map<string, string>();
+    for (const c of customers) {
+      const cBills = allBills.filter((b) => b.customerId === c.id);
+      if (cBills.length > 0) {
+        cBills.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        latestBillIdByCustomer.set(c.id, cBills[0].id);
+      }
+    }
+
     // Customer items with calculated last bill dues (evaluated against allBills to preserve lifetime dues)
     const customerItems = customers.map((c) => {
-      const cBills = allBills.filter((b) => b.customerId === c.id);
-      cBills.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-      const latestBill = cBills[0];
+      const latestBillId = latestBillIdByCustomer.get(c.id);
+      const latestBill = latestBillId ? allBills.find((b) => b.id === latestBillId) : null;
 
       return {
         id: c.id,
         cId: c.cId,
+        customerCode: c.customerCode,
         name: c.name,
+        isActive: c.isActive,
         mobileNumber: c.mobileNumber,
         address: c.address,
         previousUnit: c.previousUnit,
@@ -131,6 +142,7 @@ export class GetGarageDashboardHandler implements IQueryHandler<GetGarageDashboa
       totalBill: b.totalBill,
       clearMoney: b.clearMoney,
       presentDues: b.presentDues,
+      isLatestBill: latestBillIdByCustomer.get(b.customerId) === b.id,
     }));
 
     const garageDto = this.mapper.map(garage, Garage, GarageResponseDto);

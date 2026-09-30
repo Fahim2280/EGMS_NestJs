@@ -7,6 +7,8 @@ import {
   IAuditLogRepository,
   EMPLOYEE_REPOSITORY_TOKEN,
   IEmployeeRepository,
+  CUSTOMER_REPOSITORY_TOKEN,
+  ICustomerRepository,
 } from '@domain/index';
 import { GetAuditLogsResponseDto } from '../../dtos/audit-log.dto';
 
@@ -19,6 +21,8 @@ export class GetAuditLogsHandler
     private readonly auditRepo: IAuditLogRepository,
     @Inject(EMPLOYEE_REPOSITORY_TOKEN)
     private readonly employeeRepo: IEmployeeRepository,
+    @Inject(CUSTOMER_REPOSITORY_TOKEN)
+    private readonly customerRepo: ICustomerRepository,
   ) {}
 
   async execute(query: GetAuditLogsQuery): Promise<GetAuditLogsResponseDto> {
@@ -56,18 +60,29 @@ export class GetAuditLogsHandler
       this.auditRepo.getStats(query.companyId),
     ]);
 
-    // Build a map of employeeId -> employeeName for any EMPLOYEE logs
+    // Build map of employeeId -> employeeName
     const employeeIdsToResolve = new Set<string>();
+    const customerIdsToResolve = new Set<string>();
+
     for (const log of filteredResult.logs) {
       if (log.entityType === 'EMPLOYEE' && log.entityId) {
         employeeIdsToResolve.add(log.entityId);
       }
-      if (log.entityType === 'EMPLOYEE' && log.details) {
-        const match = log.details.match(
-          /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/,
+      if ((log.entityType === 'CUSTOMER' || log.entityType === 'ELECTRIC_BILL') && log.entityId) {
+        customerIdsToResolve.add(log.entityId);
+      }
+      if (log.details) {
+        const matches = log.details.match(
+          /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/g,
         );
-        if (match) {
-          employeeIdsToResolve.add(match[0]);
+        if (matches) {
+          matches.forEach((m) => {
+            if (log.entityType === 'EMPLOYEE') {
+              employeeIdsToResolve.add(m);
+            } else {
+              customerIdsToResolve.add(m);
+            }
+          });
         }
       }
     }
@@ -88,6 +103,21 @@ export class GetAuditLogsHandler
               employeeMap.set(emp.id, emp.name);
             }
           }
+        }
+      } catch {
+        // Fallback silently if lookup encounters an error
+      }
+    }
+
+    const customerMap = new Map<string, string>();
+    if (customerIdsToResolve.size > 0) {
+      try {
+        const allCustomers = await this.customerRepo.findByCompanyId(
+          query.companyId,
+        );
+        for (const cust of allCustomers) {
+          const display = cust.customerCode ? `${cust.name} (${cust.customerCode})` : cust.name;
+          customerMap.set(cust.id, display);
         }
       } catch {
         // Fallback silently if lookup encounters an error
@@ -133,6 +163,22 @@ export class GetAuditLogsHandler
                   .split(`employee ${id}`).join(`employee ${name}`)
                   .split(`#${id}`).join(name)
                   .split(id).join(name);
+              }
+            }
+          }
+        } else if (log.entityType === 'CUSTOMER' || log.entityType === 'ELECTRIC_BILL') {
+          if (log.entityId && customerMap.has(log.entityId)) {
+            const resolvedCust = customerMap.get(log.entityId)!;
+            if (!entityName || entityName.startsWith('#') || entityName === log.entityId) {
+              entityName = resolvedCust;
+            }
+          }
+          if (details) {
+            for (const [id, display] of customerMap.entries()) {
+              if (details.includes(id)) {
+                details = details
+                  .split(`customer ${id}`).join(`customer ${display}`)
+                  .split(id).join(display);
               }
             }
           }

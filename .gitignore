@@ -21,9 +21,9 @@ lerna-debug.log*
 .env.local
 
 # File uploads and persistent storage (prevent leaking customer KYC documents)
-/storage/
-/public/uploads/
-!/public/uploads/.gitkeep
+# /storage/
+# /public/uploads/
+# !/public/uploads/.gitkeep
 
 # temp directory
 .temp
