@@ -14,11 +14,21 @@ services:
       - DB_PASSWORD=${DB_PASSWORD:-PandaKnightStrongProdPass2026!}
       - DB_DATABASE=egms_db
       - DB_SYNCHRONIZE=false
+      - DB_CONNECTION_LIMIT=${DB_CONNECTION_LIMIT:-30}
       - ALLOW_SEED=false
       - JWT_SECRET=${JWT_SECRET:-please_change_this_to_a_random_32_char_secret}
       - JWT_EXPIRES_IN=7d
       - HTTPS=false
+      - APP_URL=${APP_URL:-http://localhost:3000}
       - UPLOAD_DIR=storage/uploads
+      - ADMIN_APPROVAL_EMAIL=${ADMIN_APPROVAL_EMAIL:-kfahim2280@gmail.com}
+      - APPROVAL_TOKEN_EXPIRY_HOURS=${APPROVAL_TOKEN_EXPIRY_HOURS:-48}
+      - SMTP_HOST=${SMTP_HOST:-smtp.gmail.com}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_SECURE=${SMTP_SECURE:-false}
+      - SMTP_USER=${SMTP_USER:-}
+      - SMTP_PASS=${SMTP_PASS:-}
+      - SMTP_FROM=${SMTP_FROM:-"EGMS Portal <kfahim2280@gmail.com>"}
     ports:
       - "3000:3000"
     volumes:
