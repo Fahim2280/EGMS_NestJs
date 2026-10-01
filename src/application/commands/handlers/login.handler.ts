@@ -1,5 +1,5 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { Inject, UnauthorizedException } from '@nestjs/common';
+import { Inject, UnauthorizedException, ForbiddenException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { LoginCommand } from '../impl/login.command';
@@ -32,6 +32,17 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
     // 1. Try authenticating as Company (Super Admin)
     const company = await this.companyRepo.findByEmail(normalizedEmail);
     if (company) {
+      // Block login if company registration is not yet approved
+      if (company.registrationStatus === 'PENDING') {
+        throw new ForbiddenException(
+          'আপনার কোম্পানি নিবন্ধন এখনো অনুমোদিত হয়নি। অনুগ্রহ করে অ্যাডমিনের অনুমোদনের জন্য অপেক্ষা করুন। (Your company registration is pending admin approval.)',
+        );
+      }
+      if (company.registrationStatus === 'REJECTED') {
+        throw new ForbiddenException(
+          'আপনার কোম্পানি নিবন্ধন প্রত্যাখ্যাত হয়েছে। (Your company registration has been rejected.)',
+        );
+      }
       const isMatch = await bcrypt.compare(password, company.password);
       if (isMatch) {
         const garages = await this.garageRepo.findByCompanyId(company.id);

@@ -31,6 +31,8 @@ import { ForgotPasswordHandler } from './commands/handlers/forgot-password.handl
 import { ResetPasswordHandler } from './commands/handlers/reset-password.handler';
 import { UpdateCompanyHandler } from './commands/handlers/update-company.handler';
 import { UpdateEmployeePermissionHandler } from './commands/handlers/update-employee-permission.handler';
+import { ApproveCompanyHandler } from './commands/handlers/approve-company.handler';
+import { RejectCompanyHandler } from './commands/handlers/reject-company.handler';
 import { CreateGuarantorHandler } from './commands/handlers/create-guarantor.handler';
 import { UpdateGuarantorHandler } from './commands/handlers/update-guarantor.handler';
 import { DeleteGuarantorHandler } from './commands/handlers/delete-guarantor.handler';
@@ -83,6 +85,8 @@ const CommandHandlers = [
   ResetPasswordHandler,
   UpdateCompanyHandler,
   UpdateEmployeePermissionHandler,
+  ApproveCompanyHandler,
+  RejectCompanyHandler,
   CreateGuarantorHandler,
   UpdateGuarantorHandler,
   DeleteGuarantorHandler,

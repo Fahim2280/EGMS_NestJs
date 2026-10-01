@@ -1,5 +1,7 @@
 import { AuditableEntity, AuditableProps } from '../common/auditable.entity';
 
+export type RegistrationStatus = 'PENDING' | 'ACTIVE' | 'REJECTED';
+
 export interface CreateCompanyProps extends AuditableProps {
   id: string;
   name: string;
@@ -10,6 +12,7 @@ export interface CreateCompanyProps extends AuditableProps {
   address: string;
   role?: string;
   unitRate?: number;
+  registrationStatus?: RegistrationStatus;
 }
 
 export class Company extends AuditableEntity {
@@ -22,6 +25,7 @@ export class Company extends AuditableEntity {
   public readonly role: string;
   public address: string;
   public unitRate: number;
+  public registrationStatus: RegistrationStatus;
 
   constructor(props: CreateCompanyProps) {
     super(props);
@@ -35,13 +39,15 @@ export class Company extends AuditableEntity {
     this.role = props.role || 'SUPER_ADMIN';
     this.address = props.address.trim();
     this.unitRate = props.unitRate !== undefined && props.unitRate !== null ? Number(props.unitRate) : 15;
+    this.registrationStatus = props.registrationStatus ?? 'PENDING';
   }
 
   public static create(props: CreateCompanyProps): Company {
     return new Company({
       ...props,
       role: 'SUPER_ADMIN',
-      isActive: true,
+      isActive: false,
+      registrationStatus: 'PENDING',
       isDeleted: false,
       createdDate: new Date(),
     });
@@ -70,6 +76,12 @@ export class Company extends AuditableEntity {
     } else {
       this.modifiedDate = new Date();
     }
+  }
+
+  public approve(): void {
+    this.registrationStatus = 'ACTIVE';
+    this.isActive = true;
+    this.modifiedDate = new Date();
   }
 
   public updatePassword(hashedPassword: string, updatedByStamp?: string): void {

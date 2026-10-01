@@ -205,4 +205,123 @@ export class EmailService {
       this.logger.error(`[EMAIL] Failed to send welcome email to ${to}: ${err.message}`);
     }
   }
+
+  async sendCompanyApprovalRequestEmail(
+    to: string,
+    companyName: string,
+    companyEmail: string,
+    approveUrl: string,
+    rejectUrl: string,
+  ): Promise<void> {
+    const fromAddress =
+      this.config.get<string>('SMTP_FROM') ||
+      process.env.SMTP_FROM ||
+      'EGMS Portal <noreply@egms.app>';
+
+    const registeredAt = new Date().toLocaleString('en-BD', {
+      timeZone: 'Asia/Dhaka',
+      dateStyle: 'full',
+      timeStyle: 'short',
+    });
+
+    const html = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Company Registration Approval</title>
+</head>
+<body style="margin:0;padding:0;background:#0f172a;font-family:'Segoe UI',Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#0f172a;padding:40px 0;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="background:linear-gradient(135deg,#1e293b 0%,#0f172a 100%);border-radius:16px;border:1px solid rgba(245,158,11,0.25);overflow:hidden;">
+          <!-- Header -->
+          <tr>
+            <td style="background:linear-gradient(135deg,#b45309 0%,#f59e0b 100%);padding:32px;text-align:center;">
+              <div style="background:rgba(255,255,255,0.15);display:inline-block;padding:12px 16px;border-radius:12px;margin-bottom:16px;">
+                <span style="font-size:28px;">🏢</span>
+              </div>
+              <h1 style="margin:0;color:#ffffff;font-size:24px;font-weight:700;letter-spacing:-0.5px;">New Company Registration</h1>
+              <p style="margin:6px 0 0;color:rgba(255,255,255,0.8);font-size:13px;">Approval Required — EGMS Admin Panel</p>
+            </td>
+          </tr>
+          <!-- Body -->
+          <tr>
+            <td style="padding:36px 40px;">
+              <p style="margin:0 0 20px;color:#94a3b8;font-size:15px;line-height:1.6;">
+                A new company has requested to register on the <strong style="color:#fbbf24;">EGMS Portal</strong>. Please review the details below and approve or reject this registration.
+              </p>
+              <!-- Company Details Card -->
+              <div style="background:rgba(245,158,11,0.07);border:1px solid rgba(245,158,11,0.2);border-radius:12px;padding:20px 24px;margin-bottom:28px;">
+                <p style="margin:0 0 4px;color:#f59e0b;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;">Company Details</p>
+                <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:12px;">
+                  <tr>
+                    <td style="padding:6px 0;color:#64748b;font-size:13px;width:120px;">Company Name</td>
+                    <td style="padding:6px 0;color:#f1f5f9;font-size:14px;font-weight:600;">${companyName}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:6px 0;color:#64748b;font-size:13px;">Email</td>
+                    <td style="padding:6px 0;color:#a5b4fc;font-size:14px;">${companyEmail}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:6px 0;color:#64748b;font-size:13px;">Registered</td>
+                    <td style="padding:6px 0;color:#94a3b8;font-size:13px;">${registeredAt}</td>
+                  </tr>
+                </table>
+              </div>
+              <!-- Action Buttons -->
+              <p style="margin:0 0 16px;color:#94a3b8;font-size:14px;">Click one of the buttons below to take action. Each link can only be used <strong style="color:#fbbf24;">once</strong> and will expire in <strong style="color:#fbbf24;">48 hours</strong>.</p>
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td align="center" style="padding:0 8px 0 0;">
+                    <a href="${approveUrl}" style="display:inline-block;background:linear-gradient(135deg,#059669 0%,#10b981 100%);color:#ffffff;text-decoration:none;font-size:15px;font-weight:700;padding:14px 32px;border-radius:10px;letter-spacing:0.3px;">
+                      ✅ Approve Company
+                    </a>
+                  </td>
+                  <td align="center" style="padding:0 0 0 8px;">
+                    <a href="${rejectUrl}" style="display:inline-block;background:linear-gradient(135deg,#dc2626 0%,#ef4444 100%);color:#ffffff;text-decoration:none;font-size:15px;font-weight:700;padding:14px 32px;border-radius:10px;letter-spacing:0.3px;">
+                      ❌ Reject & Delete
+                    </a>
+                  </td>
+                </tr>
+              </table>
+              <!-- Warning -->
+              <div style="background:rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.2);border-radius:10px;padding:14px 18px;margin-top:28px;">
+                <p style="margin:0;color:#fca5a5;font-size:12px;line-height:1.6;">
+                  ⚠️ <strong>Rejecting</strong> will permanently delete the company and all associated data. This action cannot be undone.
+                </p>
+              </div>
+            </td>
+          </tr>
+          <!-- Footer -->
+          <tr>
+            <td style="border-top:1px solid rgba(245,158,11,0.1);padding:20px 40px;text-align:center;">
+              <p style="margin:0;color:#475569;font-size:12px;">
+                © ${new Date().getFullYear()} EGMS Portal — This is an automated admin notification. Do not reply to this email.
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+
+    try {
+      const transporter = this.getTransporter();
+      await transporter.sendMail({
+        from: fromAddress,
+        to,
+        subject: `🏢 [ACTION REQUIRED] New Company Registration: ${companyName}`,
+        html,
+      });
+      this.logger.log(`[EMAIL] Approval request email sent to admin for company '${companyName}'`);
+    } catch (err: any) {
+      this.logger.error(`[EMAIL] Failed to send approval request email: ${err.message}`);
+      this.logger.warn(`[EMAIL DEV FALLBACK] Approve: ${approveUrl} | Reject: ${rejectUrl}`);
+    }
+  }
 }

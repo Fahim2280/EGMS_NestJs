@@ -7,6 +7,7 @@ A production-grade enterprise multi-tenant portal built with **NestJS 11**, **Cl
 ## 🌟 Key Highlights & Capabilities
 
 - 🏢 **Multi-Tenant Company & Garage Architecture**: Centralized management of company branches, physical garage workshops, and staff assignments.
+- 📬 **Company Registration & Admin Email Approval Workflow**: New tenant registrations are placed in a secure `PENDING` state (`isActive: false`). A golden-themed HTML review email is instantly sent to the platform administrator with one-click **Approve** and **Reject** buttons powered by 64-character cryptographic verification tokens.
 - ⚡ **Electric Billing & Meter Calculation Engine**: Automatic computation of consumed meter units, energy tariff charges, rent, loan installments, previous arrears, advance deposit offsets, and printable billing invoices/receipts.
 - 📞 **Multi-Phone Numbers System**: Employees, customers, and guarantors can register multiple phone numbers with categorization (`Personal`, `WhatsApp`, `Emergency`, `Work`, `Alternative`), dedicated primary number tagging, one-click WhatsApp chat, and click-to-call.
 - 📁 **File Upload, Progressive Compression (<5MB) & Download**: Modeled directly after enterprise .NET `FileService.cs`:
@@ -28,17 +29,19 @@ A production-grade enterprise multi-tenant portal built with **NestJS 11**, **Cl
    │                          COMPANY                            │
    │  - Super Admin Tenant Credentials                           │
    │  - Electricity Rate (৳/unit), Commercial Profile            │
-   └───────┬───────────────────────────────┬─────────────────────┘
-           │ 1:N                           │ 1:N
-           ▼                               ▼
-   ┌───────────────┐              ┌──────────────────────────────┐
-   │    GARAGE     │              │           EMPLOYEE           │
-   │ - Facilities  │              │ - Role: SUPER_ADMIN / GENERAL│
-   │ - Service Bays│              │ - Permissions & Garage Scopes│
-   └───────┬───────┘              │ - Multiple Contact Phones    │
-           │ 1:N                  │ - Attached Documents         │
-           ▼                      └──────────────────────────────┘
-   ┌──────────────────────────────┐
+   │  - registrationStatus ('PENDING'|'ACTIVE'|'REJECTED')       │
+   │  - isActive (boolean, false until approved)                 │
+   └───────┬───────────────────────────┬─────────────────────────┤
+           │ 1:N                       │ 1:N                     │ 1:N
+           ▼                           ▼                         ▼
+   ┌───────────────┐          ┌──────────────────┐   ┌───────────────────────────┐
+   │    GARAGE     │          │     EMPLOYEE     │   │  COMPANY_APPROVAL_TOKEN   │
+   │ - Facilities  │          │ - SUPER_ADMIN /  │   │ - 64-char Hex Token       │
+   │ - Service Bays│          │   GENERAL        │   │ - 48h Expiration          │
+   └───────┬───────┘          │ - Permissions    │   │ - One-click Verify Links  │
+           │ 1:N              │ - Multi-Phones   │   └───────────────────────────┘
+           ▼                  │ - Documents      │
+   ┌──────────────────────────┴──────────────────┘
    │           CUSTOMER           │
    │ - Baseline Meter & Advance ৳ │
    │ - Present Dues               │
@@ -65,6 +68,8 @@ A production-grade enterprise multi-tenant portal built with **NestJS 11**, **Cl
 - **`electricityRate`**: Default electricity tariff per unit (৳)
 - **`role`**: `SUPER_ADMIN`
 - **`address`**: Commercial headquarters address
+- **`registrationStatus`**: `'PENDING' | 'ACTIVE' | 'REJECTED'` (default: `'PENDING'`)
+- **`isActive`**: Activation flag (`false` until platform administrator approval)
 
 ### 2. Garage (`garages`)
 - **`id`**: Unique Identifier (UUID)
@@ -110,6 +115,13 @@ A production-grade enterprise multi-tenant portal built with **NestJS 11**, **Cl
 ### 7. Audit Log (`audit_logs`)
 - Complete historical record of administrative actions, entity mutations, logins, and deletions with timestamps, actor IDs, IP addresses, and user agents.
 
+### 8. Company Approval Token (`company_approval_tokens`)
+- **`id`**, **`companyId`**: Unique identifier and foreign key to `companies.id` (`onDelete: 'CASCADE'`)
+- **`token`**: 64-character hexadecimal cryptographically secure random verification token (`crypto.randomBytes(32)`)
+- **`expiresAt`**: Expiration timestamp (configured via `APPROVAL_TOKEN_EXPIRY_HOURS`, default 48h)
+- **`isUsed`**: Single-use invalidation boolean flag
+- **`createdAt`**: Token generation timestamp
+
 ---
 
 ## 🏗️ Architecture & Technical Stack
@@ -127,8 +139,9 @@ A production-grade enterprise multi-tenant portal built with **NestJS 11**, **Cl
                                     ▼
 ┌────────────────────────────────────────────────────────────────────────┐
 │                        APPLICATION LAYER                               │
-│  - CQRS Commands: CreateCustomer, UpdateCustomer, CreateEmployee,      │
-│    UpdateEmployee, CreateGuarantor, GenerateMonthlyBills, etc.         │
+│  - CQRS Commands: RegisterCompany, ApproveCompany, RejectCompany,      │
+│    CreateCustomer, UpdateCustomer, CreateEmployee, UpdateEmployee,     │
+│    CreateGuarantor, GenerateMonthlyBills, etc.                         │
 │  - CQRS Queries: GetCustomerById, GetEmployeesByCompany,               │
 │    GetGuarantorsByCustomer, GetExecutiveDashboard, etc.                │
 │  - Services: BillingCalculationService, AuditLogService, FileService   │
@@ -138,14 +151,17 @@ A production-grade enterprise multi-tenant portal built with **NestJS 11**, **Cl
                                     ▼
 ┌────────────────────────────────────────────────────────────────────────┐
 │                          DOMAIN LAYER                                  │
-│  - Pure Domain Entities: Customer, Employee, Guarantor, ElectricBill   │
+│  - Pure Domain Entities: Company, CompanyApprovalToken, Customer,      │
+│    Employee, Guarantor, Garage, ElectricBill                           │
 │  - Interfaces & Types: AttachedDocument, ContactPhone, AuditableEntity │
-│  - Repository Ports: ICustomerRepository, IGuarantorRepository, etc.   │
+│  - Repository Ports: ICustomerRepository, ICompanyApprovalTokenRepo,   │
+│    ICompanyRepository, IGuarantorRepository, etc.                      │
 └───────────────────────────────────▲────────────────────────────────────┘
                                     │ (Implements Ports)
 ┌───────────────────────────────────┴────────────────────────────────────┐
 │                      INFRASTRUCTURE LAYER                              │
 │  - TypeORM MySQL Persistence with automatic schema sync                │
+│  - Email Service: Nodemailer SMTP with HTML action templates           │
 │  - File Service: Sharp-powered progressive compression & FS management │
 │  - Passport JWT Strategy, RolesGuard, PermissionsGuard                 │
 │  - Internationalization Dictionary (i18n): English & Bengali           │
@@ -155,6 +171,7 @@ A production-grade enterprise multi-tenant portal built with **NestJS 11**, **Cl
 - **Runtime & Framework**: Node.js, NestJS 11 (Express platform)
 - **Database & ORM**: MySQL 8.0, TypeORM
 - **Image Processing**: `sharp` (High-performance native image compression engine)
+- **Email Delivery**: Nodemailer (SMTP transport with responsive HTML templates)
 - **Templating**: Express Handlebars (`hbs`) with custom layout engine
 - **Authentication**: Passport.js, `@nestjs/jwt`, `bcryptjs`
 - **Patterns**: CQRS (`@nestjs/cqrs`), AutoMapper (`@automapper/nestjs`)
@@ -204,6 +221,28 @@ Modeled directly after `HIS-AppointmentServicesAPI.Infrastructure.Services.FileS
 
 ---
 
+## 📬 Company Registration & Admin Email Approval Workflow
+
+EGMS implements a secure, email-based administrator verification gate for all new tenant registrations:
+
+### How It Works:
+1. **Tenant Registration (`POST /register`)**:
+   - When a company self-registers, the company record is created in a `PENDING` state (`isActive: false`, `registrationStatus: 'PENDING'`).
+   - The user is rendered `views/auth/register-pending.hbs` notifying them that their application is undergoing administrator review.
+2. **Cryptographic Token Generation**:
+   - A 64-character hex token (`crypto.randomBytes(32)`) is generated and saved in `company_approval_tokens` with a configurable expiration window (`APPROVAL_TOKEN_EXPIRY_HOURS`, default 48 hours).
+3. **Admin Review Email**:
+   - A golden-themed HTML email is dispatched to `ADMIN_APPROVAL_EMAIL` (default: `kfahim2280@gmail.com`) containing full company metadata, contact info, and two one-click action buttons:
+     - **✅ Approve Company**: `${APP_URL}/company/approve?token=<token>`
+     - **❌ Reject & Delete**: `${APP_URL}/company/reject?token=<token>`
+4. **Admin Decision**:
+   - **Approval**: Token is verified and invalidated; the company is activated (`isActive = true`, `registrationStatus = 'ACTIVE'`); a welcome email is sent to the company Super Admin; audit log recorded.
+   - **Rejection**: Token is invalidated; company and all cascading records (initial garage, employee, tokens) are completely purged from the database; audit log recorded.
+5. **Login Gate**:
+   - Company accounts cannot log in while in `PENDING` or `REJECTED` status. `LoginHandler` rejects unapproved access with `403 Forbidden` and bilingual guidance (EN / BN).
+
+---
+
 ## ⚙️ Configuration (`.env`)
 
 Create a `.env` file in the root directory:
@@ -211,6 +250,7 @@ Create a `.env` file in the root directory:
 ```env
 PORT=3000
 NODE_ENV=development
+APP_URL=http://localhost:3000
 
 # MySQL Database Configuration
 DB_HOST=127.0.0.1
@@ -218,10 +258,24 @@ DB_PORT=3306
 DB_USERNAME=root
 DB_PASSWORD=your_password
 DB_DATABASE=egms_db
+DB_SYNCHRONIZE=true
+ALLOW_SEED=false
 
 # JWT Authentication
 JWT_SECRET=your_super_secret_jwt_key_2026_enterprise_secure!
 JWT_EXPIRES_IN=7d
+
+# Email / SMTP Configuration
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=your_email@gmail.com
+SMTP_PASS=your_gmail_app_password
+SMTP_FROM="EGMS Portal <your_email@gmail.com>"
+
+# Company Registration Approval Workflow
+ADMIN_APPROVAL_EMAIL=kfahim2280@gmail.com
+APPROVAL_TOKEN_EXPIRY_HOURS=48
 ```
 
 ---
@@ -253,7 +307,9 @@ On initial application boot, the database seeder initializes sample accounts:
 | `http://localhost:3000/employees/permissions` | Granular permission manager (`canCreate`, `canEdit`, `canDelete`, garage branches) |
 | `http://localhost:3000/audit-logs` | Comprehensive security and activity audit log |
 | `http://localhost:3000/login` | Portal login view with 1-click demo buttons |
-| `http://localhost:3000/register` | Tenant self-registration view |
+| `http://localhost:3000/register` | Tenant self-registration view (submits company for admin approval) |
+| `http://localhost:3000/company/approve?token=...` | One-click admin link to approve and activate registered company |
+| `http://localhost:3000/company/reject?token=...` | One-click admin link to reject and purge registered company |
 
 ---
 

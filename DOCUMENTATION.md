@@ -19,6 +19,7 @@
    - 4.2 [Multi-Phone Number (`ContactPhone`) Subsystem](#42-multi-phone-number-contactphone-subsystem)
    - 4.3 [Progressive Under-5MB Compression & File Storage Subsystem](#43-progressive-under-5mb-compression--file-storage-subsystem)
    - 4.4 [Tenant Isolation & Soft Deletion Lifecycle](#44-tenant-isolation--soft-deletion-lifecycle)
+   - 4.5 [Company Registration & Admin Email Approval Workflow](#45-company-registration--admin-email-approval-workflow)
 5. [Complete API & MVC Endpoint Reference](#5-complete-api--mvc-endpoint-reference)
    - 5.1 [Authentication & Tenant Onboarding](#51-authentication--tenant-onboarding)
    - 5.2 [Executive Dashboard & Analytics](#52-executive-dashboard--analytics)
@@ -42,16 +43,17 @@ The project is structured according to **Clean Architecture** principles to deco
 src/
 ├── domain/                      # Enterprise Business Rules (Entities, Value Objects, Interfaces)
 │   ├── common/                  # AuditableEntity base, ContactPhone, AttachedDocument
-│   ├── entities/                # Pure domain entities (Company, Garage, Employee, Customer, etc.)
-│   └── repositories/            # Repository port interfaces (ICustomerRepository, etc.)
+│   ├── entities/                # Pure domain entities (Company, CompanyApprovalToken, Garage, Employee, Customer, etc.)
+│   └── repositories/            # Repository port interfaces (ICustomerRepository, ICompanyApprovalTokenRepository, etc.)
 ├── application/                 # Application Business Rules (Use Cases, CQRS, DTOs, Mappings)
-│   ├── commands/                # CQRS Commands & Command Handlers
+│   ├── commands/                # CQRS Commands & Command Handlers (RegisterCompany, ApproveCompany, RejectCompany, etc.)
 │   ├── queries/                 # CQRS Queries & Query Handlers
 │   ├── dtos/                    # Inbound validation DTOs
 │   ├── mappings/                # AutoMapper profile definitions
 │   └── services/                # BillingCalculationService, AuditLogService
 ├── infrastructure/              # External Interfaces & Framework Adapters
 │   ├── auth/                    # JWT Strategy, RolesGuard, PermissionsGuard, Password Hashing
+│   ├── email/                   # EmailService (Nodemailer SMTP, approval requests, welcome emails)
 │   ├── persistence/typeorm/     # TypeORM Entities, Repositories, Database Seeders
 │   ├── services/                # FileService (Sharp image compression & filesystem storage)
 │   └── i18n/                    # Localization dictionary & translation helpers
@@ -85,25 +87,27 @@ src/
 
 ### Visual Entity Relationship Model
 ```
-┌────────────────────────────────────────────────────────────────────────┐
-│                               COMPANY                                  │
-│ PK id: varchar(100)                                                    │
-│    companyName: varchar(255)                                           │
-│    electricityRate: decimal(10,2)                                      │
-└───────────────┬───────────────────────────────────────┬────────────────┘
-                │ 1:N                                   │ 1:N
-                ▼                                       ▼
-┌───────────────────────────────┐       ┌────────────────────────────────┐
-│            GARAGE             │       │            EMPLOYEE            │
-│ PK id: varchar(100)           │       │ PK id: varchar(100)            │
-│ FK companyId: varchar(100)    │       │ FK companyId: varchar(100)     │
-│    garageName: varchar(255)   │       │    email: varchar(255)         │
-│    address: text              │       │    role: 'SUPER_ADMIN'|'GENERAL│
-└───────────────┬───────────────┘       │    phoneNumbers: json          │
-                │ 1:N                   │    documents: json             │
-                ▼                       │    canCreate/canEdit/canDelete │
-┌───────────────────────────────┐       │    garageIds: json             │
-│           CUSTOMER            │       └────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                                       COMPANY                                          │
+│ PK id: varchar(100)                                                                    │
+│    companyName: varchar(255)                                                           │
+│    registrationStatus: 'PENDING' | 'ACTIVE' | 'REJECTED'                               │
+│    isActive: boolean (default: false)                                                  │
+│    electricityRate: decimal(10,2)                                                      │
+└───────┬───────────────────────────────┬───────────────────────────────┬────────────────┘
+        │ 1:N                           │ 1:N                           │ 1:N
+        ▼                               ▼                               ▼
+┌───────────────────────────────┐ ┌────────────────────────────────┐ ┌───────────────────────────┐
+│            GARAGE             │ │            EMPLOYEE            │ │  COMPANY_APPROVAL_TOKEN   │
+│ PK id: varchar(100)           │ │ PK id: varchar(100)            │ │ PK id: varchar(100)       │
+│ FK companyId: varchar(100)    │ │ FK companyId: varchar(100)     │ │ FK companyId: varchar     │
+│    garageName: varchar(255)   │ │    email: varchar(255)         │ │    token: varchar(255)    │
+│    address: text              │ │    role: 'SUPER_ADMIN'|'GENERAL│ │    expiresAt: datetime    │
+└───────────────┬───────────────┘ │    phoneNumbers: json          │ │    isUsed: boolean        │
+                │ 1:N             │    documents: json             │ │    createdAt: datetime    │
+                ▼                 │    canCreate/canEdit/canDelete │ └───────────────────────────┘
+┌───────────────────────────────┐ │    garageIds: json             │
+│           CUSTOMER            │ └────────────────────────────────┘
 │ PK id: varchar(100)           │
 │ FK companyId: varchar(100)    │
 │ FK garageId: varchar(100)     │
@@ -144,7 +148,9 @@ src/
 | `role` | `VARCHAR(50)` | NOT NULL | Default `SUPER_ADMIN` |
 | `electricityRate`| `DECIMAL(10,2)`| NOT NULL, Default `12.00` | Baseline tariff rate per unit (৳) |
 | `address` | `TEXT` | NOT NULL | Commercial headquarters address |
-| `isActive`, `isDeleted` | `BOOLEAN` | Default `true`, `false` | Soft-deletion and activation flags |
+| `registrationStatus` | `VARCHAR(20)` | NOT NULL, Default `'PENDING'` | Approval state: `'PENDING'`, `'ACTIVE'`, `'REJECTED'` |
+| `isActive` | `BOOLEAN` | Default `false` | Activated only upon administrator approval |
+| `isDeleted` | `BOOLEAN` | Default `false` | Soft-deletion flag |
 | Audit Fields | `VARCHAR`, `DATETIME` | Nullable | `createdBy`, `editByName`, `createdDate`, etc. |
 
 #### 2. `Customer`
@@ -218,6 +224,16 @@ src/
 | `presentDues` | `DECIMAL(10,2)`| NOT NULL | Net remaining balance carried to ledger |
 | `status` | `VARCHAR(50)` | Default `'UNPAID'` | `'PAID'`, `'PARTIAL'`, `'UNPAID'` |
 
+#### 6. `CompanyApprovalToken` (`company_approval_tokens`)
+| Column | Type | Constraints | Description |
+|---|---|---|---|
+| `id` | `VARCHAR(100)` | Primary Key | UUID identifier |
+| `companyId` | `VARCHAR(100)` | Foreign Key, CASCADE | References `companies.id` |
+| `token` | `VARCHAR(255)` | NOT NULL, UNIQUE | 64-character hexadecimal cryptographic verification token |
+| `expiresAt` | `DATETIME` | NOT NULL | Expiry timestamp (configured via `APPROVAL_TOKEN_EXPIRY_HOURS`, default 48h) |
+| `isUsed` | `BOOLEAN` | NOT NULL, Default `false` | Single-use invalidation flag |
+| `createdAt` | `DATETIME` | NOT NULL | Generation timestamp |
+
 ---
 
 ## 3. Authentication, Authorization & Security Policies
@@ -252,6 +268,15 @@ The application implements dual authentication handling:
   Enforces granular capabilities for general staff. If an employee has `role === 'GENERAL'` and lacks `canCreate`, attempts to post to `/customers` or `/bills/new` are denied with `403 Forbidden`.
 - **Branch-Level Access Isolation**:
   Employees with an assigned `garageIds` array cannot view, edit, or generate bills for customers outside their allowed facilities. Super Admins bypass facility restrictions.
+
+### 3.3 Company Registration Status & Access Lifecycle
+When an employee or Super Admin attempts authentication via `LoginHandler`:
+1. The company tenant record is resolved by `companyId`.
+2. **Pending Registration Gate**: If `company.registrationStatus === 'PENDING'` or `!company.isActive`, authentication is denied immediately with `403 Forbidden`:
+   > *"Your company registration is pending approval from the administrator. Please wait for confirmation. / আপনার কোম্পানির নিবন্ধন এখনও অনুমোদনের অপেক্ষায় রয়েছে।"*
+3. **Rejected Registration Gate**: If `company.registrationStatus === 'REJECTED'`, login is blocked with `403 Forbidden`:
+   > *"Your company registration was not approved. / আপনার কোম্পানির নিবন্ধন অনুমোদন করা হয়নি।"*
+4. Only companies with `registrationStatus === 'ACTIVE'` and `isActive === true` can issue JWT tokens and proceed to the dashboard.
 
 ---
 
@@ -377,6 +402,85 @@ Implemented in [`FileService`](file:///d:/GitHub/EGMS_NestJs/src/infrastructure/
 
 ---
 
+### 4.5 Company Registration & Admin Email Approval Workflow
+
+To ensure security, identity verification, and administrative governance over multi-tenant provisioning, all new company registrations pass through an email-based administrator approval gate:
+
+```
+[ New Registrant ]
+       │
+       ▼ Submits Registration Form
+  POST /register
+       │
+       ├──► 1. Creates Company Entity (isActive = false, registrationStatus = 'PENDING')
+       ├──► 2. Provisions Default Garage & Super Admin Employee Account
+       ├──► 3. Generates 64-character Cryptographic Token (crypto.randomBytes(32))
+       ├──► 4. Persists CompanyApprovalToken in MySQL (configurable expiry, default 48h)
+       ├──► 5. Dispatches Golden-Themed HTML Email with Action Links to ADMIN_APPROVAL_EMAIL
+       │
+       ▼ Renders views/auth/register-pending.hbs (Informs registrant to await admin review)
+[ Registrant Browser ]
+
+                           [ Platform Admin Email Inbox ]
+                                        │
+                       Receives Approval Notification Email
+                                        │
+                      ┌─────────────────┴─────────────────┐
+                      │                                   │
+              Clicks "Approve"                    Clicks "Reject"
+                      │                                   │
+                      ▼                                   ▼
+          GET /company/approve?token=...       GET /company/reject?token=...
+                      │                                   │
+                      ├─► Validates Token                 ├─► Validates Token
+                      ├─► Company: isActive = true        ├─► Hard-deletes Company
+                      │   registrationStatus = 'ACTIVE'   │   (Cascades: Garage,
+                      ├─► Marks token as isUsed           │   Employee, Tokens)
+                      ├─► Sends Welcome Email to Tenant   ├─► Marks token as isUsed
+                      ├─► Logs Audit: APPROVE             ├─► Logs Audit: REJECT
+                      ▼                                   ▼
+           Renders approval-result.hbs         Renders approval-result.hbs
+            (Company is Now Active)             (Registration Purged)
+```
+
+#### Detailed Workflow Steps:
+1. **Registration Ingestion (`POST /register`)**:
+   - Validates input fields using `RegisterCompanyDto`.
+   - `RegisterCompanyHandler` checks for email duplicates across `Company` and `Employee` repositories.
+   - Saves `Company` entity with `isActive: false` and `registrationStatus: 'PENDING'`.
+   - Provisions default `Garage` branch and creates initial Super Admin `Employee` account.
+2. **Cryptographic Token Issuance**:
+   - Generates a cryptographically secure 64-character hex token: `crypto.randomBytes(32).toString('hex')`.
+   - Calculates expiry date (`Date.now() + APPROVAL_TOKEN_EXPIRY_HOURS * 3600 * 1000`, default 48h).
+   - Inserts record into `company_approval_tokens`.
+3. **Admin Notification Email Dispatch**:
+   - `EmailService.sendCompanyApprovalRequestEmail()` sends an HTML email to `ADMIN_APPROVAL_EMAIL` (default: `kfahim2280@gmail.com`).
+   - The email contains:
+     - Company Name, Representative Name, Email, Phone, Address, Initial Garage Name.
+     - Registration timestamp and token expiration countdown.
+     - Two distinct action buttons:
+       - **✅ Approve Company**: `${APP_URL}/company/approve?token=${token}`
+       - **❌ Reject & Delete**: `${APP_URL}/company/reject?token=${token}`
+4. **Registrant Waiting Screen**:
+   - Instead of auto-logging the user in, the controller renders `views/auth/register-pending.hbs`.
+   - The view displays a bilingual confirmation (English / বাংলা) informing the user that their registration has been submitted and is awaiting administrator verification.
+5. **Admin Decision Execution**:
+   - **On Approval (`GET /company/approve`)**:
+     - `ApproveCompanyHandler` locates the token and checks `isValid()` (must not be used and must not be expired).
+     - Updates company status: `isActive = true`, `registrationStatus = 'ACTIVE'`.
+     - Marks token `isUsed = true`.
+     - Sends an automated welcome email with login instructions to the company Super Admin.
+     - Creates audit log entry (`ADMIN_APPROVE_COMPANY`).
+     - Renders `views/auth/approval-result.hbs` indicating successful activation.
+   - **On Rejection (`GET /company/reject`)**:
+     - `RejectCompanyHandler` locates the token and validates it.
+     - Hard-deletes the company record (`companyRepository.delete(companyId)`).
+     - Due to database foreign key cascade constraints (`onDelete: 'CASCADE'`), associated garages, employees, and tokens are completely purged.
+     - Creates audit log entry (`ADMIN_REJECT_COMPANY`).
+     - Renders `views/auth/approval-result.hbs` indicating the registration was rejected and purged.
+
+---
+
 ## 5. Complete API & MVC Endpoint Reference
 
 ### 5.1 Authentication & Tenant Onboarding
@@ -393,10 +497,11 @@ Authenticates a Super Admin or Staff Employee.
   ```
 - **Responses**:
   - `302 Found`: Redirects to `/` on success. Sets `Set-Cookie: jwt=<token>; HttpOnly; Path=/; Max-Age=604800`.
-  - `401 Unauthorized`: Re-renders login view with error message.
+  - `401 Unauthorized`: Re-renders login view with credential error message.
+  - `403 Forbidden`: Company is in `PENDING` (awaiting approval) or `REJECTED` status.
 
 #### `POST /register`
-Registers a new tenant Company and creates the primary Super Admin profile.
+Registers a new tenant Company and creates the primary Super Admin profile in `PENDING` status.
 - **Request Body**:
   ```json
   {
@@ -410,8 +515,26 @@ Registers a new tenant Company and creates the primary Super Admin profile.
   }
   ```
 - **Responses**:
-  - `302 Found`: Redirects to `/login?registered=true`.
+  - `200 OK`: Renders `views/auth/register-pending.hbs` displaying company details and notifying the registrant that approval is pending. Triggers admin approval request email.
   - `400 Bad Request`: Validation failure or email already taken.
+
+#### `GET /company/approve`
+One-click admin verification link from approval notification email.
+- **Query Parameters**:
+  - `token` (string, required): 64-character hexadecimal cryptographic verification token.
+- **Behavior**: Validates token, activates company (`isActive = true`, `registrationStatus = 'ACTIVE'`), marks token as used, sends welcome email to company Super Admin, records audit log.
+- **Responses**:
+  - `200 OK`: Renders `views/auth/approval-result.hbs` with `approved: true` and activation confirmation.
+  - `400 Bad Request`: Token is invalid, expired, or previously used.
+
+#### `GET /company/reject`
+One-click admin rejection link from approval notification email.
+- **Query Parameters**:
+  - `token` (string, required): 64-character hexadecimal cryptographic verification token.
+- **Behavior**: Validates token, marks token as used, hard-deletes company record (cascading to garage, employee, tokens), records audit log.
+- **Responses**:
+  - `200 OK`: Renders `views/auth/approval-result.hbs` with `approved: false` and purge confirmation.
+  - `400 Bad Request`: Token is invalid, expired, or previously used.
 
 #### `GET /logout`
 Clears the session cookie.
@@ -651,6 +774,12 @@ The UI is built using responsive vanilla CSS and **Express Handlebars (`hbs`)** 
 - **`file-uploader.hbs`**: Drag-and-drop file upload zone with client-side file selection, preview badges, auto-compress indicators, and removal controls.
 - **`phone-repeater.hbs`**: Dynamic multi-phone input table supporting multiple phone types and primary selection.
 
+### Dedicated Authentication & Workflow Views (`views/auth/`)
+- **`login.hbs`**: Responsive glassmorphic login interface with bilingual toggle and 1-click demo credential autofill.
+- **`register.hbs`**: Company tenant self-registration form with contact details and initial workshop provisioning.
+- **`register-pending.hbs`**: Bilingual confirmation screen displayed post-registration informing the tenant that their registration is undergoing administrative review.
+- **`approval-result.hbs`**: Administrative decision landing page for `GET /company/approve` and `GET /company/reject` displaying live status badges, verified company details, and next action links.
+
 ### Custom Handlebars Helpers Registered in `main.ts`:
 | Helper | Usage | Description |
 |---|---|---|
@@ -671,6 +800,7 @@ The UI is built using responsive vanilla CSS and **Express Handlebars (`hbs`)** 
 ```env
 PORT=3000
 NODE_ENV=development
+APP_URL=http://localhost:3000
 
 # MySQL Database Configuration
 DB_HOST=127.0.0.1
@@ -678,10 +808,24 @@ DB_PORT=3306
 DB_USERNAME=root
 DB_PASSWORD=your_mysql_password
 DB_DATABASE=egms_db
+DB_SYNCHRONIZE=true
+ALLOW_SEED=false
 
 # JWT Security
 JWT_SECRET=super_secret_jwt_egms_key_2026_enterprise_secure!
 JWT_EXPIRES_IN=7d
+
+# Email / SMTP Configuration
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=your_email@gmail.com
+SMTP_PASS=your_gmail_app_password
+SMTP_FROM="EGMS Portal <your_email@gmail.com>"
+
+# Company Registration Approval Workflow
+ADMIN_APPROVAL_EMAIL=kfahim2280@gmail.com
+APPROVAL_TOKEN_EXPIRY_HOURS=48
 ```
 
 ### 7.2 Running the Application

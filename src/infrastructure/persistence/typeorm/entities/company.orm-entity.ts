@@ -48,6 +48,10 @@ export class CompanyOrmEntity extends BaseAuditableOrmEntity {
   @Column('decimal', { precision: 10, scale: 2, default: 15 })
   unitRate: number;
 
+  @AutoMap()
+  @Column({ type: 'varchar', length: 20, default: 'PENDING' })
+  registrationStatus: string;
+
   @OneToMany(() => GarageOrmEntity, (garage) => garage.company, {
     cascade: true,
   })
