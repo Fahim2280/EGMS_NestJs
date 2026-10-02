@@ -43,7 +43,7 @@ export class EmailService implements OnModuleInit {
     const key =
       this.config.get<string>('RESEND_API_KEY') ||
       process.env.RESEND_API_KEY ||
-      're_49QbsC1R_M1srbXhgqy5WMUu4tzDJHmgG';
+      '';
     return (key || '').trim();
   }
 
