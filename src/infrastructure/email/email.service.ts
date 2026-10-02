@@ -10,13 +10,23 @@ export class EmailService implements OnModuleInit {
   constructor(private readonly config: ConfigService) {}
 
   async onModuleInit() {
+    const resendKey = this.getResendApiKey();
+    if (resendKey) {
+      this.logger.log(
+        '✅ [EMAIL] Resend HTTPS API mode active (Port 443 - bypasses all SMTP firewall blocks)',
+      );
+      return;
+    }
+
     const rawUser = this.config.get<string>('SMTP_USER') || process.env.SMTP_USER || '';
     const rawPass = this.config.get<string>('SMTP_PASS') || process.env.SMTP_PASS || '';
     const host = this.config.get<string>('SMTP_HOST') || process.env.SMTP_HOST || 'smtp.gmail.com';
     const port = Number(this.config.get<number>('SMTP_PORT') || process.env.SMTP_PORT || 587);
 
     if (!rawUser || !rawPass) {
-      this.logger.warn(`⚠️ [EMAIL] SMTP_USER or SMTP_PASS is NOT configured! Outgoing emails will NOT be sent.`);
+      this.logger.warn(
+        '⚠️ [EMAIL] Neither RESEND_API_KEY nor SMTP credentials configured. Outgoing emails will not be sent.',
+      );
       return;
     }
 
@@ -26,16 +36,50 @@ export class EmailService implements OnModuleInit {
       this.logger.log(`✅ [EMAIL] SMTP connection verified successfully with ${host}:${port} for ${rawUser}`);
     } catch (err: any) {
       this.logger.error(`❌ [EMAIL] SMTP verification failed with ${host}:${port}: ${err.message}`);
-      if (err.message?.includes('535') || err.message?.includes('Username and Password not accepted')) {
-        this.logger.error(`💡 [EMAIL HINT] Gmail requires an App Password (16 chars with 2-Step Verification). Normal account password will be rejected.`);
-      } else if (err.code === 'ETIMEDOUT' || err.code === 'ECONNREFUSED') {
-        this.logger.error(`💡 [EMAIL HINT] Port ${port} may be blocked by your VPS hosting firewall. Try port 465 with SMTP_SECURE=true or open port ${port}.`);
-      }
     }
   }
 
+  private getResendApiKey(): string {
+    const key =
+      this.config.get<string>('RESEND_API_KEY') ||
+      process.env.RESEND_API_KEY ||
+      're_49QbsC1R_M1srbXhgqy5WMUu4tzDJHmgG';
+    return (key || '').trim();
+  }
+
+  private getFromAddress(): string {
+    const resendKey = this.getResendApiKey();
+    const rawFrom =
+      this.config.get<string>('SMTP_FROM') ||
+      process.env.SMTP_FROM ||
+      '';
+
+    const resendFrom =
+      this.config.get<string>('RESEND_FROM') ||
+      process.env.RESEND_FROM;
+
+    if (resendKey) {
+      if (resendFrom) return resendFrom;
+      if (rawFrom && rawFrom.includes('@') && !rawFrom.includes('gmail.com')) return rawFrom;
+      return 'EGMS Portal <onboarding@resend.dev>';
+    }
+
+    const userEmail =
+      this.config.get<string>('SMTP_USER') ||
+      process.env.SMTP_USER ||
+      'noreply@egms.shop';
+
+    const trimmed = rawFrom.trim();
+    if (!trimmed) {
+      return `EGMS Portal <${userEmail}>`;
+    }
+    if (trimmed.includes('@')) {
+      return trimmed;
+    }
+    return `"${trimmed}" <${userEmail}>`;
+  }
+
   private getTransporter(): nodemailer.Transporter {
-    // Reload from .env if variables aren't loaded in older running process
     if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
       dotenv.config();
     }
@@ -66,7 +110,101 @@ export class EmailService implements OnModuleInit {
     });
   }
 
+  private async dispatchEmail(options: {
+    to: string;
+    subject: string;
+    html: string;
+    text?: string;
+  }): Promise<{ messageId: string; response?: string }> {
+    const resendKey = this.getResendApiKey();
+
+    if (resendKey) {
+      const from = this.getFromAddress();
+      const res = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${resendKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          from,
+          to: [options.to],
+          subject: options.subject,
+          html: options.html,
+          text: options.text,
+        }),
+      });
+
+      const data: any = await res.json();
+      if (!res.ok) {
+        throw new Error(
+          `Resend API error (${res.status}): ${data.message || JSON.stringify(data)}`,
+        );
+      }
+      return { messageId: data.id, response: 'Resend HTTPS 200 OK' };
+    }
+
+    const transporter = this.getTransporter();
+    const from = this.getFromAddress();
+    const result = await transporter.sendMail({
+      from,
+      to: options.to,
+      subject: options.subject,
+      html: options.html,
+      text: options.text,
+    });
+    return { messageId: result.messageId, response: result.response };
+  }
+
   async testSmtpConnection(): Promise<{ success: boolean; config: any; message: string }> {
+    const resendKey = this.getResendApiKey();
+    const adminEmail =
+      this.config.get<string>('ADMIN_APPROVAL_EMAIL') ||
+      process.env.ADMIN_APPROVAL_EMAIL ||
+      'kfahim2280@gmail.com';
+
+    if (resendKey) {
+      const maskedKey = `${resendKey.substring(0, 6)}••••••••${resendKey.slice(-4)}`;
+      try {
+        const result = await this.dispatchEmail({
+          to: adminEmail,
+          subject: '🧪 [RESEND TEST] EGMS Portal Live Email Test',
+          text: `This is a test email sent via Resend HTTPS API at ${new Date().toISOString()}.`,
+          html: `<div style="font-family:sans-serif;padding:24px;background:#f0fdf4;border:1px solid #86efac;border-radius:12px;max-width:550px;">
+            <div style="background:#22c55e;color:#fff;display:inline-block;padding:6px 12px;border-radius:6px;font-weight:bold;margin-bottom:12px;font-size:13px;">✅ Resend HTTPS Active</div>
+            <h2 style="color:#15803d;margin:0 0 10px;">Resend Email is Working!</h2>
+            <p style="color:#166534;font-size:15px;line-height:1.5;">
+              This email was delivered via <strong>Resend HTTPS API (Port 443)</strong>, completely bypassing all cPanel & hosting SMTP firewall blocks!
+            </p>
+            <p style="color:#64748b;font-size:12px;margin-top:16px;border-top:1px solid #bbf7d0;padding-top:10px;">
+              Delivered to: <strong>${adminEmail}</strong><br/>
+              Timestamp: ${new Date().toLocaleString('en-BD', { timeZone: 'Asia/Dhaka' })}
+            </p>
+          </div>`,
+        });
+
+        return {
+          success: true,
+          config: {
+            provider: 'Resend HTTPS API (Port 443 - zero firewall blocks)',
+            apiKey: maskedKey,
+            from: this.getFromAddress(),
+            recipient: adminEmail,
+          },
+          message: `Email successfully delivered to ${adminEmail} via Resend! ID: ${result.messageId}`,
+        };
+      } catch (err: any) {
+        return {
+          success: false,
+          config: {
+            provider: 'Resend HTTPS API (Port 443)',
+            apiKey: maskedKey,
+          },
+          message: err.message || String(err),
+        };
+      }
+    }
+
     const rawUser = this.config.get<string>('SMTP_USER') || process.env.SMTP_USER || '';
     const rawPass = this.config.get<string>('SMTP_PASS') || process.env.SMTP_PASS || '';
     const host = this.config.get<string>('SMTP_HOST') || process.env.SMTP_HOST || 'smtp.gmail.com';
@@ -96,11 +234,6 @@ export class EmailService implements OnModuleInit {
       const transporter = this.getTransporter();
       await transporter.verify();
 
-      const adminEmail =
-        this.config.get<string>('ADMIN_APPROVAL_EMAIL') ||
-        process.env.ADMIN_APPROVAL_EMAIL ||
-        'kfahim2280@gmail.com';
-
       const from = this.getFromAddress();
       const sendResult = await transporter.sendMail({
         from,
@@ -128,29 +261,7 @@ export class EmailService implements OnModuleInit {
     }
   }
 
-  private getFromAddress(): string {
-    const rawFrom =
-      this.config.get<string>('SMTP_FROM') ||
-      process.env.SMTP_FROM ||
-      '';
-    const userEmail =
-      this.config.get<string>('SMTP_USER') ||
-      process.env.SMTP_USER ||
-      'noreply@egms.shop';
-
-    const trimmed = rawFrom.trim();
-    if (!trimmed) {
-      return `EGMS Portal <${userEmail}>`;
-    }
-    if (trimmed.includes('@')) {
-      return trimmed;
-    }
-    return `"${trimmed}" <${userEmail}>`;
-  }
-
   async sendPasswordResetEmail(to: string, resetLink: string): Promise<void> {
-    const fromAddress = this.getFromAddress();
-
     const html = `
 <!DOCTYPE html>
 <html lang="en">
@@ -164,7 +275,6 @@ export class EmailService implements OnModuleInit {
     <tr>
       <td align="center">
         <table width="560" cellpadding="0" cellspacing="0" style="background:linear-gradient(135deg,#1e293b 0%,#0f172a 100%);border-radius:16px;border:1px solid rgba(99,102,241,0.2);overflow:hidden;">
-          <!-- Header -->
           <tr>
             <td style="background:linear-gradient(135deg,#6366f1 0%,#8b5cf6 100%);padding:32px;text-align:center;">
               <div style="background:rgba(255,255,255,0.15);display:inline-block;padding:12px 16px;border-radius:12px;margin-bottom:16px;">
@@ -174,7 +284,6 @@ export class EmailService implements OnModuleInit {
               <p style="margin:6px 0 0;color:rgba(255,255,255,0.75);font-size:13px;">Electric Garage Management System</p>
             </td>
           </tr>
-          <!-- Body -->
           <tr>
             <td style="padding:36px 40px;">
               <h2 style="margin:0 0 12px;color:#f8fafc;font-size:22px;font-weight:700;">Reset Your Password</h2>
@@ -200,7 +309,6 @@ export class EmailService implements OnModuleInit {
               </p>
             </td>
           </tr>
-          <!-- Footer -->
           <tr>
             <td style="border-top:1px solid rgba(99,102,241,0.1);padding:20px 40px;text-align:center;">
               <p style="margin:0;color:#475569;font-size:12px;">
@@ -216,9 +324,7 @@ export class EmailService implements OnModuleInit {
 </html>`;
 
     try {
-      const transporter = this.getTransporter();
-      await transporter.sendMail({
-        from: fromAddress,
+      await this.dispatchEmail({
         to,
         subject: '🔐 Reset Your EGMS Password',
         html,
@@ -226,17 +332,15 @@ export class EmailService implements OnModuleInit {
       this.logger.log(`[EMAIL] Password reset email sent to ${to}`);
     } catch (err: any) {
       this.logger.error(`[EMAIL] Failed to send password reset email to ${to}: ${err.message}`);
-      // Log the reset link so development works without SMTP configured
       this.logger.warn(`[EMAIL DEV FALLBACK] Reset link for ${to}: ${resetLink}`);
     }
   }
 
   async sendWelcomeEmail(to: string, companyName: string): Promise<void> {
-    const fromAddress = this.getFromAddress();
     const appUrl =
       this.config.get<string>('APP_URL') ||
       process.env.APP_URL ||
-      'https://localhost:3000';
+      'https://egms.shop';
 
     const html = `
 <!DOCTYPE html>
@@ -301,9 +405,7 @@ export class EmailService implements OnModuleInit {
 </html>`;
 
     try {
-      const transporter = this.getTransporter();
-      await transporter.sendMail({
-        from: fromAddress,
+      await this.dispatchEmail({
         to,
         subject: '🎉 Welcome to EGMS Portal!',
         html,
@@ -321,8 +423,6 @@ export class EmailService implements OnModuleInit {
     approveUrl: string,
     rejectUrl: string,
   ): Promise<void> {
-    const fromAddress = this.getFromAddress();
-
     const registeredAt = new Date().toLocaleString('en-BD', {
       timeZone: 'Asia/Dhaka',
       dateStyle: 'full',
@@ -342,7 +442,6 @@ export class EmailService implements OnModuleInit {
     <tr>
       <td align="center">
         <table width="600" cellpadding="0" cellspacing="0" style="background:linear-gradient(135deg,#1e293b 0%,#0f172a 100%);border-radius:16px;border:1px solid rgba(245,158,11,0.25);overflow:hidden;">
-          <!-- Header -->
           <tr>
             <td style="background:linear-gradient(135deg,#b45309 0%,#f59e0b 100%);padding:32px;text-align:center;">
               <div style="background:rgba(255,255,255,0.15);display:inline-block;padding:12px 16px;border-radius:12px;margin-bottom:16px;">
@@ -352,13 +451,11 @@ export class EmailService implements OnModuleInit {
               <p style="margin:6px 0 0;color:rgba(255,255,255,0.8);font-size:13px;">Approval Required — EGMS Admin Panel</p>
             </td>
           </tr>
-          <!-- Body -->
           <tr>
             <td style="padding:36px 40px;">
               <p style="margin:0 0 20px;color:#94a3b8;font-size:15px;line-height:1.6;">
                 A new company has requested to register on the <strong style="color:#fbbf24;">EGMS Portal</strong>. Please review the details below and approve or reject this registration.
               </p>
-              <!-- Company Details Card -->
               <div style="background:rgba(245,158,11,0.07);border:1px solid rgba(245,158,11,0.2);border-radius:12px;padding:20px 24px;margin-bottom:28px;">
                 <p style="margin:0 0 4px;color:#f59e0b;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;">Company Details</p>
                 <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:12px;">
@@ -376,7 +473,6 @@ export class EmailService implements OnModuleInit {
                   </tr>
                 </table>
               </div>
-              <!-- Action Buttons -->
               <p style="margin:0 0 16px;color:#94a3b8;font-size:14px;">Click one of the buttons below to take action. Each link can only be used <strong style="color:#fbbf24;">once</strong> and will expire in <strong style="color:#fbbf24;">48 hours</strong>.</p>
               <table width="100%" cellpadding="0" cellspacing="0">
                 <tr>
@@ -392,7 +488,6 @@ export class EmailService implements OnModuleInit {
                   </td>
                 </tr>
               </table>
-              <!-- Warning -->
               <div style="background:rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.2);border-radius:10px;padding:14px 18px;margin-top:28px;">
                 <p style="margin:0;color:#fca5a5;font-size:12px;line-height:1.6;">
                   ⚠️ <strong>Rejecting</strong> will permanently delete the company and all associated data. This action cannot be undone.
@@ -400,7 +495,6 @@ export class EmailService implements OnModuleInit {
               </div>
             </td>
           </tr>
-          <!-- Footer -->
           <tr>
             <td style="border-top:1px solid rgba(245,158,11,0.1);padding:20px 40px;text-align:center;">
               <p style="margin:0;color:#475569;font-size:12px;">
@@ -416,9 +510,7 @@ export class EmailService implements OnModuleInit {
 </html>`;
 
     try {
-      const transporter = this.getTransporter();
-      await transporter.sendMail({
-        from: fromAddress,
+      await this.dispatchEmail({
         to,
         subject: `🏢 [ACTION REQUIRED] New Company Registration: ${companyName}`,
         html,

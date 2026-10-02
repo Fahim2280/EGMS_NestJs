@@ -5,13 +5,15 @@ export declare class EmailService implements OnModuleInit {
     private readonly logger;
     constructor(config: ConfigService);
     onModuleInit(): Promise<void>;
+    private getResendApiKey;
+    private getFromAddress;
     private getTransporter;
+    private dispatchEmail;
     testSmtpConnection(): Promise<{
         success: boolean;
         config: any;
         message: string;
     }>;
-    private getFromAddress;
     sendPasswordResetEmail(to: string, resetLink: string): Promise<void>;
     sendWelcomeEmail(to: string, companyName: string): Promise<void>;
     sendCompanyApprovalRequestEmail(to: string, companyName: string, companyEmail: string, approveUrl: string, rejectUrl: string): Promise<void>;
