@@ -1,0 +1,98 @@
+{{!--
+  Reusable Date Filter Bar Partial
+  Required context variables:
+    - formAction: string (e.g. "/bills" or "/garages/:id")
+    - fromDate: string (current fromDate value, may be empty)
+    - toDate: string (current toDate value, may be empty)
+    - preset: string (current preset value, may be empty)
+    - filterDrawerId: string (unique ID for collapse drawer, e.g. "billsFilterDrawer")
+    - extraFields: optional extra hidden/visible inputs passed via inline content
+--}}
+<div class="dfb-wrapper" id="{{filterDrawerId}}-wrapper">
+  {{!-- Mobile toggle button --}}
+  <div class="dfb-mobile-toggle" onclick="toggleFilterDrawer('{{filterDrawerId}}')">
+    <span class="dfb-toggle-icon">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="10" y1="18" x2="14" y2="18"/>
+      </svg>
+    </span>
+    <span class="dfb-toggle-label">
+      {{#if isBn}}ফিল্টার ও তারিখ{{else}}Filter & Date{{/if}}
+      {{#if (or fromDate toDate)}}
+        <span class="dfb-active-dot" title="Filter active"></span>
+      {{/if}}
+    </span>
+    <svg class="dfb-toggle-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <polyline points="6 9 12 15 18 9"/>
+    </svg>
+  </div>
+
+  {{!-- Filter Form (collapsible on mobile) --}}
+  <form id="{{filterDrawerId}}" class="dfb-form dfb-collapse" method="GET" action="{{formAction}}">
+
+    {{!-- Date Range inputs --}}
+    <div class="dfb-group">
+      <label class="dfb-label" for="{{filterDrawerId}}_from">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        {{#if isBn}}শুরু{{else}}From{{/if}}
+      </label>
+      <input type="date" id="{{filterDrawerId}}_from" name="fromDate" class="dfb-input" value="{{fromDate}}"
+             onchange="clearPreset('{{filterDrawerId}}')">
+    </div>
+
+    <div class="dfb-group">
+      <label class="dfb-label" for="{{filterDrawerId}}_to">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        {{#if isBn}}শেষ{{else}}To{{/if}}
+      </label>
+      <input type="date" id="{{filterDrawerId}}_to" name="toDate" class="dfb-input" value="{{toDate}}"
+             onchange="clearPreset('{{filterDrawerId}}')">
+    </div>
+
+    {{!-- Extra slot for page-specific inputs (garage select, search, etc.) --}}
+    {{{extraFields}}}
+
+    {{!-- Actions --}}
+    <div class="dfb-actions">
+      <button type="submit" class="btn btn-primary dfb-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        {{#if isBn}}ফিল্টার{{else}}Filter{{/if}}
+      </button>
+      <a href="{{formAction}}" class="btn btn-secondary dfb-btn" style="color: #ef4444;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        {{#if isBn}}রিসেট{{else}}Reset{{/if}}
+      </a>
+    </div>
+
+    {{!-- Quick Preset Pills --}}
+    <div class="dfb-presets">
+      <button type="button" class="dfb-preset-pill {{#if (eq preset 'today')}}dfb-preset-active{{/if}}"
+              onclick="setDatePreset('today','{{filterDrawerId}}')">
+        {{#if isBn}}আজ{{else}}Today{{/if}}
+      </button>
+      <button type="button" class="dfb-preset-pill {{#if (eq preset 'thisMonth')}}dfb-preset-active{{/if}}"
+              onclick="setDatePreset('thisMonth','{{filterDrawerId}}')">
+        {{#if isBn}}এই মাস{{else}}This Month{{/if}}
+      </button>
+      <button type="button" class="dfb-preset-pill {{#if (eq preset 'lastMonth')}}dfb-preset-active{{/if}}"
+              onclick="setDatePreset('lastMonth','{{filterDrawerId}}')">
+        {{#if isBn}}গত মাস{{else}}Last Month{{/if}}
+      </button>
+      <button type="button" class="dfb-preset-pill {{#if (eq preset 'last30')}}dfb-preset-active{{/if}}"
+              onclick="setDatePreset('last30','{{filterDrawerId}}')">
+        {{#if isBn}}শেষ ৩০ দিন{{else}}Last 30 Days{{/if}}
+      </button>
+      <button type="button" class="dfb-preset-pill {{#if (eq preset 'thisYear')}}dfb-preset-active{{/if}}"
+              onclick="setDatePreset('thisYear','{{filterDrawerId}}')">
+        {{#if isBn}}এই বছর{{else}}This Year{{/if}}
+      </button>
+      <button type="button" class="dfb-preset-pill {{#if (eq preset 'all')}}dfb-preset-active{{/if}}"
+              onclick="setDatePreset('all','{{filterDrawerId}}')">
+        {{#if isBn}}সব{{else}}All Time{{/if}}
+      </button>
+    </div>
+
+    {{!-- Hidden preset field --}}
+    <input type="hidden" name="preset" id="{{filterDrawerId}}_preset" value="{{preset}}">
+  </form>
+</div>

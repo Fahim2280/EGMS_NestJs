@@ -1,0 +1,43 @@
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.UpdateCompanyHandler = void 0;
+const cqrs_1 = require("@nestjs/cqrs");
+const common_1 = require("@nestjs/common");
+const update_company_command_1 = require("../impl/update-company.command");
+const index_1 = require("../../../domain/index");
+let UpdateCompanyHandler = class UpdateCompanyHandler {
+    companyRepo;
+    constructor(companyRepo) {
+        this.companyRepo = companyRepo;
+    }
+    async execute(command) {
+        const { companyId, name, companyName, phoneNumber, address, updatedByStamp, unitRate } = command;
+        const company = await this.companyRepo.getByIdAsync(companyId);
+        if (!company) {
+            throw new common_1.NotFoundException(`Company with ID '${companyId}' not found.`);
+        }
+        const actorRole = updatedByStamp?.split('|')[1] || '';
+        const effectiveUnitRate = actorRole === 'SUPER_ADMIN' ? unitRate : undefined;
+        company.updateDetails(name, companyName, phoneNumber, address, effectiveUnitRate, updatedByStamp);
+        await this.companyRepo.updateAsync(company);
+    }
+};
+exports.UpdateCompanyHandler = UpdateCompanyHandler;
+exports.UpdateCompanyHandler = UpdateCompanyHandler = __decorate([
+    (0, cqrs_1.CommandHandler)(update_company_command_1.UpdateCompanyCommand),
+    __param(0, (0, common_1.Inject)(index_1.COMPANY_REPOSITORY_TOKEN)),
+    __metadata("design:paramtypes", [Object])
+], UpdateCompanyHandler);
+//# sourceMappingURL=update-company.handler.js.map

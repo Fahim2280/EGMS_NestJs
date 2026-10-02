@@ -1,5 +1,5 @@
 # Nestjs specific
-/dist
+# /dist (tracked for cPanel deployment where nest build is not run on server)
 /node_modules
 /build
 /tmp

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="{{#if lang}}{{lang}}{{else}}en{{/if}}" data-theme="{{#if theme}}{{theme}}{{else}}dark{{/if}}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{title}}</title>
+  <script>
+    // Immediate zero-flicker hydration of theme and language
+    (function() {
+      try {
+        var t = localStorage.getItem('egms_theme');
+        if (t) document.documentElement.setAttribute('data-theme', t);
+        var l = localStorage.getItem('egms_lang');
+        if (l) document.documentElement.setAttribute('lang', l);
+      } catch (e) {}
+    })();
+  </script>
+  <!-- Google Fonts: Plus Jakarta Sans & Hind Siliguri (Bengali) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css?v=3.5">
+</head>
+<body class="{{#if currentUser}}has-sidebar{{else}}has-standalone{{/if}}">
+  {{#if currentUser}}
+    <!-- Enterprise Dashboard Layout with Left Sidebar & Mobile Bottom Dock -->
+    <div class="app-layout">
+      {{> sidebar}}
+
+      <div class="app-main">
+        {{> topbar}}
+
+        <main class="main-content">
+          <div class="container-fluid app-container">
+            {{> alerts}}
+            {{{body}}}
+          </div>
+        </main>
+
+        {{> footer}}
+      </div>
+
+      {{> bottom_nav}}
+    </div>
+  {{else}}
+    <!-- Standalone Layout for Public / Auth Pages -->
+    <div class="standalone-layout">
+      {{> navbar}}
+
+      <main class="main-content">
+        <div class="container">
+          {{> alerts}}
+          {{{body}}}
+        </div>
+      </main>
+
+      {{> footer}}
+    </div>
+  {{/if}}
+
+  {{#if toast}}
+    <div class="toast-container" id="globalToastContainer">
+      <div class="toast toast-{{toast.type}}">
+        {{#if (eq toast.type 'success')}}
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" color="#10b981" style="flex-shrink:0;">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+        {{else if (eq toast.type 'error')}}
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" color="#ef4444" style="flex-shrink:0;">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+        {{else}}
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" color="#38bdf8" style="flex-shrink:0;">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="16" x2="12" y2="12"/>
+            <line x1="12" y1="8" x2="12.01" y2="8"/>
+          </svg>
+        {{/if}}
+        <div style="flex:1;">{{toast.message}}</div>
+        <button type="button" class="toast-close" onclick="this.closest('.toast').remove()" aria-label="Close">&times;</button>
+      </div>
+    </div>
+  {{/if}}
+
+  <!-- Universal Modern Confirmation Dialog -->
+  <div id="appConfirmModal" class="confirm-modal-overlay" style="display: none;" role="dialog" aria-modal="true">
+    <div class="confirm-modal-card" id="confirmModalCard">
+      <div class="confirm-modal-top">
+        <div class="confirm-modal-icon-badge type-warning" id="confirmModalIconBadge">
+          <span id="confirmModalIcon" style="font-size: 1.5rem; line-height: 1;">⚠️</span>
+        </div>
+        <button type="button" class="confirm-modal-close-btn" id="confirmModalCloseBtn" aria-label="Close">&times;</button>
+      </div>
+      <h3 class="confirm-modal-title" id="confirmModalTitle">{{t 'common.confirm'}}</h3>
+      <p class="confirm-modal-desc" id="confirmModalDesc"></p>
+
+      <div class="confirm-modal-preview" id="confirmModalPreview" style="display: none;">
+        <div class="confirm-modal-avatar" id="confirmModalAvatar">U</div>
+        <div style="flex: 1; min-width: 0;">
+          <div style="font-weight: 700; font-size: 0.95rem; color: #fff;" id="confirmModalTargetName"></div>
+          <div style="font-size: 0.8rem; color: var(--color-text-muted); margin-top: 0.15rem;" id="confirmModalTargetSub"></div>
+        </div>
+        <div id="confirmModalTargetBadge"></div>
+      </div>
+
+      <div class="confirm-modal-callout type-warning" id="confirmModalCallout" style="display: none;">
+        <span id="confirmModalCalloutIcon" style="font-size: 1.1rem; line-height: 1; flex-shrink: 0;">⚠️</span>
+        <div id="confirmModalCalloutText" style="font-size: 0.84rem; line-height: 1.45;"></div>
+      </div>
+
+      <div class="confirm-modal-actions">
+        <button type="button" class="btn btn-secondary confirm-cancel-btn" id="confirmModalCancelBtn">
+          {{t 'common.cancel'}}
+        </button>
+        <button type="button" class="btn confirm-submit-btn btn-warning" id="confirmModalSubmitBtn">
+          <span id="confirmModalSubmitIcon" style="margin-right: 0.35rem;"></span>
+          <span id="confirmModalSubmitText">{{t 'common.confirm'}}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  {{> image-lightbox-modal}}
+
+  <script src="/js/main.js?v=3.0"></script>
+</body>
+</html>

@@ -1,0 +1,423 @@
+<div class="page-header">
+  <div class="header-content">
+    <h1 class="page-title">{{t 'bills.title'}}</h1>
+    <p class="page-subtitle">{{t 'bills.subtitle'}}</p>
+  </div>
+  {{#if (or isSuperAdmin currentUser.canCreate)}}
+  <div class="header-actions">
+    <a href="/bills/new" class="btn btn-primary" style="background: #10b981; border-color: #10b981; display: inline-flex; align-items: center; gap: 0.5rem; white-space: nowrap; flex-shrink: 0; padding: 0.62rem 1.25rem; font-weight: 700; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <line x1="12" y1="5" x2="12" y2="19"/>
+        <line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+      <span>{{t 'bills.newBill'}}</span>
+    </a>
+  </div>
+  {{/if}}
+</div>
+
+<!-- Inline Filter Form -->
+<div class="card dfb-card" style="padding: 1rem 1.25rem; margin-bottom: 1rem; overflow: visible; position: relative; z-index: 25;">
+  <div class="dfb-mobile-toggle" onclick="toggleFilterDrawer('billsFilterInline')">
+    <span class="dfb-toggle-icon">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="10" y1="18" x2="14" y2="18"/></svg>
+    </span>
+    <span class="dfb-toggle-label">
+      {{#if isBn}}ফিল্টার ও তারিখ{{else}}Filter & Date{{/if}}
+      {{#if (or fromDate toDate selectedGarageId search)}}<span class="dfb-active-dot"></span>{{/if}}
+    </span>
+    <svg class="dfb-toggle-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+  </div>
+
+  <form id="billsFilterInline" class="dfb-form dfb-collapse" method="GET" action="/bills">
+    <!-- From Date -->
+    <div class="dfb-group">
+      <label class="dfb-label" for="billsFrom">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        {{#if isBn}}শুরু{{else}}From{{/if}}
+      </label>
+      <input type="date" id="billsFrom" name="fromDate" class="dfb-input" value="{{fromDate}}" onchange="clearPreset('billsFilterInline')">
+    </div>
+    <!-- To Date -->
+    <div class="dfb-group">
+      <label class="dfb-label" for="billsTo">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        {{#if isBn}}শেষ{{else}}To{{/if}}
+      </label>
+      <input type="date" id="billsTo" name="toDate" class="dfb-input" value="{{toDate}}" onchange="clearPreset('billsFilterInline')">
+    </div>
+    <!-- Garage select -->
+    <div class="dfb-group" style="min-width: 160px;">
+      <label class="dfb-label">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+        {{#if isBn}}গ্যারেজ{{else}}Garage{{/if}}
+      </label>
+      <select name="garageId" class="dfb-input dfb-select filter-select" data-custom-select>
+        <option value="">{{t 'common.allGarages'}}</option>
+        {{#each garages}}
+          <option value="{{this.id}}" {{#if (eq this.id ../selectedGarageId)}}selected{{/if}}>{{this.garageName}}</option>
+        {{/each}}
+      </select>
+    </div>
+    <!-- Search -->
+    <div class="dfb-group" style="min-width: 180px; flex: 1;">
+      <label class="dfb-label">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        {{#if isBn}}গ্রাহক খুঁজুন{{else}}Search Customer{{/if}}
+      </label>
+      <input type="text" name="search" class="dfb-input" placeholder="{{#if isBn}}গ্রাহক নং, নাম, মোবাইল, NID, কোড...{{else}}Customer ID, name, phone, NID, code...{{/if}}" value="{{search}}">
+    </div>
+    <!-- Actions -->
+    <div class="dfb-actions">
+      <button type="submit" class="btn btn-primary dfb-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        {{#if isBn}}ফিল্টার{{else}}Filter{{/if}}
+      </button>
+      <a href="/bills" class="btn btn-secondary dfb-btn" style="color: #ef4444;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        {{#if isBn}}রিসেট{{else}}Reset{{/if}}
+      </a>
+    </div>
+    <!-- Preset Pills -->
+    <div class="dfb-presets">
+      <button type="button" class="dfb-preset-pill {{#if (eq preset 'today')}}dfb-preset-active{{/if}}" onclick="setDatePreset('today','billsFilterInline')">{{#if isBn}}আজ{{else}}Today{{/if}}</button>
+      <button type="button" class="dfb-preset-pill {{#if (eq preset 'thisMonth')}}dfb-preset-active{{/if}}" onclick="setDatePreset('thisMonth','billsFilterInline')">{{#if isBn}}এই মাস{{else}}This Month{{/if}}</button>
+      <button type="button" class="dfb-preset-pill {{#if (eq preset 'lastMonth')}}dfb-preset-active{{/if}}" onclick="setDatePreset('lastMonth','billsFilterInline')">{{#if isBn}}গত মাস{{else}}Last Month{{/if}}</button>
+      <button type="button" class="dfb-preset-pill {{#if (eq preset 'last30')}}dfb-preset-active{{/if}}" onclick="setDatePreset('last30','billsFilterInline')">{{#if isBn}}শেষ ৩০ দিন{{else}}Last 30 Days{{/if}}</button>
+      <button type="button" class="dfb-preset-pill {{#if (eq preset 'thisYear')}}dfb-preset-active{{/if}}" onclick="setDatePreset('thisYear','billsFilterInline')">{{#if isBn}}এই বছর{{else}}This Year{{/if}}</button>
+      <button type="button" class="dfb-preset-pill {{#if (eq preset 'all')}}dfb-preset-active{{/if}}" onclick="setDatePreset('all','billsFilterInline')">{{#if isBn}}সব{{else}}All Time{{/if}}</button>
+    </div>
+    <input type="hidden" name="preset" id="billsFilterInline_preset" value="{{preset}}">
+  </form>
+</div>
+
+
+<!-- KPI Summary Ribbon -->
+<div class="kpi-grid-5" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+  <div class="card" style="padding: 1rem; text-align: center;">
+    <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--color-text-muted); font-weight: 600; margin-bottom: 0.4rem;">{{#if isBn}}মোট বিল{{else}}Total Bills{{/if}}</div>
+    <div style="font-size: 1.5rem; font-weight: 700; color: var(--color-text-primary);">{{bnNum totalBillsCount}}</div>
+  </div>
+  <div class="card" style="padding: 1rem; text-align: center;">
+    <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--color-text-muted); font-weight: 600; margin-bottom: 0.4rem;">{{t 'bills.consumed'}} (kWh)</div>
+    <div style="font-size: 1.5rem; font-weight: 700; color: #38bdf8;">{{bnMoney summary.totalUnits}}</div>
+  </div>
+  <div class="card" style="padding: 1rem; text-align: center;">
+    <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--color-text-muted); font-weight: 600; margin-bottom: 0.4rem;">{{t 'bills.totalBill'}}</div>
+    <div style="font-size: 1.5rem; font-weight: 700; color: #818cf8;">{{t 'common.currency'}}{{bnMoney summary.totalBilled}}</div>
+  </div>
+  <div class="card" style="padding: 1rem; text-align: center;">
+    <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--color-text-muted); font-weight: 600; margin-bottom: 0.4rem;">{{t 'bills.paid'}}</div>
+    <div style="font-size: 1.5rem; font-weight: 700; color: #34d399;">{{t 'common.currency'}}{{bnMoney summary.totalPaid}}</div>
+  </div>
+  <div class="card" style="padding: 1rem; text-align: center;">
+    <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--color-text-muted); font-weight: 600; margin-bottom: 0.4rem;">{{t 'bills.presentDues'}}</div>
+    <div style="font-size: 1.5rem; font-weight: 700; color: #f87171;">{{t 'common.currency'}}{{bnMoney summary.totalDues}}</div>
+  </div>
+</div>
+
+<div class="card" style="overflow: hidden; border-radius: var(--radius-lg); box-shadow: var(--shadow-sm);">
+  <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; padding: 0.9rem 1.25rem; border-bottom: 1px solid var(--color-border-subtle); background: var(--color-surface);">
+    <div style="display: flex; align-items: center; gap: 0.6rem;">
+      <div style="width: 8px; height: 8px; border-radius: 50%; background: #6366f1;"></div>
+      <h2 class="card-title" style="margin: 0; font-size: 1.05rem; font-weight: 700;">{{t 'bills.ledgerTitle'}}</h2>
+      <span class="badge" style="background: rgba(99, 102, 241, 0.12); color: #4f46e5; font-size: 0.75rem; padding: 0.15rem 0.5rem; border-radius: 9999px; font-weight: 700;">
+        {{bnNum totalBillsCount}}
+      </span>
+    </div>
+  </div>
+
+  {{#if bills.length}}
+    <!-- Desktop Table View -->
+    <div class="table-responsive desktop-bills-table">
+      <table class="data-table bills-ledger-table">
+        <thead>
+          <tr>
+            <th style="width: 82px;">{{t 'common.date'}}</th>
+            <th style="min-width: 160px;">{{t 'bills.customer'}}</th>
+            <th class="th-num" style="width: 65px;" title="{{t 'bills.prevUnit'}}">{{#if isBn}}পূর্ব রিডিং{{else}}Prev{{/if}}</th>
+            <th class="th-num" style="width: 65px;" title="{{t 'bills.currUnit'}}">{{#if isBn}}বর্তমান রিডিং{{else}}Curr{{/if}}</th>
+            <th class="th-num" style="width: 82px; text-align: center; white-space: nowrap;">{{t 'bills.consumed'}}</th>
+            <th class="th-num" style="width: 80px;">{{t 'bills.electricBill'}}</th>
+            <th class="th-num" style="width: 80px;">{{#if isBn}}পূর্ব বকেয়া{{else}}Prev Dues{{/if}}</th>
+            <th class="th-num" style="width: 60px;">{{t 'bills.rent'}}</th>
+            <th class="th-num" style="width: 60px;">{{t 'bills.loan'}}</th>
+            <th class="th-num" style="width: 88px;">{{#if isBn}}সর্বমোট{{else}}Total{{/if}}</th>
+            <th class="th-num" style="width: 80px;">{{#if isBn}}পরিশোধ{{else}}Paid{{/if}}</th>
+            <th class="th-num" style="width: 105px; text-align: right; white-space: nowrap;">{{t 'bills.presentDues'}}</th>
+            <th style="width: 88px; text-align: right;">{{t 'common.actions'}}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each bills}}
+            <tr class="{{#if this.isLatestBill}}row-latest-bill{{else}}row-archived-bill{{/if}}">
+              <td>
+                <span class="date-badge-pill">{{tDate this.date}}</span>
+              </td>
+              <td>
+                <div class="customer-table-cell">
+                  <div class="cust-title-line">
+                    {{#if this.customerCId}}
+                      <span class="badge-cid">#{{bnNum this.customerCId}}</span>
+                    {{/if}}
+                    <a href="/customers/{{this.customerId}}" class="customer-name-link" title="{{this.customerName}}">
+                      {{this.customerName}}
+                    </a>
+                    {{#if this.customerCode}}
+                      <span class="customer-code-sub">({{this.customerCode}})</span>
+                    {{/if}}
+                  </div>
+                  {{#if this.garageName}}
+                    <div class="table-garage-pill" title="{{#if ../isBn}}গ্যারেজ: {{this.garageName}}{{else}}Garage: {{this.garageName}}{{/if}}">
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                      <span class="garage-name-text">{{this.garageName}}</span>
+                    </div>
+                  {{/if}}
+                </div>
+              </td>
+              <td class="cell-num">{{bnMoney this.previousUnit}}</td>
+              <td class="cell-num font-semibold">{{bnMoney this.currentUnit}}</td>
+              <td style="text-align: center; white-space: nowrap;">
+                <span class="badge-consumed-units">{{bnMoney this.totalUnit}} {{t 'common.unitShort'}}</span>
+              </td>
+              <td class="cell-num">{{bnMoney this.electricBill}}</td>
+              <td class="cell-num cell-muted-due">
+                {{#if (gt this.previousDues 0)}}
+                  <span class="text-due-prev">{{bnMoney this.previousDues}}</span>
+                {{else}}
+                  <span class="cell-dash">—</span>
+                {{/if}}
+              </td>
+              <td class="cell-num">
+                {{#if (gt this.rentBill 0)}}
+                  {{bnMoney this.rentBill}}
+                {{else}}
+                  <span class="cell-dash">—</span>
+                {{/if}}
+              </td>
+              <td class="cell-num">
+                {{#if (gt this.loan 0)}}
+                  {{bnMoney this.loan}}
+                {{else}}
+                  <span class="cell-dash">—</span>
+                {{/if}}
+              </td>
+              <td class="cell-num font-bold text-accent">{{bnMoney this.totalBill}}</td>
+              <td class="cell-num">
+                {{#if (gt this.clearMoney 0)}}
+                  <span class="text-success font-semibold">{{bnMoney this.clearMoney}}</span>
+                {{else}}
+                  <span class="cell-dash">—</span>
+                {{/if}}
+              </td>
+              <td class="cell-num" style="text-align: right; white-space: nowrap;">
+                {{#if (gt this.presentDues 0)}}
+                  <span class="dues-badge dues-has-due">
+                    ৳{{bnMoney this.presentDues}}
+                  </span>
+                {{else}}
+                  {{#if (lt this.presentDues 0)}}
+                    <span class="dues-badge dues-advance">
+                      ৳{{bnMoney (subtract 0 this.presentDues)}} {{#if ../isBn}}অগ্রিম{{else}}Adv{{/if}}
+                    </span>
+                  {{else}}
+                    <span class="dues-badge dues-cleared">
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                      {{#if ../isBn}}পরিশোধিত{{else}}Cleared{{/if}}
+                    </span>
+                  {{/if}}
+                {{/if}}
+              </td>
+              <td style="text-align: right; white-space: nowrap;">
+                <div class="table-actions-group">
+                  <!-- Receipt button: always available -->
+                  <a href="/bills/{{this.id}}" class="btn btn-secondary btn-icon-action" title="{{t 'bills.receipt'}}" aria-label="{{t 'bills.receipt'}}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                  </a>
+
+                  {{#if this.isLatestBill}}
+                    <!-- Edit only allowed on latest bill -->
+                    {{#if (or ../isSuperAdmin ../currentUser.canEdit)}}
+                    <a href="/bills/{{this.id}}/edit" class="btn btn-secondary btn-icon-action btn-action-edit" title="{{t 'common.edit'}}" aria-label="{{t 'common.edit'}}">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </a>
+                    {{/if}}
+                    <!-- Delete only allowed on latest bill -->
+                    {{#if (or ../isSuperAdmin ../currentUser.canDelete)}}
+                    <form action="/bills/{{this.id}}/delete" method="POST" style="display: inline;" onsubmit="return confirm('{{t 'bills.confirmDelete'}}');">
+                      <button type="submit" class="btn btn-icon-action btn-action-delete" title="{{t 'common.delete'}}" aria-label="{{t 'common.delete'}}">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                      </button>
+                    </form>
+                    {{/if}}
+                  {{else}}
+                    <!-- Locked indicator for older bills -->
+                    <span class="btn-icon-action action-locked-pill" title="{{#if ../isBn}}পূর্ববর্তী রেকর্ড - শুধুমাত্র সর্বশেষ বিল পরিবর্তন বা মুছে ফেলা সম্ভব{{else}}Archived bill - only the latest bill can be edited or deleted{{/if}}">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    </span>
+                  {{/if}}
+                </div>
+              </td>
+            </tr>
+          {{/each}}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Mobile Cards View (Rendered under 768px) -->
+    <div class="mobile-bills-cards">
+      {{#each bills}}
+        <div class="mobile-bill-card {{#if this.isLatestBill}}mbc-latest{{else}}mbc-archived{{/if}}">
+          <div class="mbc-top">
+            <div class="mbc-cust-info">
+              <div class="mbc-name-row">
+                {{#if this.customerCId}}
+                  <span class="badge-cid">#{{bnNum this.customerCId}}</span>
+                {{/if}}
+                <a href="/customers/{{this.customerId}}" class="mbc-name">{{this.customerName}}</a>
+                {{#if this.customerCode}}
+                  <span class="customer-code-sub">({{this.customerCode}})</span>
+                {{/if}}
+              </div>
+              {{#if this.garageName}}
+                <div class="table-garage-pill" style="margin-top: 0.35rem; width: fit-content;">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                  <span>{{this.garageName}}</span>
+                </div>
+              {{/if}}
+            </div>
+            <div class="mbc-meta">
+              <span class="date-badge-pill">{{tDate this.date}}</span>
+              {{#if this.isLatestBill}}
+                <span class="mbc-latest-tag">{{#if ../isBn}}সর্বশেষ বিল{{else}}Latest{{/if}}</span>
+              {{/if}}
+            </div>
+          </div>
+
+          <!-- Reading details -->
+          <div class="mbc-reading-bar">
+            <span>{{#if ../isBn}}রিডিং{{else}}Reading{{/if}}: <strong>{{bnMoney this.previousUnit}}</strong> &rarr; <strong>{{bnMoney this.currentUnit}}</strong></span>
+            <span class="badge badge-consumed-units">{{bnMoney this.totalUnit}} {{t 'common.unitShort'}}</span>
+          </div>
+
+          <!-- Financial summary grid -->
+          <div class="mbc-grid">
+            <div class="mbc-stat-box">
+              <span class="mbc-stat-lbl">{{t 'bills.electricBill'}}</span>
+              <span class="mbc-stat-val">৳{{bnMoney this.electricBill}}</span>
+            </div>
+            <div class="mbc-stat-box">
+              <span class="mbc-stat-lbl">{{t 'bills.rent'}} + {{t 'bills.loan'}}</span>
+              <span class="mbc-stat-val">৳{{bnMoney (add this.rentBill this.loan)}}</span>
+            </div>
+            <div class="mbc-stat-box">
+              <span class="mbc-stat-lbl">{{t 'bills.totalBill'}}</span>
+              <span class="mbc-stat-val font-bold">৳{{bnMoney this.totalBill}}</span>
+            </div>
+            <div class="mbc-stat-box">
+              <span class="mbc-stat-lbl">{{t 'bills.paid'}}</span>
+              <span class="mbc-stat-val text-success font-bold">৳{{bnMoney this.clearMoney}}</span>
+            </div>
+          </div>
+
+          <div class="mbc-bottom">
+            <div class="mbc-dues">
+              <span class="mbc-due-label">{{t 'bills.presentDues'}}:</span>
+              <strong class="{{#if (ne this.presentDues 0)}}text-danger{{else}}text-success{{/if}}" style="font-size: 1.15rem; font-family: monospace;">
+                ৳{{bnMoney this.presentDues}}
+              </strong>
+            </div>
+
+            <div class="table-actions-group">
+              <a href="/bills/{{this.id}}" class="btn btn-secondary btn-icon-action" title="{{t 'bills.receipt'}}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+              </a>
+
+              {{#if this.isLatestBill}}
+                {{#if (or ../isSuperAdmin ../currentUser.canEdit)}}
+                <a href="/bills/{{this.id}}/edit" class="btn btn-secondary btn-icon-action btn-action-edit" title="{{t 'common.edit'}}">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                </a>
+                {{/if}}
+                {{#if (or ../isSuperAdmin ../currentUser.canDelete)}}
+                <form action="/bills/{{this.id}}/delete" method="POST" style="display: inline;" onsubmit="return confirm('{{t 'bills.confirmDelete'}}');">
+                  <button type="submit" class="btn btn-danger btn-icon-action btn-action-delete" title="{{t 'common.delete'}}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                  </button>
+                </form>
+                {{/if}}
+              {{else}}
+                <span class="btn-icon-action action-locked-pill" title="{{#if ../isBn}}পূর্ববর্তী রেকর্ড - লকড{{else}}Archived bill (Locked){{/if}}">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </span>
+              {{/if}}
+            </div>
+          </div>
+        </div>
+      {{/each}}
+    </div>
+  {{else}}
+    <div style="text-align: center; padding: 4rem 1rem;">
+      <div style="font-size: 3rem; margin-bottom: 1rem;">⚡</div>
+      <h3 style="color: var(--color-text-primary); font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">{{t 'bills.noBills'}}</h3>
+      <p style="color: var(--color-text-muted); margin-bottom: 1.5rem;">{{t 'bills.noBillsSub'}}</p>
+      {{#if (or isSuperAdmin currentUser.canCreate)}}
+      <a href="/bills/new" class="btn btn-primary" style="background: #10b981; border-color: #10b981;">{{t 'bills.newBill'}}</a>
+      {{/if}}
+    </div>
+  {{/if}}
+</div>
+
+<!-- Pagination Controls -->
+{{#if pagination.totalPages}}
+  {{#if (gt pagination.totalPages 1)}}
+  <div class="pagination-bar" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; padding: 0.75rem 0; margin-top: 0.5rem;"
+       data-page="{{pagination.page}}"
+       data-total-pages="{{pagination.totalPages}}"
+       data-total-count="{{pagination.totalCount}}"
+       data-has-next="{{pagination.hasNext}}"
+       data-has-prev="{{pagination.hasPrev}}"
+       data-from="{{fromDate}}"
+       data-to="{{toDate}}"
+       data-garage="{{selectedGarageId}}"
+       data-search="{{search}}"
+       data-preset="{{preset}}"
+       id="billsPagination">
+    <div style="font-size: 0.85rem; color: var(--color-text-muted);">
+      {{#if isBn}}পৃষ্ঠা {{bnNum pagination.page}} / {{bnNum pagination.totalPages}} · মোট {{bnNum pagination.totalCount}} টি বিল
+      {{else}}Page {{pagination.page}} of {{pagination.totalPages}} · {{pagination.totalCount}} bills{{/if}}
+    </div>
+    <div id="billsPaginationBtns" style="display: flex; gap: 0.4rem; flex-wrap: wrap;"></div>
+  </div>
+  <script>
+    (function() {
+      const bar = document.getElementById('billsPagination');
+      if (!bar) return;
+      const d = bar.dataset;
+      const page = parseInt(d.page);
+      const params = new URLSearchParams({
+        fromDate: d.from || '',
+        toDate: d.to || '',
+        garageId: d.garage || '',
+        search: d.search || '',
+        preset: d.preset || '',
+      });
+      const btns = document.getElementById('billsPaginationBtns');
+      if (d.hasPrev === 'true') {
+        params.set('page', page - 1);
+        btns.insertAdjacentHTML('beforeend',
+          '<a href="?' + params.toString() + '" class="btn btn-secondary btn-sm">&larr; Prev</a>');
+      }
+      if (d.hasNext === 'true') {
+        params.set('page', page + 1);
+        btns.insertAdjacentHTML('beforeend',
+          '<a href="?' + params.toString() + '" class="btn btn-secondary btn-sm">Next &rarr;</a>');
+      }
+    })();
+  </script>
+  {{/if}}
+{{/if}}
+
+
+
+

@@ -1,0 +1,257 @@
+<div class="page-header" style="margin-bottom: 1.5rem;">
+  <div class="header-content">
+    <a href="/customers" style="color: var(--color-text-muted); text-decoration: none; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 0.35rem; margin-bottom: 0.5rem; transition: color 0.15s ease;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+      {{t 'common.back'}}
+    </a>
+    <h1 class="page-title" style="display: flex; align-items: center; gap: 0.65rem;">
+      <span style="display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 10px; background: rgba(99, 102, 241, 0.15); color: #818cf8;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+      </span>
+      {{t 'customers.createTitle'}}
+    </h1>
+    <p class="page-subtitle">{{t 'customers.createSubtitle'}}</p>
+  </div>
+</div>
+
+
+
+<div class="customer-create-grid" style="display: grid; grid-template-columns: 1.25fr 0.75fr; gap: 1.75rem; align-items: start; max-width: 1100px; margin: 0 auto;">
+  <!-- Form Column -->
+  <div class="card" style="padding: 1.75rem; border-top: 3px solid #6366f1; margin-bottom: 0;">
+    <form action="/customers" method="POST" enctype="multipart/form-data">
+      <!-- Section 1: Facility & Identification -->
+      <div style="margin-bottom: 1.75rem;">
+        <div class="form-section-title" style="margin-bottom: 1.25rem;">
+          <span class="section-icon-badge">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </span>
+          {{t 'customers.facilityAndProfile'}}
+        </div>
+
+        {{> profile-avatar-uploader avatarId="customerAvatar" fieldName="avatarFile" title=(t 'profile.picture') hint=(t 'profile.pictureHint')}}
+
+        <div class="form-group" style="margin-bottom: 1.25rem;">
+          <label class="form-label" for="garageId">
+            <span>{{t 'customers.garage'}} <span style="color: #f43f5e;">*</span></span>
+          </label>
+          <select id="garageId" name="garageId" class="form-input" required onchange="handleGarageChange()">
+            <option value="" disabled {{#unless selectedGarageId}}selected{{/unless}}>{{t 'common.selectGarage'}}</option>
+            {{#each garages}}
+              <option value="{{this.id}}" data-subtext="{{this.address}}" data-active="{{this.isActive}}" {{#if (eq this.id ../selectedGarageId)}}selected{{/if}} {{#unless this.isActive}}disabled style="color: #ef4444; background: rgba(239, 68, 68, 0.08);"{{/unless}}>
+                🏢 {{this.garageName}} {{#unless this.isActive}} [🚫 {{t 'garages.suspended'}}]{{/unless}}
+              </option>
+            {{/each}}
+          </select>
+          <div id="garageSuspendedWarning" style="display: {{#if isGarageSuspended}}flex{{else}}none{{/if}}; margin-top: 0.75rem; background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; padding: 0.75rem 1rem; color: #f87171; font-size: 0.88rem; align-items: center; gap: 0.5rem;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink: 0;"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+            <div>
+              <strong>{{t 'garages.suspendedNoticeShort'}}:</strong> {{t 'msg.garageSuspendedCustomerBlocked'}}
+            </div>
+          </div>
+          <span class="form-hint" id="garageBranchHint">{{t 'customers.garageBranchHint'}}</span>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1.25rem;">
+          <label class="form-label" for="name">
+            <span>{{t 'customers.name'}} <span style="color: #f43f5e;">*</span></span>
+          </label>
+          <input type="text" id="name" name="name" class="form-input" required placeholder="e.g. Mohammad Rahim" value="{{formData.name}}">
+        </div>
+
+        {{> phone-repeater containerId="customerPhones" primaryFieldName="mobileNumber" primaryValue=formData.mobileNumber jsonFieldName="phoneNumbersJson" initialPhones=(resolvePhones formData.phoneNumbers formData.mobileNumber) required=true}}
+
+        <div class="form-grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label" for="fatherName">{{t 'customers.fatherName'}}</label>
+            <input type="text" id="fatherName" name="fatherName" class="form-input" placeholder="{{t 'customers.fatherName'}}" value="{{formData.fatherName}}">
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label" for="motherName">{{t 'customers.motherName'}}</label>
+            <input type="text" id="motherName" name="motherName" class="form-input" placeholder="{{t 'customers.motherName'}}" value="{{formData.motherName}}">
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0;">
+          <label class="form-label" for="nidNumber">
+            <span>{{t 'customers.nid'}} <span style="color: #f43f5e;">*</span></span>
+          </label>
+          <input type="text" id="nidNumber" name="nidNumber" class="form-input" required placeholder="e.g. 19901234567890123" value="{{formData.nidNumber}}">
+          <span class="form-hint">{{t 'customers.nidHint'}}</span>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0; margin-top: 1.25rem;">
+          <label class="form-label" for="customerCode">
+            <span>{{t 'customers.code'}} <span style="color: var(--color-text-muted); font-size: 0.8rem; font-weight: 400;">({{#if isBn}}ঐচ্ছিক{{else}}optional{{/if}})</span></span>
+          </label>
+          <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <input type="text" id="customerCode" name="customerCode" class="form-input" placeholder="e.g. CUST-001" value="{{#if formData.customerCode}}{{formData.customerCode}}{{else}}{{nextCustomerCode}}{{/if}}" maxlength="50" autocomplete="off">
+            <span id="codeStatus" style="font-size: 0.8rem; white-space: nowrap;"></span>
+          </div>
+          <span class="form-hint">{{t 'customers.codeHint'}}</span>
+        </div>
+      </div>
+
+      <!-- Section 2: Premises & Electricity Setup -->
+      <div style="margin-bottom: 1.5rem;">
+        <div class="form-section-title" style="margin-bottom: 1.25rem;">
+          <span class="section-icon-badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          </span>
+          {{t 'customers.premisesAndMeter'}}
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1.25rem;">
+          <label class="form-label" for="address">
+            <span>{{t 'customers.address'}} <span style="color: #f43f5e;">*</span></span>
+          </label>
+          <textarea id="address" name="address" class="form-input" rows="2" required placeholder="{{t 'customers.premisesAddressPlaceholder'}}">{{formData.address}}</textarea>
+        </div>
+
+        <div class="form-grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label" for="previousUnit">
+              <span>{{t 'customers.baselineMeter'}} <span style="color: #f43f5e;">*</span></span>
+            </label>
+            <input type="number" step="0.01" min="0" id="previousUnit" name="previousUnit" class="form-input" required placeholder="0.00" value="{{#if formData.previousUnit}}{{formData.previousUnit}}{{else}}0.00{{/if}}">
+            <span class="form-hint">{{t 'customers.baselineMeterHint'}}</span>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label" for="advanceMoney">
+              <span>{{t 'customers.advanceMoney'}} ({{t 'common.currency'}}) <span style="color: #f43f5e;">*</span></span>
+            </label>
+            <input type="number" step="0.01" id="advanceMoney" name="advanceMoney" class="form-input" required placeholder="0.00" value="{{#if formData.advanceMoney}}{{formData.advanceMoney}}{{else}}0.00{{/if}}">
+            <span class="form-hint">{{t 'customers.advanceMoneyHint'}}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 3: Guarantor Information (Optional) -->
+      {{> guarantor-create-section targetType="customer" formData=formData}}
+
+      <!-- Section 4: Documents & Identity Attachments -->
+      {{> documents-multi-uploader targetType="customer" fieldPrefix="customerDoc"}}
+
+      <div class="form-actions" style="margin-top: 2rem; display: flex; gap: 0.75rem; justify-content: flex-end; align-items: center;">
+        <a href="/customers" class="btn btn-secondary" style="padding: 0.65rem 1.25rem;">{{t 'common.cancel'}}</a>
+        <button type="submit" id="saveCustomerBtn" class="btn btn-primary" style="padding: 0.65rem 1.5rem; display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 700; box-shadow: 0 4px 16px rgba(99, 102, 241, 0.35);">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          {{t 'customers.saveCustomer'}}
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Guidelines & Tips Sidebar -->
+  <div class="customer-create-sidebar" style="position: sticky; top: 84px;">
+    <div class="card registration-guide-card">
+      <h3 class="guide-title">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        {{#if isBn}}নিবন্ধন সংক্রান্ত নির্দেশিকা{{else}}নিবন্ধন সংক্রান্ত নির্দেশিকা (Registration Notes){{/if}}
+      </h3>
+
+      <div class="guide-list">
+        <div class="guide-item">
+          <div class="guide-step-badge step-1">১</div>
+          <div>
+            <strong class="guide-strong">গ্যারেজ অ্যাক্সেস নিয়ন্ত্রণ {{#unless isBn}}<span style="font-size: 0.78rem; opacity: 0.8;">(Garage Access)</span>{{/unless}}:</strong>
+            <span class="guide-text">নির্বাচিত গ্যারেজের অনুমোদিত কর্মীরাই কেবল এই গ্রাহকের বিল পরিচালনা করতে পারবেন।</span>
+          </div>
+        </div>
+
+        <div class="guide-item">
+          <div class="guide-step-badge step-2">২</div>
+          <div>
+            <strong class="guide-strong">প্রাথমিক মিটারিং {{#unless isBn}}<span style="font-size: 0.78rem; opacity: 0.8;">(Baseline Metering)</span>{{/unless}}:</strong>
+            <span class="guide-text">প্রাথমিক ইউনিট হলো গ্রাহকের মিটার শুরুর রিডিং, যা প্রথম মাসের বিদ্যুৎ বিল হিসাব করার প্রারম্ভিক পয়েন্ট হিসেবে ব্যবহৃত হবে।</span>
+          </div>
+        </div>
+
+        <div class="guide-item">
+          <div class="guide-step-badge step-3">৩</div>
+          <div>
+            <strong class="guide-strong">জামিনদারবৃন্দ {{#unless isBn}}<span style="font-size: 0.78rem; opacity: 0.8;">(Guarantors)</span>{{/unless}}:</strong>
+            <span class="guide-text">গ্রাহক নিবন্ধনের সময়ই একই পেজে সরাসরি জামিনদার যোগ করতে পারবেন, অথবা পরেও তার প্রোফাইল পেজ থেকে পিতা-মাতার নাম ও পরিচয়পত্রসহ একাধিক জামিনদার যুক্ত করা যাবে।</span>
+          </div>
+        </div>
+
+        <div class="guide-item">
+          <div class="guide-step-badge step-4">৪</div>
+          <div>
+            <strong class="guide-strong">ডকুমেন্টস ও ফাইল {{#unless isBn}}<span style="font-size: 0.78rem; opacity: 0.8;">(File Upload)</span>{{/unless}}:</strong>
+            <span class="guide-text">গ্রাহকের এনআইডি বা চুক্তিপত্র সরাসরি আপলোড করতে পারবেন। ৫ MB এর বেশি ছবি স্বয়ংক্রিয়ভাবে অপ্টিমাইজ/কম্প্রেস করা হবে।</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function handleGarageChange() {
+    const select = document.getElementById('garageId');
+    const warning = document.getElementById('garageSuspendedWarning');
+    const inPageAlert = document.getElementById('inPageAlertBanner');
+    const submitBtn = document.getElementById('saveCustomerBtn');
+    if (!select) return;
+    const selectedOption = select.options[select.selectedIndex];
+    const isSuspended = selectedOption && (selectedOption.getAttribute('data-active') === 'false' || selectedOption.disabled);
+
+    if (isSuspended && select.value) {
+      if (warning) warning.style.display = 'flex';
+      if (inPageAlert) inPageAlert.style.display = 'flex';
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.style.opacity = '0.5';
+        submitBtn.style.cursor = 'not-allowed';
+        submitBtn.title = "{{t 'msg.garageSuspendedCustomerBlocked'}}";
+      }
+    } else {
+      if (warning) warning.style.display = 'none';
+      if (inPageAlert) inPageAlert.style.display = 'none';
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.style.opacity = '1';
+        submitBtn.style.cursor = 'pointer';
+        submitBtn.title = '';
+      }
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    handleGarageChange();
+  });
+
+  (function() {
+    const input = document.getElementById('customerCode');
+    const status = document.getElementById('codeStatus');
+    if (!input || !status) return;
+
+    let timer;
+    input.addEventListener('input', function() {
+      clearTimeout(timer);
+      const val = this.value.trim();
+      if (!val) {
+        status.innerHTML = '';
+        return;
+      }
+      status.innerHTML = '<span style="color: var(--color-text-muted); font-size: 0.75rem;">{{t "customers.checking"}}</span>';
+      timer = setTimeout(async () => {
+        try {
+          const url = `/customers/check-code?code=${encodeURIComponent(val)}`;
+          const res = await fetch(url);
+          const data = await res.json();
+          if (data.available) {
+            status.innerHTML = '<span style="color: #10b981; font-weight: 600; font-size: 0.8rem;">{{t "customers.codeAvailable"}}</span>';
+          } else {
+            status.innerHTML = '<span style="color: #f43f5e; font-weight: 600; font-size: 0.8rem;">{{t "customers.codeInUse"}}</span>';
+          }
+        } catch (e) {
+          status.innerHTML = '';
+        }
+      }, 350);
+    });
+  })();
+</script>

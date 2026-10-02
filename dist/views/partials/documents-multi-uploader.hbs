@@ -1,0 +1,644 @@
+{{!-- 
+  Reusable Multi-Category Document Uploader Partial
+  Parameters:
+    - targetType: 'customer' | 'employee' (default 'customer')
+    - fieldPrefix: 'customerDoc' | 'employeeDoc' (default 'customerDoc')
+    - title: string (optional section title)
+    - hint: string (optional helper hint)
+--}}
+
+<style>
+  .multi-doc-wrapper {
+    background: rgba(15, 23, 42, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+    transition: all 0.25s ease;
+  }
+  .multi-doc-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .multi-doc-title-group {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .multi-doc-icon-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: rgba(56, 189, 248, 0.15);
+    color: #38bdf8;
+    font-size: 1.1rem;
+  }
+  .multi-doc-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #f1f5f9;
+    margin: 0;
+  }
+  .multi-doc-hint {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    margin-top: 0.15rem;
+  }
+
+  /* Slot Grid/List */
+  .multi-doc-slots {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .doc-slot-card {
+    background: rgba(15, 23, 42, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 1rem;
+    transition: all 0.2s ease;
+    position: relative;
+  }
+  .doc-slot-card:hover {
+    border-color: rgba(56, 189, 248, 0.3);
+  }
+  .doc-slot-top {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    margin-bottom: 0.75rem;
+  }
+  .doc-slot-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: 0.5rem;
+  }
+  .doc-slot-label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--color-text, #cbd5e1);
+    margin: 0;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+  .doc-slot-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .doc-slot-badge-preset {
+    background: rgba(16, 185, 129, 0.15);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    color: #34d399;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+  .doc-slot-btn-remove {
+    background: rgba(239, 68, 68, 0.12);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #f87171;
+    border-radius: 6px;
+    padding: 0.3rem 0.55rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    transition: all 0.2s;
+    line-height: 1.2;
+  }
+  .doc-slot-btn-remove:hover {
+    background: rgba(239, 68, 68, 0.25);
+    color: #ef4444;
+  }
+  .doc-slot-category-select {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 0.5rem 0.65rem !important;
+    font-size: 0.86rem !important;
+    border-radius: 6px !important;
+    background: rgba(15, 23, 42, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #f8fafc;
+    min-height: 42px;
+  }
+  [data-theme="light"] .doc-slot-label {
+    color: #1e293b !important;
+  }
+  [data-theme="light"] .doc-slot-category-select {
+    background: #ffffff !important;
+    border-color: #cbd5e1 !important;
+    color: #0f172a !important;
+  }
+
+  @media (max-width: 576px) {
+    .multi-doc-wrapper {
+      padding: 0.85rem 0.65rem !important;
+      border-radius: 10px !important;
+      margin-bottom: 1rem !important;
+    }
+    .doc-slot-card {
+      padding: 0.75rem 0.6rem !important;
+      border-radius: 8px !important;
+    }
+    .doc-slot-dropzone {
+      padding: 0.85rem 0.5rem !important;
+    }
+    .doc-slot-drop-title {
+      font-size: 0.82rem !important;
+    }
+    .doc-slot-drop-subtitle {
+      font-size: 0.72rem !important;
+    }
+    .btn-add-doc-slot {
+      padding: 0.55rem 0.75rem !important;
+      font-size: 0.8rem !important;
+    }
+  }
+
+  /* Slot Drop Zone */
+  .doc-slot-dropzone {
+    border: 2px dashed rgba(255, 255, 255, 0.16);
+    border-radius: 8px;
+    padding: 1.1rem 0.85rem;
+    text-align: center;
+    background: rgba(15, 23, 42, 0.35);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+  }
+  .doc-slot-dropzone:hover, .doc-slot-dropzone.dragover {
+    border-color: #38bdf8;
+    background: rgba(56, 189, 248, 0.08);
+  }
+  .doc-slot-drop-title {
+    color: #38bdf8;
+    font-size: 0.88rem;
+    font-weight: 600;
+    margin-bottom: 0.15rem;
+  }
+  .doc-slot-drop-subtitle {
+    color: #94a3b8;
+    font-size: 0.76rem;
+  }
+
+  /* File Chips Preview List */
+  .doc-slot-file-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+  }
+  .doc-file-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    background: rgba(30, 41, 59, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 6px;
+    padding: 0.35rem 0.6rem;
+    font-size: 0.8rem;
+    color: #e2e8f0;
+    max-width: 100%;
+  }
+  .doc-file-chip-info {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-width: 0;
+    overflow: hidden;
+  }
+  .doc-file-chip-name {
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 180px;
+  }
+  .doc-file-chip-size {
+    color: #94a3b8;
+    font-size: 0.72rem;
+  }
+  .doc-file-chip-remove {
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #f87171;
+    border-radius: 4px;
+    width: 22px;
+    height: 22px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.75rem;
+    line-height: 1;
+    padding: 0;
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+  .doc-file-chip-remove:hover {
+    background: rgba(239, 68, 68, 0.35);
+    color: #ef4444;
+  }
+
+  /* Add Slot Button */
+  .btn-add-doc-slot {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(99, 102, 241, 0.15);
+    border: 1px dashed rgba(99, 102, 241, 0.4);
+    color: #a5b4fc;
+    border-radius: 8px;
+    padding: 0.65rem 1.15rem;
+    font-size: 0.86rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 0.75rem;
+    transition: all 0.2s ease;
+    width: 100%;
+    justify-content: center;
+  }
+  .btn-add-doc-slot:hover {
+    background: rgba(99, 102, 241, 0.25);
+    border-color: #818cf8;
+    color: #ffffff;
+  }
+
+  /* Light Theme Overrides */
+  [data-theme="light"] .multi-doc-wrapper {
+    background: #f8fafc !important;
+    border-color: #cbd5e1 !important;
+  }
+  [data-theme="light"] .multi-doc-title {
+    color: #0f172a !important;
+  }
+  [data-theme="light"] .multi-doc-hint {
+    color: #64748b !important;
+  }
+  [data-theme="light"] .doc-slot-card {
+    background: #ffffff !important;
+    border-color: #e2e8f0 !important;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05) !important;
+  }
+  [data-theme="light"] .doc-slot-card:hover {
+    border-color: #818cf8 !important;
+  }
+  [data-theme="light"] .doc-slot-dropzone {
+    background: #f8fafc !important;
+    border-color: #cbd5e1 !important;
+  }
+  [data-theme="light"] .doc-slot-dropzone:hover,
+  [data-theme="light"] .doc-slot-dropzone.dragover {
+    border-color: #4f46e5 !important;
+    background: #eef2ff !important;
+  }
+  [data-theme="light"] .doc-slot-drop-title {
+    color: #4f46e5 !important;
+  }
+  [data-theme="light"] .doc-slot-drop-subtitle {
+    color: #64748b !important;
+  }
+  [data-theme="light"] .doc-file-chip {
+    background: #ffffff !important;
+    border-color: #cbd5e1 !important;
+    color: #0f172a !important;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04) !important;
+  }
+  [data-theme="light"] .doc-file-chip-name {
+    color: #0f172a !important;
+  }
+  [data-theme="light"] .doc-file-chip-size {
+    color: #64748b !important;
+  }
+  [data-theme="light"] .btn-add-doc-slot {
+    background: #f5f3ff !important;
+    border-color: #a78bfa !important;
+    color: #6d28d9 !important;
+  }
+  [data-theme="light"] .btn-add-doc-slot:hover {
+    background: #ede9fe !important;
+    color: #5b21b6 !important;
+    border-color: #7c3aed !important;
+  }
+</style>
+
+<div class="multi-doc-wrapper" id="{{#if fieldPrefix}}{{fieldPrefix}}{{else}}customerDoc{{/if}}Wrapper">
+  <div class="multi-doc-header">
+    <div class="multi-doc-title-group">
+      <span class="multi-doc-icon-badge">📁</span>
+      <div>
+        <h4 class="multi-doc-title">
+          {{#if uploaderTitle}}{{uploaderTitle}}{{else if label}}{{label}}{{else}}{{t 'documents.title'}}{{/if}}
+        </h4>
+        <div class="multi-doc-hint">
+          {{#if (eq targetType 'employee')}}
+            {{t 'documents.employeePresetNote'}}
+          {{else if (eq targetType 'guarantor')}}
+            {{t 'documents.guarantorPresetNote'}}
+          {{else}}
+            {{t 'documents.customerPresetNote'}}
+          {{/if}}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {{!-- Container for document slots --}}
+  <div class="multi-doc-slots" id="{{#if fieldPrefix}}{{fieldPrefix}}{{else}}customerDoc{{/if}}SlotsContainer">
+    {{!-- Slots are populated here via JavaScript on load --}}
+  </div>
+
+  {{!-- Button to add another category slot --}}
+  <button type="button" class="btn-add-doc-slot" id="{{#if fieldPrefix}}{{fieldPrefix}}{{else}}customerDoc{{/if}}AddSlotBtn">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    {{t 'documents.addCategorySlot'}}
+  </button>
+</div>
+
+<script>
+(function() {
+  var prefix = '{{#if fieldPrefix}}{{fieldPrefix}}{{else}}customerDoc{{/if}}';
+  var target = '{{#if targetType}}{{targetType}}{{else}}customer{{/if}}';
+  var container = document.getElementById(prefix + 'SlotsContainer');
+  var addBtn = document.getElementById(prefix + 'AddSlotBtn');
+  if (!container || !addBtn) return;
+
+  var MAX_SLOTS = 15;
+  var slotIndexCounter = 0;
+
+  var categoryOptions = [
+    { value: 'NID', label: "{{t 'documents.typeNid'}}" },
+    { value: 'PHOTO', label: "{{t 'documents.typePhoto'}}" },
+    { value: 'ELECTRICITY_BILL', label: "{{t 'documents.typeElectricityBill'}}" },
+    { value: 'TRADE_LICENSE', label: "{{t 'documents.typeTradeLicense'}}" },
+    { value: 'AGREEMENT', label: "{{t 'documents.typeAgreement'}}" },
+    { value: 'PASSPORT', label: "{{t 'documents.typePassport'}}" },
+    { value: 'RESUME', label: "{{t 'documents.typeResume'}}" },
+    { value: 'APPOINTMENT_LETTER', label: "{{t 'documents.typeAppointment'}}" },
+    { value: 'DRIVING_LICENSE', label: "{{t 'documents.typeDrivingLicense'}}" },
+    { value: 'EDUCATIONAL', label: "{{t 'documents.typeEducational'}}" },
+    { value: 'GENERAL', label: "{{t 'documents.typeGeneral'}}" },
+    { value: 'OTHER', label: "{{t 'documents.typeOther'}}" }
+  ];
+
+  function formatSize(bytes) {
+    if (!bytes) return '0 B';
+    var k = 1024;
+    var sizes = ['B', 'KB', 'MB', 'GB'];
+    var i = Math.floor(Math.log(bytes) / Math.log(k));
+    return (bytes / Math.pow(k, i)).toFixed(1) + ' ' + sizes[i];
+  }
+
+  function getFileIcon(name) {
+    var ext = (name.split('.').pop() || '').toLowerCase();
+    if (ext === 'pdf') return '📕';
+    if (['jpg', 'jpeg', 'png', 'webp', 'heic'].indexOf(ext) >= 0) return '🖼️';
+    if (['xls', 'xlsx', 'csv'].indexOf(ext) >= 0) return '📊';
+    if (['doc', 'docx'].indexOf(ext) >= 0) return '📄';
+    return '📁';
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  }
+
+  function renderCategoryOptions(selectedVal) {
+    return categoryOptions.map(function(opt) {
+      var isSel = (opt.value === selectedVal) ? 'selected' : '';
+      return '<option value="' + opt.value + '" ' + isSel + '>' + opt.label + '</option>';
+    }).join('');
+  }
+
+  function createSlot(slotIdx, defaultCategory, isPreset) {
+    var slot = document.createElement('div');
+    slot.className = 'doc-slot-card';
+    slot.dataset.slotIndex = slotIdx;
+
+    var categoryNameAttr = prefix + 'Type_' + slotIdx;
+    var filesNameAttr = prefix + 'Files_' + slotIdx;
+
+    var presetBadgeHtml = isPreset 
+      ? '<span class="doc-slot-badge-preset">{{#if isBn}}প্রস্তাবিত{{else}}Recommended{{/if}}</span>' 
+      : '';
+
+    var removeBtnHtml = !isPreset 
+      ? '<button type="button" class="doc-slot-btn-remove" title="{{t "documents.removeSlot"}}">✕ {{t "documents.removeSlot"}}</button>' 
+      : '';
+
+    slot.innerHTML = 
+      '<div class="doc-slot-top">' +
+        '<div class="doc-slot-header-row">' +
+          '<label class="doc-slot-label">' +
+            '🏷️ {{t "documents.slotTitle"}}' +
+          '</label>' +
+          '<div class="doc-slot-actions">' +
+            presetBadgeHtml +
+            removeBtnHtml +
+          '</div>' +
+        '</div>' +
+        '<div class="doc-slot-select-row">' +
+          '<select name="' + categoryNameAttr + '" class="form-input doc-slot-category-select">' +
+            renderCategoryOptions(defaultCategory) +
+          '</select>' +
+        '</div>' +
+      '</div>' +
+      '<div class="doc-slot-dropzone">' +
+        '<input type="file" name="' + filesNameAttr + '" class="doc-slot-native-input" multiple accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx,.xls,.xlsx,.txt" style="display: none;" />' +
+        '<div style="pointer-events: none;">' +
+          '<div style="font-size: 1.5rem; margin-bottom: 0.2rem;">☁️</div>' +
+          '<div class="doc-slot-drop-title">{{t "documents.clickOrDrag"}}</div>' +
+          '<div class="doc-slot-drop-subtitle">PDF, JPG, PNG, WEBP, DOCX, XLSX (Max 5MB)</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="doc-slot-file-list" style="display: none;"></div>';
+
+    // Hook events
+    var dropzone = slot.querySelector('.doc-slot-dropzone');
+    var nativeInput = slot.querySelector('.doc-slot-native-input');
+    var fileList = slot.querySelector('.doc-slot-file-list');
+    var dt = new DataTransfer();
+
+    dropzone.addEventListener('click', function() {
+      nativeInput.click();
+    });
+
+    ['dragenter', 'dragover'].forEach(function(evt) {
+      dropzone.addEventListener(evt, function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        dropzone.classList.add('dragover');
+      }, false);
+    });
+
+    ['dragleave', 'drop'].forEach(function(evt) {
+      dropzone.addEventListener(evt, function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        dropzone.classList.remove('dragover');
+      }, false);
+    });
+
+    dropzone.addEventListener('drop', function(e) {
+      if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        appendFiles(e.dataTransfer.files);
+      }
+    });
+
+    nativeInput.addEventListener('change', function() {
+      if (nativeInput.files && nativeInput.files.length > 0) {
+        appendFiles(nativeInput.files);
+      }
+    });
+
+    function appendFiles(newFiles) {
+      Array.from(newFiles).forEach(function(f) {
+        dt.items.add(f);
+      });
+      nativeInput.files = dt.files;
+      renderFileList();
+    }
+
+    function removeFile(fileIndex) {
+      var newDt = new DataTransfer();
+      var currentFiles = dt.files;
+      for (var i = 0; i < currentFiles.length; i++) {
+        if (i !== fileIndex) {
+          newDt.items.add(currentFiles[i]);
+        }
+      }
+      dt = newDt;
+      nativeInput.files = dt.files;
+      renderFileList();
+    }
+
+    function renderFileList() {
+      fileList.innerHTML = '';
+      var files = dt.files;
+      if (!files || files.length === 0) {
+        fileList.style.display = 'none';
+        return;
+      }
+
+      fileList.style.display = 'flex';
+
+      Array.from(files).forEach(function(f, idx) {
+        var chip = document.createElement('div');
+        chip.className = 'doc-file-chip';
+
+        var isOversized = f.size > 5 * 1024 * 1024;
+
+        chip.innerHTML = 
+          '<div class="doc-file-chip-info">' +
+            '<span style="font-size: 1rem;">' + getFileIcon(f.name) + '</span>' +
+            '<div style="min-width: 0;">' +
+              '<div class="doc-file-chip-name" title="' + escapeHtml(f.name) + '">' + escapeHtml(f.name) + '</div>' +
+              '<div class="doc-file-chip-size">' + formatSize(f.size) + (isOversized ? ' <span style="color:#f87171;font-weight:600;">(>5MB)</span>' : '') + '</div>' +
+            '</div>' +
+          '</div>' +
+          '<button type="button" class="doc-file-chip-remove" title="Remove">&times;</button>';
+
+        chip.querySelector('.doc-file-chip-remove').addEventListener('click', function(e) {
+          e.stopPropagation();
+          removeFile(idx);
+        });
+
+        fileList.appendChild(chip);
+      });
+    }
+
+    if (!isPreset) {
+      var removeBtn = slot.querySelector('.doc-slot-btn-remove');
+      if (removeBtn) {
+        removeBtn.addEventListener('click', function() {
+          slot.remove();
+          reindexSlots();
+        });
+      }
+    }
+
+    return slot;
+  }
+
+  function reindexSlots() {
+    var allSlots = container.querySelectorAll('.doc-slot-card');
+    allSlots.forEach(function(slot, idx) {
+      slot.dataset.slotIndex = idx;
+      var select = slot.querySelector('.doc-slot-category-select');
+      if (select) select.name = prefix + 'Type_' + idx;
+      var fileInput = slot.querySelector('.doc-slot-native-input');
+      if (fileInput) fileInput.name = prefix + 'Files_' + idx;
+    });
+    slotIndexCounter = allSlots.length;
+  }
+
+  // Initialize preset slots
+  if (target === 'guarantor') {
+    var slot0 = createSlot(0, 'NID', true);
+    container.appendChild(slot0);
+
+    var slot1 = createSlot(1, 'PHOTO', true);
+    container.appendChild(slot1);
+
+    var slot2 = createSlot(2, 'SIGNATURE', true);
+    container.appendChild(slot2);
+
+    slotIndexCounter = 3;
+  } else {
+    var slot0 = createSlot(0, 'NID', true);
+    container.appendChild(slot0);
+
+    var slot1 = createSlot(1, 'PHOTO', true);
+    container.appendChild(slot1);
+
+    slotIndexCounter = 2;
+  }
+
+  // Add category slot button handler
+  addBtn.addEventListener('click', function() {
+    var currentCount = container.querySelectorAll('.doc-slot-card').length;
+    if (currentCount >= MAX_SLOTS) {
+      alert('Maximum ' + MAX_SLOTS + ' document categories can be added.');
+      return;
+    }
+
+    var defaultCat = 'ELECTRICITY_BILL';
+    if (target === 'employee') {
+      defaultCat = currentCount === 2 ? 'RESUME' : (currentCount === 3 ? 'APPOINTMENT_LETTER' : 'EDUCATIONAL');
+    } else if (target === 'guarantor') {
+      defaultCat = currentCount === 3 ? 'AGREEMENT' : (currentCount === 4 ? 'ELECTRICITY_BILL' : 'OTHER');
+    } else {
+      defaultCat = currentCount === 2 ? 'ELECTRICITY_BILL' : (currentCount === 3 ? 'TRADE_LICENSE' : 'AGREEMENT');
+    }
+
+    var newSlot = createSlot(slotIndexCounter, defaultCat, false);
+    container.appendChild(newSlot);
+    reindexSlots();
+  });
+})();
+</script>

@@ -1,0 +1,118 @@
+<div class="auth-split">
+  <!-- Left Hero Panel -->
+  <div class="auth-hero">
+    <div class="auth-hero-icon">⚡</div>
+    <h2>{{t 'auth.heroTitle'}}</h2>
+    <p>{{t 'auth.heroDesc'}}</p>
+    <ul class="auth-hero-features">
+      <li>{{t 'auth.heroFeature1'}}</li>
+      <li>{{t 'auth.heroFeature2'}}</li>
+      <li>{{t 'auth.heroFeature3'}}</li>
+      <li>{{t 'auth.heroFeature4'}}</li>
+      <li>{{t 'auth.heroFeature5'}}</li>
+    </ul>
+  </div>
+
+  <!-- Right Form Panel -->
+  <div class="auth-card-pane">
+    <div class="auth-card-inner">
+      <div style="margin-bottom: 2rem;">
+        <h1 style="font-size: 1.75rem; font-weight: 800; color: var(--color-text-primary); margin-bottom: 0.4rem;">{{t 'auth.welcomeBack'}}</h1>
+        <p style="color: var(--color-text-muted); font-size: 0.9rem;">{{t 'auth.signInSubtitle'}}</p>
+      </div>
+
+      {{#if successMessage}}
+        <div class="alert alert-success" style="margin-bottom: 1.25rem;">✅ {{successMessage}}</div>
+      {{/if}}
+
+      {{#if error}}
+        <div class="alert alert-danger" style="margin-bottom: 1.25rem;">⚠️ {{error}}</div>
+      {{/if}}
+
+      <form action="/login" method="POST" id="loginForm">
+        <div class="form-group" style="margin-bottom: 1.25rem;">
+          <label class="form-label" for="loginEmail" style="display:block;margin-bottom:0.4rem;font-size:0.875rem;font-weight:600;color:var(--color-text-muted);">{{t 'auth.emailAddress'}}</label>
+          <input
+            type="email"
+            id="loginEmail"
+            name="email"
+            class="form-control"
+            required
+            placeholder="admin@apexauto.com"
+            value="{{email}}"
+            style="width:100%;padding:0.75rem 1rem;border-radius:10px;font-size:0.95rem;"
+          />
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1.75rem;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem;">
+            <label class="form-label" for="loginPassword" style="font-size:0.875rem;font-weight:600;color:var(--color-text-muted);margin:0;">{{t 'auth.password'}}</label>
+            <a href="/forgot-password" style="font-size:0.8rem;color:var(--color-primary);text-decoration:none;font-weight:600;transition:color 0.15s;">{{t 'auth.forgotPassword'}}</a>
+          </div>
+          <div class="password-input-wrapper">
+            <input
+              type="password"
+              id="loginPassword"
+              name="password"
+              class="form-control"
+              required
+              placeholder="••••••••"
+              style="width:100%;padding:0.75rem 2.75rem 0.75rem 1rem;border-radius:10px;font-size:0.95rem;"
+            />
+            <button type="button" class="password-toggle-btn" aria-label="Toggle password visibility" tabindex="-1">
+              <svg class="eye-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+              <svg class="eye-off-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                <line x1="1" y1="1" x2="23" y2="23"></line>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width:100%;padding:0.875rem;font-weight:700;font-size:0.95rem;border-radius:10px;" id="loginSubmitBtn">
+          {{t 'auth.signInBtn'}}
+        </button>
+      </form>
+
+      <!-- Demo Quick Fill Buttons -->
+      <div style="margin-top: 1.75rem; padding-top: 1.5rem; border-top: 1px solid rgba(99,102,241,0.1);">
+        <p style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#475569;text-align:center;margin-bottom:0.75rem;">
+          {{t 'auth.demoAccounts'}}
+        </p>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+          <button type="button" class="btn btn-secondary btn-sm quick-fill-btn" data-email="admin@apexauto.com" data-pass="Admin@123" style="font-size:0.8rem;">
+            🏢 {{t 'nav.superAdmin'}}
+          </button>
+          <button type="button" class="btn btn-secondary btn-sm quick-fill-btn" data-email="john.doe@apexauto.com" data-pass="Employee@123" style="font-size:0.8rem;">
+            👤 {{t 'nav.employees'}}
+          </button>
+        </div>
+      </div>
+
+      <p style="text-align:center;margin-top:1.5rem;font-size:0.85rem;color:#475569;">
+        {{t 'auth.newCompanyPrompt'}} <a href="/register" style="color:#818cf8;font-weight:600;text-decoration:none;">{{t 'auth.registerHere'}}</a>
+      </p>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Quick-fill demo buttons
+  document.querySelectorAll('.quick-fill-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.getElementById('loginEmail').value = btn.dataset.email;
+      document.getElementById('loginPassword').value = btn.dataset.pass;
+      document.getElementById('loginEmail').dispatchEvent(new Event('input'));
+    });
+  });
+
+  // Submit button loading state
+  document.getElementById('loginForm').addEventListener('submit', () => {
+    const btn = document.getElementById('loginSubmitBtn');
+    btn.textContent = 'Signing in...';
+    btn.disabled = true;
+  });
+</script>

@@ -1,0 +1,327 @@
+<div style="padding-top: 1rem; padding-bottom: 2rem;">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+    <div>
+      <h1 style="font-size: 1.75rem; font-weight: 700; color: var(--color-text-primary); margin: 0;">{{t 'employees.title'}}</h1>
+      <p style="color: var(--color-text-muted); margin: 0.25rem 0 0 0; font-size: 0.95rem;">
+        {{t 'employees.subtitle'}}
+      </p>
+    </div>
+    {{#if isSuperAdmin}}
+      <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;" class="header-actions">
+        <a href="/employees/permissions" class="btn btn-secondary" style="display: inline-flex; align-items: center; gap: 0.4rem;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+          {{t 'employees.managePermissions'}}
+        </a>
+        <a href="/employees/new" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 0.4rem;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          {{t 'employees.addEmployee'}}
+        </a>
+      </div>
+    {{/if}}
+  </div>
+
+  <!-- Search & Filter Toolbar -->
+  <div class="card dfb-card" style="padding: 1rem 1.25rem; margin-bottom: 1.5rem; overflow: visible; position: relative; z-index: 25;">
+    <div class="dfb-mobile-toggle" onclick="toggleFilterDrawer('employeesFilterInline')">
+      <span class="dfb-toggle-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="10" y1="18" x2="14" y2="18"/></svg>
+      </span>
+      <span class="dfb-toggle-label">
+        {{#if isBn}}ফিল্টার ও অনুসন্ধান{{else}}Filter & Search{{/if}}
+        {{#if (or search role status fromDate toDate)}}<span class="dfb-active-dot"></span>{{/if}}
+      </span>
+      <svg class="dfb-toggle-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+
+    <form id="employeesFilterInline" method="GET" action="/employees" class="table-filter-form dfb-form dfb-collapse" style="display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: flex-end;">
+      <!-- Search -->
+      <div class="dfb-group" style="flex: 1; min-width: 180px;">
+        <label class="dfb-label">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          {{#if isBn}}কর্মী খুঁজুন{{else}}Search Employees{{/if}}
+        </label>
+        <input type="text" name="search" class="dfb-input" placeholder="{{#if isBn}}নাম বা ইমেইল...{{else}}Name or email...{{/if}}" value="{{search}}">
+      </div>
+      <!-- Role filter -->
+      <div class="dfb-group">
+        <label class="dfb-label">{{#if isBn}}ভূমিকা{{else}}Role{{/if}}</label>
+        <select name="role" class="dfb-input dfb-select filter-select" data-custom-select>
+          <option value="">{{#if isBn}}সব ভূমিকা{{else}}All Roles{{/if}}</option>
+          <option value="SUPER_ADMIN" {{#if (eq role 'SUPER_ADMIN')}}selected{{/if}}>Super Admin</option>
+          <option value="ADMIN" {{#if (eq role 'ADMIN')}}selected{{/if}}>Admin</option>
+          <option value="EMPLOYEE" {{#if (eq role 'EMPLOYEE')}}selected{{/if}}>Employee</option>
+        </select>
+      </div>
+      <!-- Status filter -->
+      <div class="dfb-group">
+        <label class="dfb-label">{{#if isBn}}স্ট্যাটাস{{else}}Status{{/if}}</label>
+        <select name="status" class="dfb-input dfb-select filter-select" data-custom-select>
+          <option value="">{{#if isBn}}সবাই{{else}}All Status{{/if}}</option>
+          <option value="active" {{#if (eq status 'active')}}selected{{/if}}>{{t 'common.active'}}</option>
+          <option value="inactive" {{#if (eq status 'inactive')}}selected{{/if}}>{{t 'employees.suspended'}}</option>
+        </select>
+      </div>
+      <!-- Date Joined From -->
+      <div class="dfb-group" style="min-width: 130px;">
+        <label class="dfb-label">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          {{#if isBn}}যোগদান শুরু{{else}}Joined From{{/if}}
+        </label>
+        <input type="date" name="fromDate" class="dfb-input" value="{{fromDate}}">
+      </div>
+      <!-- Date Joined To -->
+      <div class="dfb-group" style="min-width: 130px;">
+        <label class="dfb-label">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          {{#if isBn}}যোগদান শেষ{{else}}Joined To{{/if}}
+        </label>
+        <input type="date" name="toDate" class="dfb-input" value="{{toDate}}">
+      </div>
+      <!-- Actions -->
+      <div class="dfb-actions">
+        <button type="submit" class="btn btn-primary dfb-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          {{#if isBn}}ফিল্টার{{else}}Filter{{/if}}
+        </button>
+        {{#if (or search role status fromDate toDate)}}
+          <a href="/employees" class="btn btn-secondary dfb-btn" style="color: #ef4444;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            {{#if isBn}}রিসেট{{else}}Reset{{/if}}
+          </a>
+        {{/if}}
+      </div>
+    </form>
+  </div>
+
+  {{#if employees.length}}
+    <!-- Desktop Table View (> 768px) -->
+    <div class="card desktop-employee-table" style="padding: 0; overflow: hidden; box-shadow: var(--shadow-sm); border-radius: var(--radius-lg); margin-bottom: 1.5rem;">
+      <div class="table-responsive">
+        <table class="data-table employees-table">
+          <thead>
+            <tr>
+              <th style="min-width: 170px;">{{t 'employees.name'}}</th>
+              <th style="min-width: 180px;">{{t 'employees.email'}}</th>
+              <th style="width: 140px;">{{t 'employees.phone'}}</th>
+              <th style="width: 130px;">{{t 'employees.role'}}</th>
+              <th style="width: 100px;">{{t 'employees.status'}}</th>
+              <th style="width: 140px;">{{t 'employees.nid'}}</th>
+              <th style="width: 95px; text-align: right;">{{t 'common.actions'}}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each employees}}
+              <tr style="border-bottom: 1px solid var(--color-border); transition: background 0.15s;">
+                <td style="padding: 1rem; font-weight: 600;">
+                  <div class="table-avatar-cell">
+                    <div class="user-avatar-wrapper previewable-avatar"
+                         data-preview-img="{{profilePicUrl this}}"
+                         data-preview-name="{{this.name}}"
+                         data-preview-code="UUID: {{this.id}}"
+                         data-preview-badge="{{#if isBn}}{{#if (eq this.role 'SUPER_ADMIN')}}{{t 'employees.roleSuperAdmin'}}{{else}}{{t 'employees.roleGeneral'}}{{/if}}{{else}}{{this.role}}{{/if}}"
+                         data-preview-sub="{{this.email}}{{#if this.phoneNumber}} • 📞 {{this.phoneNumber}}{{/if}}"
+                         title="{{#if (profilePicUrl this)}}{{t 'profile.clickToEnlarge'}}{{else}}{{this.name}}{{/if}}">
+                      {{#if (profilePicUrl this)}}
+                        <img src="{{profilePicUrl this}}" alt="{{this.name}}" class="table-avatar-img" loading="lazy" />
+                        <span class="avatar-zoom-badge">
+                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        </span>
+                      {{else}}
+                        <div class="table-avatar-initials avatar-gradient-{{modulo @index 5}}">
+                          {{firstChar this.name}}
+                        </div>
+                      {{/if}}
+                    </div>
+                    <div>
+                      <div class="cust-title-line">
+                        <span class="badge-cid">#{{bnNum (add @index 1)}}</span>
+                        <a href="/employees/{{this.id}}" class="customer-name-link" title="{{this.name}}">{{this.name}}</a>
+                      </div>
+                      <div style="font-size: 0.74rem; color: var(--color-text-muted); margin-top: 2px;">
+                        {{#if this.address}}{{this.address}}{{else}}<span style="font-family: monospace; font-size: 0.7rem; opacity: 0.65;">#{{this.id}}</span>{{/if}}
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <a href="mailto:{{this.email}}" class="employee-email-link" title="{{this.email}}">
+                    {{this.email}}
+                  </a>
+                </td>
+                <td>
+                  <div class="employee-phone-cell">
+                    <span>{{this.phoneNumber}}</span>
+                    {{#if this.phoneNumbers}}
+                      {{#if (gt this.phoneNumbers.length 1)}}
+                        <span class="badge" title="{{#each this.phoneNumbers}}{{this.number}} ({{this.type}})&#10;{{/each}}" style="background: rgba(99, 102, 241, 0.15); color: #818cf8; font-size: 0.7rem; padding: 1px 6px; border-radius: 10px; cursor: help;">
+                          +{{bnNum (subtract this.phoneNumbers.length 1)}}
+                        </span>
+                      {{/if}}
+                    {{/if}}
+                  </div>
+                </td>
+                <td>{{{roleBadge this.role}}}</td>
+                <td>
+                  {{#if this.isActive}}
+                    <span class="status-pill status-active"><span class="badge-dot"></span> {{t 'common.active'}}</span>
+                  {{else}}
+                    <span class="status-pill status-inactive"><span class="badge-dot"></span> {{t 'employees.suspended'}}</span>
+                  {{/if}}
+                </td>
+                <td>
+                  <span class="table-nid-badge" title="NID: {{this.nidNumber}}">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><circle cx="8" cy="10" r="2"/><line x1="14" y1="9" x2="18" y2="9"/><line x1="14" y1="13" x2="18" y2="13"/></svg>
+                    {{this.nidNumber}}
+                  </span>
+                </td>
+                <td style="padding: 1rem; text-align: right;">
+                  <div class="table-actions-group">
+                    <a href="/employees/{{this.id}}" class="btn btn-secondary btn-icon-action" title="{{t 'common.view'}}" aria-label="{{t 'common.view'}}">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </a>
+                    <a href="/employees/{{this.id}}/edit" class="btn btn-secondary btn-icon-action" title="{{t 'common.edit'}}" aria-label="{{t 'common.edit'}}">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </a>
+                    <a href="/employees/permissions" class="btn btn-primary btn-icon-action btn-action-perm" title="{{t 'employees.managePermissions'}}" aria-label="{{t 'employees.managePermissions'}}">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    </a>
+                  </div>
+                </td>
+              </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Mobile Employee Cards (<= 768px) -->
+    <div class="mobile-employees-cards">
+      {{#each employees}}
+        <div class="mobile-employee-card">
+          <div class="mec-header">
+            <div class="mec-avatar-info">
+              <div class="user-avatar-wrapper previewable-avatar"
+                   data-preview-img="{{profilePicUrl this}}"
+                   data-preview-name="{{this.name}}"
+                   data-preview-code="#{{bnNum (add @index 1)}}"
+                   data-preview-badge="{{#if isBn}}{{#if (eq this.role 'SUPER_ADMIN')}}{{t 'employees.roleSuperAdmin'}}{{else}}{{t 'employees.roleGeneral'}}{{/if}}{{else}}{{this.role}}{{/if}}"
+                   data-preview-sub="{{this.email}}{{#if this.phoneNumber}} • 📞 {{this.phoneNumber}}{{/if}}">
+                {{#if (profilePicUrl this)}}
+                  <img src="{{profilePicUrl this}}" alt="{{this.name}}" class="table-avatar-img" loading="lazy" />
+                {{else}}
+                  <div class="table-avatar-initials avatar-gradient-{{modulo @index 5}}">
+                    {{firstChar this.name}}
+                  </div>
+                {{/if}}
+              </div>
+              <div style="min-width: 0; flex: 1;">
+                <div style="display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap;">
+                  <span class="badge-cid">#{{bnNum (add @index 1)}}</span>
+                  <a href="/employees/{{this.id}}" class="mec-name">{{this.name}}</a>
+                </div>
+                {{#if this.address}}
+                  <div style="font-size: 0.73rem; color: var(--color-text-muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                    📍 {{this.address}}
+                  </div>
+                {{/if}}
+              </div>
+            </div>
+            <div style="flex-shrink: 0;">
+              {{#if this.isActive}}
+                <span class="status-pill status-active"><span class="badge-dot"></span> {{t 'common.active'}}</span>
+              {{else}}
+                <span class="status-pill status-inactive"><span class="badge-dot"></span> {{t 'employees.suspended'}}</span>
+              {{/if}}
+            </div>
+          </div>
+
+          <div class="mec-details-grid">
+            <div class="mec-box">
+              <span class="mec-lbl">{{t 'employees.role'}}</span>
+              <div class="mec-val">{{{roleBadge this.role}}}</div>
+            </div>
+            <div class="mec-box">
+              <span class="mec-lbl">{{t 'employees.phone'}}</span>
+              <div class="mec-val">
+                {{#if this.phoneNumber}}
+                  <a href="tel:{{this.phoneNumber}}" style="color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 3px;">
+                    <span>📞</span> {{this.phoneNumber}}
+                  </a>
+                {{else if this.phoneNumbers.length}}
+                  {{#each this.phoneNumbers}}{{#if @first}}
+                    <a href="tel:{{this.number}}" style="color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 3px;">
+                      <span>📞</span> {{this.number}}
+                    </a>
+                  {{/if}}{{/each}}
+                {{else}}
+                  <span style="color: var(--color-text-muted);">—</span>
+                {{/if}}
+              </div>
+            </div>
+            <div class="mec-box mec-box-full">
+              <span class="mec-lbl">{{t 'employees.email'}}</span>
+              <div class="mec-val">
+                <a href="mailto:{{this.email}}" class="mec-link" title="{{this.email}}">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                  {{this.email}}
+                </a>
+              </div>
+            </div>
+            <div class="mec-box mec-box-full">
+              <span class="mec-lbl">{{t 'employees.nid'}}</span>
+              <div class="mec-val">
+                {{#if this.nidNumber}}
+                  <span class="table-nid-badge" style="display: inline-flex; align-items: center; gap: 5px; font-size: 0.8rem; padding: 3px 8px;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><circle cx="8" cy="10" r="2"/><line x1="14" y1="9" x2="18" y2="9"/><line x1="14" y1="13" x2="18" y2="13"/></svg>
+                    {{this.nidNumber}}
+                  </span>
+                {{else}}
+                  <span style="color: var(--color-text-muted);">—</span>
+                {{/if}}
+              </div>
+            </div>
+          </div>
+
+          <div class="mec-footer">
+            <span style="font-size: 0.75rem; color: var(--color-text-muted); display: inline-flex; align-items: center; gap: 4px;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              {{#if this.createdAt}}{{formatDate this.createdAt}}{{/if}}
+            </span>
+            <div class="table-actions-group">
+              <a href="/employees/{{this.id}}" class="btn btn-secondary btn-icon-action" title="{{t 'common.view'}}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </a>
+              <a href="/employees/{{this.id}}/edit" class="btn btn-secondary btn-icon-action btn-action-edit" title="{{t 'common.edit'}}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              </a>
+              <a href="/employees/permissions" class="btn btn-primary btn-icon-action btn-action-perm" title="{{t 'employees.managePermissions'}}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              </a>
+            </div>
+          </div>
+        </div>
+      {{/each}}
+    </div>
+  {{else}}
+    <div class="card" style="text-align: center; padding: 4rem 2rem;">
+      <div style="width: 64px; height: 64px; background: rgba(16, 185, 129, 0.1); color: #10b981; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+        </svg>
+      </div>
+      <h2 style="font-size: 1.25rem; font-weight: 700; margin: 0 0 0.5rem 0;">{{t 'employees.noEmployees'}}</h2>
+      <p style="color: var(--color-text-muted); max-width: 400px; margin: 0 auto 1.5rem;">
+        {{t 'employees.noEmployeesSub'}}
+      </p>
+      {{#if isSuperAdmin}}
+        <a href="/employees/new" class="btn btn-primary">{{t 'employees.addFirst'}}</a>
+      {{/if}}
+    </div>
+  {{/if}}
+</div>

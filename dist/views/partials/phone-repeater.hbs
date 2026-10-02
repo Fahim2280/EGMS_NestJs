@@ -1,0 +1,641 @@
+{{!-- 
+  Reusable Dynamic Phone Numbers Repeater Partial
+  Parameters:
+    - containerId: string (e.g. "customerPhones")
+    - primaryFieldName: string (e.g. "mobileNumber" or "phoneNumber")
+    - jsonFieldName: string (e.g. "phoneNumbersJson", default: "phoneNumbersJson")
+    - initialPhones: Array<{ number: string, type: string, isPrimary: boolean }> | string
+    - required: boolean (default true)
+    - label: string (custom label or localized default)
+--}}
+
+<style>
+  .phone-repeater-wrapper {
+    container-type: inline-size;
+    margin-bottom: 1.25rem;
+    box-sizing: border-box;
+    width: 100%;
+  }
+
+  .phone-repeater-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .phone-repeater-header .form-label {
+    margin-bottom: 0;
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: var(--color-text, #e2e8f0);
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .phone-repeater-header .btn-add-phone {
+    background: rgba(16, 185, 129, 0.15);
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    color: #34d399;
+    padding: 0.32rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  .phone-repeater-header .btn-add-phone:hover {
+    background: rgba(16, 185, 129, 0.25);
+    border-color: rgba(16, 185, 129, 0.5);
+    color: #6ee7b7;
+  }
+
+  .phone-rows-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .phone-row-item {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(15, 23, 42, 0.5);
+    padding: 0.5rem 0.65rem;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-sizing: border-box;
+    width: 100%;
+    transition: border-color 0.2s, background-color 0.2s;
+  }
+
+  .phone-row-item:hover {
+    border-color: rgba(255, 255, 255, 0.18);
+  }
+
+  .phone-row-item:focus-within {
+    border-color: rgba(59, 130, 246, 0.45);
+    background: rgba(15, 23, 42, 0.65);
+  }
+
+  .phone-input-col {
+    flex: 1 1 180px;
+    min-width: 0;
+  }
+
+  .phone-input-col .input-phone-num {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.55rem 0.75rem;
+    font-size: 0.85rem;
+    border-radius: 6px;
+    background: rgba(15, 23, 42, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #fff;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .phone-input-col .input-phone-num:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+  }
+
+  .phone-controls-row {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    flex: 0 0 auto;
+    box-sizing: border-box;
+  }
+
+  .phone-type-col {
+    width: 135px;
+    flex-shrink: 0;
+  }
+
+  .phone-type-col .select-phone-type {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.55rem 0.5rem;
+    font-size: 0.8rem;
+    border-radius: 6px;
+    background: rgba(15, 23, 42, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #e2e8f0;
+    outline: none;
+    cursor: pointer;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  .phone-type-col .select-phone-type option {
+    background: #0f172a;
+    color: #f8fafc;
+  }
+
+  .phone-primary-col {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+  }
+
+  .primary-toggle-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    cursor: pointer;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin: 0;
+    padding: 0.35rem 0.6rem;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    color: #94a3b8;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.2s;
+    white-space: nowrap;
+    user-select: none;
+    line-height: 1.2;
+  }
+
+  .primary-toggle-label:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #cbd5e1;
+  }
+
+  .primary-toggle-label.is-primary {
+    background: rgba(16, 185, 129, 0.2);
+    color: #34d399;
+    border-color: rgba(16, 185, 129, 0.45);
+  }
+
+  .primary-toggle-label .radio-is-primary {
+    margin: 0;
+    accent-color: #10b981;
+    cursor: pointer;
+  }
+
+  .phone-action-col {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+  }
+
+  .phone-action-col .btn-remove-row {
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #f87171;
+    border-radius: 6px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.85rem;
+    padding: 0;
+  }
+
+  .phone-action-col .btn-remove-row:hover:not(:disabled) {
+    background: rgba(239, 68, 68, 0.25);
+    border-color: rgba(239, 68, 68, 0.5);
+    color: #ef4444;
+  }
+
+  /* Light Theme Overrides */
+  [data-theme="light"] .phone-repeater-header .form-label {
+    color: #1e293b !important;
+  }
+  [data-theme="light"] .phone-repeater-header .btn-add-phone {
+    background: #ecfdf5 !important;
+    border-color: #a7f3d0 !important;
+    color: #059669 !important;
+  }
+  [data-theme="light"] .phone-repeater-header .btn-add-phone:hover {
+    background: #d1fae5 !important;
+    border-color: #6ee7b7 !important;
+    color: #047857 !important;
+  }
+  [data-theme="light"] .phone-row-item {
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+  }
+  [data-theme="light"] .phone-row-item:hover {
+    border-color: #94a3b8 !important;
+  }
+  [data-theme="light"] .phone-row-item:focus-within {
+    border-color: #4f46e5 !important;
+    background: #ffffff !important;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12) !important;
+  }
+  [data-theme="light"] .phone-input-col .input-phone-num {
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    color: #0f172a !important;
+  }
+  [data-theme="light"] .phone-input-col .input-phone-num::placeholder {
+    color: #94a3b8 !important;
+  }
+  [data-theme="light"] .phone-input-col .input-phone-num:focus {
+    border-color: #4f46e5 !important;
+    box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2) !important;
+  }
+  [data-theme="light"] .phone-type-col .select-phone-type {
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    color: #0f172a !important;
+  }
+  [data-theme="light"] .phone-type-col .select-phone-type option {
+    background: #ffffff !important;
+    color: #0f172a !important;
+  }
+  [data-theme="light"] .primary-toggle-label {
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #cbd5e1;
+  }
+  [data-theme="light"] .primary-toggle-label:hover {
+    background: #e2e8f0;
+    color: #1e293b;
+  }
+  [data-theme="light"] .primary-toggle-label.is-primary {
+    background: #dcfce7;
+    color: #15803d;
+    border-color: #86efac;
+    font-weight: 700;
+  }
+  [data-theme="light"] .phone-action-col .btn-remove-row {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #dc2626;
+  }
+  [data-theme="light"] .phone-action-col .btn-remove-row:hover:not(:disabled) {
+    background: #fee2e2;
+    border-color: #fca5a5;
+    color: #b91c1c;
+  }
+
+  /* Responsive Stacking: kicks in on screens <= 560px OR narrow containers (like modals) <= 520px */
+  @container (max-width: 520px) {
+    .phone-row-item {
+      flex-direction: column !important;
+      align-items: stretch !important;
+      gap: 0.5rem !important;
+      padding: 0.65rem !important;
+    }
+    .phone-input-col {
+      width: 100% !important;
+      flex: 1 1 100% !important;
+    }
+    .phone-controls-row {
+      width: 100% !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      gap: 0.4rem !important;
+    }
+    .phone-type-col {
+      flex: 1 1 auto !important;
+      width: auto !important;
+      min-width: 0 !important;
+    }
+    .phone-type-col .select-phone-type {
+      height: 38px !important;
+      min-height: 38px !important;
+    }
+    .primary-toggle-label {
+      height: 38px !important;
+      box-sizing: border-box !important;
+    }
+    .phone-action-col .btn-remove-row {
+      height: 38px !important;
+      width: 38px !important;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .phone-row-item {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.5rem;
+      padding: 0.65rem;
+    }
+    .phone-input-col {
+      width: 100%;
+      flex: 1 1 100%;
+    }
+    .phone-controls-row {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.4rem;
+    }
+    .phone-type-col {
+      flex: 1 1 auto;
+      width: auto;
+      min-width: 0;
+    }
+    .phone-type-col .select-phone-type {
+      height: 38px !important;
+      min-height: 38px !important;
+    }
+    .primary-toggle-label {
+      height: 38px !important;
+      box-sizing: border-box !important;
+    }
+    .phone-action-col .btn-remove-row {
+      height: 38px !important;
+      width: 38px !important;
+    }
+  }
+</style>
+
+<div class="phone-repeater-wrapper" id="{{#if containerId}}{{containerId}}{{else}}phoneRepeater{{/if}}">
+  <div class="phone-repeater-header">
+    <label class="form-label">
+      <span>{{#if label}}{{label}}{{else}}{{t 'phones.title'}}{{/if}} {{#if required}}<span style="color: #f43f5e;">*</span>{{/if}}</span>
+    </label>
+    <button 
+      type="button" 
+      class="btn-add-phone">
+      + {{t 'phones.addNumber'}}
+    </button>
+  </div>
+
+  {{!-- Hidden inputs for backend submission --}}
+  <input type="hidden" name="{{#if jsonFieldName}}{{jsonFieldName}}{{else}}phoneNumbersJson{{/if}}" class="phone-json-hidden" value="">
+  <input type="hidden" name="{{#if primaryFieldName}}{{primaryFieldName}}{{else}}mobileNumber{{/if}}" class="phone-primary-hidden" value="{{#if primaryValue}}{{primaryValue}}{{/if}}">
+
+  {{!-- Dynamic rows container --}}
+  <div class="phone-rows-container">
+    {{!-- Rows are rendered and hydrated by inline JS --}}
+  </div>
+  <small class="phone-validation-hint" style="color: #f43f5e; font-size: 0.75rem; display: none; margin-top: 0.35rem;"></small>
+</div>
+
+<script>
+(function() {
+  var containerId = '{{#if containerId}}{{containerId}}{{else}}phoneRepeater{{/if}}';
+  var root = document.getElementById(containerId);
+  if (!root) return;
+
+  var rowsContainer = root.querySelector('.phone-rows-container');
+  var jsonHidden = root.querySelector('.phone-json-hidden');
+  var primaryHidden = root.querySelector('.phone-primary-hidden');
+  var addBtn = root.querySelector('.btn-add-phone');
+  var validationHint = root.querySelector('.phone-validation-hint');
+
+  // Translations passed from server
+  var tLabels = {
+    primary: '{{t "phones.primary"}}',
+    personal: '{{t "phones.personal"}}',
+    whatsapp: '{{t "phones.whatsapp"}}',
+    emergency: '{{t "phones.emergency"}}',
+    work: '{{t "phones.work"}}',
+    alternative: '{{t "phones.alternative"}}',
+    setPrimary: '{{t "phones.setPrimary"}}'
+  };
+
+  // Initial phone data resolution
+  var initialData = [];
+  try {
+    {{#if initialPhones}}
+      var raw = {{{json initialPhones}}};
+      if (Array.isArray(raw) && raw.length > 0) {
+        var valid = raw.filter(function(r) { return r && r.number && String(r.number).trim(); });
+        if (valid.length > 0) initialData = valid;
+      } else if (typeof raw === 'string' && raw.trim() && raw !== 'true' && raw !== 'false') {
+        try {
+          var parsed = JSON.parse(raw);
+          if (Array.isArray(parsed)) {
+            var validP = parsed.filter(function(r) { return r && r.number && String(r.number).trim(); });
+            if (validP.length > 0) initialData = validP;
+          } else {
+            initialData = [{ number: raw.trim(), type: 'PRIMARY', isPrimary: true }];
+          }
+        } catch(e) {
+          initialData = [{ number: raw.trim(), type: 'PRIMARY', isPrimary: true }];
+        }
+      }
+    {{/if}}
+  } catch(e) {}
+
+  // Fallback to primaryValue if initialData is still empty
+  {{#if primaryValue}}
+    if (!initialData || initialData.length === 0) {
+      var pv = '{{primaryValue}}'.trim();
+      if (pv && pv !== 'undefined' && pv !== 'null' && pv !== 'true' && pv !== 'false') {
+        initialData = [{ number: pv, type: 'PRIMARY', isPrimary: true }];
+      }
+    }
+  {{/if}}
+
+  if (!initialData || initialData.length === 0) {
+    initialData = [{ number: '', type: 'PRIMARY', isPrimary: true }];
+  }
+
+  // Ensure one is primary
+  var hasPrimary = initialData.some(function(item) { return item.isPrimary; });
+  if (!hasPrimary && initialData.length > 0) {
+    initialData[0].isPrimary = true;
+  }
+
+  function createRow(data, index) {
+    var row = document.createElement('div');
+    row.className = 'phone-row-item';
+
+    var numberVal = (data && data.number) ? data.number : '';
+    var typeVal = (data && data.type) ? data.type : (index === 0 ? 'PRIMARY' : 'PERSONAL');
+    var isPrimaryVal = data ? Boolean(data.isPrimary) : (index === 0);
+    var isRequired = {{#if required}}true{{else}}false{{/if}};
+    var reqAttr = (index === 0 && isRequired) ? ' required' : '';
+
+    row.innerHTML = 
+      '<div class="phone-input-col">' +
+        '<input type="tel" class="form-input form-control input-phone-num" ' +
+          'placeholder="01XXXXXXXXX" value="' + escapeHtml(numberVal) + '"' + reqAttr + '>' +
+      '</div>' +
+      '<div class="phone-controls-row">' +
+        '<div class="phone-type-col">' +
+          '<select class="form-input form-control select-phone-type">' +
+            '<option value="PRIMARY" ' + (typeVal === 'PRIMARY' ? 'selected' : '') + '>⭐ ' + tLabels.primary + '</option>' +
+            '<option value="PERSONAL" ' + (typeVal === 'PERSONAL' ? 'selected' : '') + '>📱 ' + tLabels.personal + '</option>' +
+            '<option value="WHATSAPP" ' + (typeVal === 'WHATSAPP' ? 'selected' : '') + '>💬 ' + tLabels.whatsapp + '</option>' +
+            '<option value="EMERGENCY" ' + (typeVal === 'EMERGENCY' ? 'selected' : '') + '>🚨 ' + tLabels.emergency + '</option>' +
+            '<option value="WORK" ' + (typeVal === 'WORK' ? 'selected' : '') + '>💼 ' + tLabels.work + '</option>' +
+            '<option value="ALTERNATIVE" ' + (typeVal === 'ALTERNATIVE' ? 'selected' : '') + '>🔄 ' + tLabels.alternative + '</option>' +
+          '</select>' +
+        '</div>' +
+        '<div class="phone-primary-col">' +
+          '<label class="primary-toggle-label ' + (isPrimaryVal ? 'is-primary' : '') + '">' +
+            '<input type="radio" name="' + containerId + '_primary_radio" class="radio-is-primary" ' + (isPrimaryVal ? 'checked' : '') + '>' +
+            '<span class="primary-text-indicator">' + (isPrimaryVal ? '✓ ' + tLabels.primary : tLabels.setPrimary) + '</span>' +
+          '</label>' +
+        '</div>' +
+        '<div class="phone-action-col">' +
+          '<button type="button" class="btn-remove-row" title="Remove">✕</button>' +
+        '</div>' +
+      '</div>';
+
+    // Event listeners for row elements
+    var numInput = row.querySelector('.input-phone-num');
+    var typeSelect = row.querySelector('.select-phone-type');
+    var radio = row.querySelector('.radio-is-primary');
+    var removeBtn = row.querySelector('.btn-remove-row');
+    var labelWrapper = row.querySelector('.primary-toggle-label');
+    var labelSpan = row.querySelector('.primary-text-indicator');
+
+    numInput.addEventListener('input', function() {
+      syncState();
+    });
+
+    typeSelect.addEventListener('change', function() {
+      syncState();
+    });
+
+    radio.addEventListener('change', function() {
+      if (this.checked) {
+        // Uncheck all other rows
+        var allRows = rowsContainer.querySelectorAll('.phone-row-item');
+        allRows.forEach(function(r) {
+          var rLabel = r.querySelector('.primary-toggle-label');
+          var rSpan = r.querySelector('.primary-text-indicator');
+          var rRadio = r.querySelector('.radio-is-primary');
+          if (r !== row) {
+            rRadio.checked = false;
+            rLabel.classList.remove('is-primary');
+            rSpan.textContent = tLabels.setPrimary;
+          }
+        });
+        labelWrapper.classList.add('is-primary');
+        labelSpan.textContent = '✓ ' + tLabels.primary;
+        syncState();
+      }
+    });
+
+    removeBtn.addEventListener('click', function() {
+      var allRows = rowsContainer.querySelectorAll('.phone-row-item');
+      if (allRows.length <= 1) {
+        // Don't remove if only 1 row; just clear value
+        numInput.value = '';
+        syncState();
+        return;
+      }
+      var wasPrimary = radio.checked;
+      row.remove();
+      if (wasPrimary) {
+        // Assign first remaining row as primary
+        var remaining = rowsContainer.querySelectorAll('.phone-row-item');
+        if (remaining.length > 0) {
+          var firstRadio = remaining[0].querySelector('.radio-is-primary');
+          firstRadio.checked = true;
+          firstRadio.dispatchEvent(new Event('change'));
+        }
+      }
+      updateRemoveButtonsState();
+      syncState();
+    });
+
+    return row;
+  }
+
+  function updateRemoveButtonsState() {
+    var allRows = rowsContainer.querySelectorAll('.phone-row-item');
+    allRows.forEach(function(r) {
+      var btn = r.querySelector('.btn-remove-row');
+      if (allRows.length <= 1) {
+        btn.style.opacity = '0.35';
+        btn.style.cursor = 'not-allowed';
+        btn.disabled = true;
+      } else {
+        btn.style.opacity = '1';
+        btn.style.cursor = 'pointer';
+        btn.disabled = false;
+      }
+    });
+  }
+
+  function syncState() {
+    var allRows = rowsContainer.querySelectorAll('.phone-row-item');
+    var result = [];
+    var primaryNumber = '';
+
+    allRows.forEach(function(r) {
+      var num = r.querySelector('.input-phone-num').value.trim();
+      var type = r.querySelector('.select-phone-type').value;
+      var isPrimary = r.querySelector('.radio-is-primary').checked;
+      if (num) {
+        result.push({
+          number: num,
+          type: type,
+          isPrimary: isPrimary
+        });
+        if (isPrimary) {
+          primaryNumber = num;
+        }
+      }
+    });
+
+    if (result.length > 0 && !primaryNumber) {
+      result[0].isPrimary = true;
+      primaryNumber = result[0].number;
+    }
+
+    jsonHidden.value = JSON.stringify(result);
+    if (primaryHidden) {
+      primaryHidden.value = primaryNumber || (result.length > 0 ? result[0].number : '');
+    }
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  }
+
+  // Populate initial rows
+  initialData.forEach(function(d, idx) {
+    var row = createRow(d, idx);
+    rowsContainer.appendChild(row);
+  });
+  updateRemoveButtonsState();
+  syncState();
+
+  // Add button click
+  addBtn.addEventListener('click', function() {
+    var newRow = createRow({ number: '', type: 'PERSONAL', isPrimary: false }, rowsContainer.children.length);
+    rowsContainer.appendChild(newRow);
+    updateRemoveButtonsState();
+    var input = newRow.querySelector('.input-phone-num');
+    if (input) input.focus();
+  });
+
+  // Ensure form submit serializes the latest state
+  var form = root.closest('form');
+  if (form) {
+    form.addEventListener('submit', function() {
+      syncState();
+    });
+  }
+})();
+</script>

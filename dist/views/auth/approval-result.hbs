@@ -1,0 +1,84 @@
+<div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem; background: var(--color-bg-primary, #0f172a);">
+  <div style="max-width: 520px; width: 100%; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border-radius: 20px; overflow: hidden; box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+    {{#if isError}}
+      border: 1px solid rgba(239,68,68,0.3);
+    {{else if approved}}
+      border: 1px solid rgba(16,185,129,0.3);
+    {{else}}
+      border: 1px solid rgba(239,68,68,0.3);
+    {{/if}}
+  ">
+
+    <!-- Header -->
+    {{#if isError}}
+    <div style="background: linear-gradient(135deg, #7f1d1d 0%, #ef4444 100%); padding: 2.5rem 2rem; text-align: center;">
+      <div style="font-size: 3rem; margin-bottom: 0.75rem;">⚠️</div>
+      <h1 style="margin: 0; color: #fff; font-size: 1.6rem; font-weight: 800;">ত্রুটি ঘটেছে / Error</h1>
+      <p style="margin: 0.5rem 0 0; color: rgba(255,255,255,0.8); font-size: 0.9rem;">An error occurred while processing the request</p>
+    </div>
+    {{else if approved}}
+    <div style="background: linear-gradient(135deg, #059669 0%, #10b981 100%); padding: 2.5rem 2rem; text-align: center;">
+      <div style="font-size: 3rem; margin-bottom: 0.75rem;">✅</div>
+      <h1 style="margin: 0; color: #fff; font-size: 1.6rem; font-weight: 800;">কোম্পানি অনুমোদিত!</h1>
+      <p style="margin: 0.5rem 0 0; color: rgba(255,255,255,0.85); font-size: 0.9rem;">Company Approved Successfully</p>
+    </div>
+    {{else}}
+    <div style="background: linear-gradient(135deg, #7f1d1d 0%, #dc2626 100%); padding: 2.5rem 2rem; text-align: center;">
+      <div style="font-size: 3rem; margin-bottom: 0.75rem;">❌</div>
+      <h1 style="margin: 0; color: #fff; font-size: 1.6rem; font-weight: 800;">নিবন্ধন প্রত্যাখ্যাত</h1>
+      <p style="margin: 0.5rem 0 0; color: rgba(255,255,255,0.85); font-size: 0.9rem;">Company Registration Rejected & Deleted</p>
+    </div>
+    {{/if}}
+
+    <!-- Body -->
+    <div style="padding: 2.5rem 2rem;">
+
+      {{#if isError}}
+      <!-- Error State -->
+      <div style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.25); border-radius: 12px; padding: 1.25rem; margin-bottom: 1.75rem;">
+        <p style="margin: 0; color: #fca5a5; font-size: 0.9rem; line-height: 1.6;">{{ error }}</p>
+      </div>
+      <p style="color: #64748b; font-size: 0.85rem; text-align: center; margin-bottom: 1.5rem;">
+        The link may have already been used or has expired (48-hour limit).
+      </p>
+      {{else if approved}}
+      <!-- Approved State -->
+      <div style="background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.2); border-radius: 12px; padding: 1.25rem; margin-bottom: 1.75rem;">
+        <p style="margin: 0; color: #6ee7b7; font-size: 0.9rem; line-height: 1.6;">{{ message }}</p>
+        <p style="margin: 0.5rem 0 0; color: #64748b; font-size: 0.82rem;">{{ messageEn }}</p>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 0.6rem; margin-bottom: 1.75rem;">
+        <div style="display: flex; align-items: center; gap: 0.75rem; color: #94a3b8; font-size: 0.85rem;">
+          <span>✅</span> কোম্পানির অ্যাকাউন্ট সক্রিয় করা হয়েছে
+        </div>
+        <div style="display: flex; align-items: center; gap: 0.75rem; color: #94a3b8; font-size: 0.85rem;">
+          <span>📧</span> কোম্পানিকে স্বাগত ইমেইল পাঠানো হয়েছে
+        </div>
+        <div style="display: flex; align-items: center; gap: 0.75rem; color: #94a3b8; font-size: 0.85rem;">
+          <span>🔐</span> তারা এখন লগইন করতে পারবেন
+        </div>
+      </div>
+      {{else}}
+      <!-- Rejected State -->
+      <div style="background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: 12px; padding: 1.25rem; margin-bottom: 1.75rem;">
+        <p style="margin: 0; color: #fca5a5; font-size: 0.9rem; line-height: 1.6;">{{ message }}</p>
+        <p style="margin: 0.5rem 0 0; color: #64748b; font-size: 0.82rem;">{{ messageEn }}</p>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 0.6rem; margin-bottom: 1.75rem;">
+        <div style="display: flex; align-items: center; gap: 0.75rem; color: #94a3b8; font-size: 0.85rem;">
+          <span>🗑️</span> কোম্পানির সমস্ত ডেটা স্থায়ীভাবে মুছে ফেলা হয়েছে
+        </div>
+        <div style="display: flex; align-items: center; gap: 0.75rem; color: #94a3b8; font-size: 0.85rem;">
+          <span>🔒</span> এই লিঙ্কটি আর ব্যবহারযোগ্য নয়
+        </div>
+      </div>
+      {{/if}}
+
+      <!-- Back Button -->
+      <a href="/login" style="display: block; text-align: center; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: #fff; text-decoration: none; font-size: 0.95rem; font-weight: 700; padding: 0.85rem 1.5rem; border-radius: 10px;">
+        ← লগইন পাতায় ফিরুন / Back to Login
+      </a>
+    </div>
+
+  </div>
+</div>

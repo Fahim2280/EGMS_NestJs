@@ -1,0 +1,134 @@
+<div class="page-header" style="margin-bottom: 1.5rem;">
+  <div class="header-content">
+    <a href="/bills/{{bill.id}}" style="color: var(--color-text-muted); text-decoration: none; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 0.35rem; margin-bottom: 0.5rem; transition: color 0.15s ease;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+      {{t 'bills.backToReceipt'}}
+    </a>
+    <h1 class="page-title" style="display: flex; align-items: center; gap: 0.65rem;">
+      <span style="display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 10px; background: rgba(99, 102, 241, 0.15); color: #818cf8;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      </span>
+      {{t 'bills.editBill'}}
+    </h1>
+    <p class="page-subtitle">{{t 'bills.editSubtitle'}}</p>
+  </div>
+</div>
+
+<div class="card" style="max-width: 860px; margin: 0 auto; padding: 2rem; border-top: 3px solid #6366f1;">
+  <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: 10px; padding: 1.15rem; margin-bottom: 1.75rem; color: #fbbf24; font-size: 0.88rem; display: flex; gap: 0.85rem; align-items: flex-start; line-height: 1.5;">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" style="flex-shrink: 0; margin-top: 2px;">
+      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+      <line x1="12" y1="9" x2="12" y2="13"/>
+      <line x1="12" y1="17" x2="12.01" y2="17"/>
+    </svg>
+    <div>
+      <strong style="color: #fef3c7; font-size: 0.92rem; display: block; margin-bottom: 0.2rem;">{{t 'bills.cascadeNotice'}}</strong>
+      {{t 'bills.cascadeNoticeDesc'}}
+    </div>
+  </div>
+
+  {{#if error}}
+    <div style="background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 10px; padding: 1rem 1.25rem; margin-bottom: 1.5rem; color: #f87171; font-size: 0.9rem; display: flex; align-items: center; gap: 0.75rem;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span>{{error}}</span>
+    </div>
+  {{/if}}
+
+  <form action="/bills/{{bill.id}}/edit" method="POST">
+    <input type="hidden" name="customerId" value="{{bill.customerId}}">
+
+    <!-- Section 1: Customer & Date -->
+    <div style="margin-bottom: 1.75rem;">
+      <div class="form-section-title">
+        <span class="section-icon-badge">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </span>
+        {{t 'bills.customerAndDate'}}
+      </div>
+
+      <div class="form-group" style="margin-bottom: 1.25rem;">
+        <label class="form-label">{{t 'bills.customerAccount'}}</label>
+        <input type="text" class="form-input" readonly value="{{bill.customerName}}" style="font-weight: 600;">
+      </div>
+
+      <div class="form-grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <div class="form-group" style="margin-bottom: 0;">
+          <label class="form-label" for="date">
+            <span>{{t 'bills.billingDate'}} <span style="color: #f43f5e;">*</span></span>
+          </label>
+          <input type="date" id="date" name="date" class="form-input" required value="{{billDateStr}}">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0;">
+          <label class="form-label" for="unitRate">
+            <span>{{t 'bills.ratePerUnit'}} ({{t 'common.currency'}}) <span style="color: #f43f5e;">*</span></span>
+            {{#if (eq user.role 'SUPER_ADMIN')}}
+            <span style="font-size: 0.7rem; color: #10b981; font-weight: 600;">{{t 'bills.editable'}}</span>
+            {{else}}
+            <span style="font-size: 0.7rem; color: var(--color-text-dim);">{{t 'bills.locked'}}</span>
+            {{/if}}
+          </label>
+          <input type="number" step="0.01" min="0.01" id="unitRate" name="unitRate" class="form-input" required 
+            value="{{#if bill.unitRate}}{{bill.unitRate}}{{else}}15.00{{/if}}"
+            {{#unless (eq user.role 'SUPER_ADMIN')}}readonly title="{{t 'bills.superAdminRateHint'}}"{{/unless}}>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 2: Meter Reading -->
+    <div style="margin-bottom: 1.75rem;">
+      <div class="form-section-title">
+        <span class="section-icon-badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        </span>
+        {{t 'bills.meterReadings'}}
+      </div>
+
+      <div class="form-group" style="margin-bottom: 0;">
+        <label class="form-label" for="currentUnit">
+          <span>{{t 'bills.currUnit'}} <span style="color: #f43f5e;">*</span></span>
+          <span style="font-size: 0.75rem; color: #38bdf8;">{{#if isBn}}পূর্ববর্তী ছিল: {{bnNum bill.previousUnit}} {{t 'common.units'}}{{else}}Previous was: {{bill.previousUnit}} units{{/if}}</span>
+        </label>
+        <input type="number" step="0.01" min="0" id="currentUnit" name="currentUnit" class="form-input" required value="{{bill.currentUnit}}">
+      </div>
+    </div>
+
+    <!-- Section 3: Additional Charges & Payment -->
+    <div style="margin-bottom: 2rem;">
+      <div class="form-section-title">
+        <span class="section-icon-badge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+        </span>
+        {{t 'bills.chargesAndSettlement'}}
+      </div>
+
+      <div class="form-grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
+        <div class="form-group" style="margin-bottom: 0;">
+          <label class="form-label" for="rentBill">{{t 'bills.rent'}} ({{t 'common.currency'}})</label>
+          <input type="number" step="0.01" min="0" id="rentBill" name="rentBill" class="form-input" required value="{{bill.rentBill}}">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0;">
+          <label class="form-label" for="loan">{{t 'bills.loan'}} ({{t 'common.currency'}})</label>
+          <input type="number" step="0.01" min="0" id="loan" name="loan" class="form-input" required value="{{bill.loan}}">
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 0;">
+        <label class="form-label" for="clearMoney">
+          <span>{{t 'bills.paid'}} ({{t 'common.currency'}}) <span style="color: #f43f5e;">*</span></span>
+          <span style="font-size: 0.75rem; color: #10b981;">{{t 'bills.receivedPayment'}}</span>
+        </label>
+        <input type="number" step="0.01" min="0" id="clearMoney" name="clearMoney" class="form-input" required value="{{bill.clearMoney}}" style="font-size: 1.05rem; font-weight: 700; color: #34d399;">
+      </div>
+    </div>
+
+    <div class="form-actions" style="display: flex; gap: 0.75rem; justify-content: flex-end; align-items: center;">
+      <a href="/bills/{{bill.id}}" class="btn btn-secondary" style="padding: 0.65rem 1.25rem;">{{t 'common.cancel'}}</a>
+      <button type="submit" class="btn btn-primary" style="padding: 0.65rem 1.5rem; display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 700; box-shadow: 0 4px 16px rgba(99, 102, 241, 0.35);">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        {{t 'bills.saveAndRecalculate'}}
+      </button>
+    </div>
+  </form>
+</div>

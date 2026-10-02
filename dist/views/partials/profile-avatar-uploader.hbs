@@ -1,0 +1,214 @@
+<!-- Profile Picture Avatar Uploader Component (প্রোফাইল পিকচার আপলোডার উইজেট) -->
+<div class="avatar-uploader-card" id="{{#if avatarId}}{{avatarId}}{{else}}profileAvatar{{/if}}Container">
+  <div class="avatar-uploader-wrapper">
+    <!-- Circular Avatar Preview Area with Camera Icon Badge -->
+    <div class="avatar-preview-box" id="{{#if avatarId}}{{avatarId}}{{else}}profileAvatar{{/if}}Box" title="{{#if (t 'profile.uploadPicture')}}{{t 'profile.uploadPicture'}}{{else}}Upload Profile Picture{{/if}}">
+      {{#if initialPhotoUrl}}
+        <img src="{{initialPhotoUrl}}" alt="Profile Avatar" class="avatar-preview-img" id="{{#if avatarId}}{{avatarId}}{{else}}profileAvatar{{/if}}Img" />
+        <div class="avatar-fallback-initials" id="{{#if avatarId}}{{avatarId}}{{else}}profileAvatar{{/if}}Initials" style="display: none;">
+          {{#if initialInitials}}{{initialInitials}}{{else}}U{{/if}}
+        </div>
+      {{else}}
+        <img src="" alt="Profile Avatar" class="avatar-preview-img" id="{{#if avatarId}}{{avatarId}}{{else}}profileAvatar{{/if}}Img" style="display: none;" />
+        <div class="avatar-fallback-initials" id="{{#if avatarId}}{{avatarId}}{{else}}profileAvatar{{/if}}Initials">
+          {{#if initialInitials}}{{initialInitials}}{{else}}
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+          {{/if}}
+        </div>
+      {{/if}}
+
+      <!-- Camera Action Trigger Badge -->
+      <label for="{{#if avatarId}}{{avatarId}}{{else}}profileAvatar{{/if}}Input" class="avatar-camera-badge" title="{{t 'profile.uploadPicture'}}">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+          <circle cx="12" cy="13" r="4"/>
+        </svg>
+      </label>
+    </div>
+
+    <!-- Details and Controls -->
+    <div class="avatar-uploader-meta">
+      <div class="avatar-uploader-title-row">
+        <h4 class="avatar-uploader-title">
+          <span>📷</span>
+          {{#if title}}{{title}}{{else}}{{t 'profile.picture'}}{{/if}}
+        </h4>
+        <span class="avatar-uploader-badge">{{#if isBn}}ঐচ্ছিক{{else}}Optional{{/if}}</span>
+      </div>
+
+      <p class="avatar-uploader-hint">
+        {{#if hint}}{{hint}}{{else}}{{t 'profile.pictureHint'}}{{/if}}
+      </p>
+
+      <div class="avatar-uploader-actions">
+        <!-- Hidden file input -->
+        <input 
+          type="file" 
+          id="{{#if avatarId}}{{avatarId}}{{else}}profileAvatar{{/if}}Input" 
+          name="{{#if fieldName}}{{fieldName}}{{else}}avatarFile{{/if}}" 
+          accept="image/png,image/jpeg,image/jpg,image/webp" 
+          style="display: none;" 
+        />
+        <!-- Hidden input for removal flag -->
+        <input 
+          type="hidden" 
+          id="{{#if avatarId}}{{avatarId}}{{else}}profileAvatar{{/if}}Removed" 
+          name="removeAvatar" 
+          value="false" 
+        />
+
+        <button 
+          type="button" 
+          class="btn btn-secondary btn-sm avatar-btn" 
+          id="{{#if avatarId}}{{avatarId}}{{else}}profileAvatar{{/if}}BrowseBtn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+          <span id="{{#if avatarId}}{{avatarId}}{{else}}profileAvatar{{/if}}BrowseBtnText">
+            {{#if initialPhotoUrl}}{{t 'profile.changePicture'}}{{else}}{{t 'profile.uploadPicture'}}{{/if}}
+          </span>
+        </button>
+
+        <button 
+          type="button" 
+          class="btn btn-secondary btn-sm avatar-remove-btn" 
+          id="{{#if avatarId}}{{avatarId}}{{else}}profileAvatar{{/if}}RemoveBtn"
+          style="{{#unless initialPhotoUrl}}display: none;{{/unless}} color: #ef4444; border-color: rgba(239, 68, 68, 0.3);">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+          <span>{{t 'profile.removePicture'}}</span>
+        </button>
+      </div>
+
+      <div id="{{#if avatarId}}{{avatarId}}{{else}}profileAvatar{{/if}}Error" class="avatar-uploader-error" style="display: none;"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function() {
+    function initAvatarUploader() {
+      var prefix = '{{#if avatarId}}{{avatarId}}{{else}}profileAvatar{{/if}}';
+      var input = document.getElementById(prefix + 'Input');
+      var browseBtn = document.getElementById(prefix + 'BrowseBtn');
+      var browseBtnText = document.getElementById(prefix + 'BrowseBtnText');
+      var removeBtn = document.getElementById(prefix + 'RemoveBtn');
+      var removedInput = document.getElementById(prefix + 'Removed');
+      var img = document.getElementById(prefix + 'Img');
+      var initials = document.getElementById(prefix + 'Initials');
+      var box = document.getElementById(prefix + 'Box');
+      var errorEl = document.getElementById(prefix + 'Error');
+
+      if (!input || !box) return;
+
+      var initialUrl = '{{initialPhotoUrl}}';
+
+      // Click to browse
+      if (browseBtn) {
+        browseBtn.addEventListener('click', function() {
+          input.click();
+        });
+      }
+      box.addEventListener('click', function(e) {
+        if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'LABEL') {
+          input.click();
+        }
+      });
+
+      // Drag & Drop
+      ['dragenter', 'dragover'].forEach(function(eventName) {
+        box.addEventListener(eventName, function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          box.classList.add('avatar-dragover');
+        });
+      });
+      ['dragleave', 'drop'].forEach(function(eventName) {
+        box.addEventListener(eventName, function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          box.classList.remove('avatar-dragover');
+        });
+      });
+      box.addEventListener('drop', function(e) {
+        if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+          input.files = e.dataTransfer.files;
+          handleFileSelected(e.dataTransfer.files[0]);
+        }
+      });
+
+      // File input change
+      input.addEventListener('change', function() {
+        if (input.files && input.files[0]) {
+          handleFileSelected(input.files[0]);
+        }
+      });
+
+      function handleFileSelected(file) {
+        if (errorEl) {
+          errorEl.style.display = 'none';
+          errorEl.textContent = '';
+        }
+
+        // Validate type
+        if (!file.type.match(/^image\/(png|jpeg|jpg|webp)$/i)) {
+          showError('{{#if isBn}}শুধুমাত্র পিএনজি, জেপিজি বা ওয়েবপি ছবি সমর্থিত।{{else}}Only PNG, JPG or WEBP images are supported.{{/if}}');
+          input.value = '';
+          return;
+        }
+
+        // Validate size (5MB max)
+        if (file.size > 5 * 1024 * 1024) {
+          showError('{{#if isBn}}ফাইলের আকার সর্বোচ্চ ৫ মেগাবাইট হতে পারবে।{{else}}File size exceeds 5MB limit.{{/if}}');
+          input.value = '';
+          return;
+        }
+
+        var reader = new FileReader();
+        reader.onload = function(e) {
+          img.src = e.target.result;
+          img.style.display = 'block';
+          if (initials) initials.style.display = 'none';
+          if (removeBtn) removeBtn.style.display = 'inline-flex';
+          if (removedInput) removedInput.value = 'false';
+          if (browseBtnText) browseBtnText.textContent = '{{t "profile.changePicture"}}';
+        };
+        reader.readAsDataURL(file);
+      }
+
+      function showError(msg) {
+        if (errorEl) {
+          errorEl.textContent = msg;
+          errorEl.style.display = 'block';
+        }
+      }
+
+      // Remove photo button
+      if (removeBtn) {
+        removeBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          input.value = '';
+          img.src = '';
+          img.style.display = 'none';
+          if (initials) initials.style.display = 'flex';
+          removeBtn.style.display = 'none';
+          if (removedInput) removedInput.value = 'true';
+          if (browseBtnText) browseBtnText.textContent = '{{t "profile.uploadPicture"}}';
+        });
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initAvatarUploader);
+    } else {
+      initAvatarUploader();
+    }
+  })();
+</script>

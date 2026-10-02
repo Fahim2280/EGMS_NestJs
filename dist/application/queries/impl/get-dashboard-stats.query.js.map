@@ -1,0 +1,1 @@
+{"version":3,"file":"get-dashboard-stats.query.js","sourceRoot":"","sources":["../../../../src/application/queries/impl/get-dashboard-stats.query.ts"],"names":[],"mappings":";;;AAAA,MAAa,sBAAsB;IAEf;IACA;IAFlB,YACkB,SAAkB,EAClB,gBAAkC;QADlC,cAAS,GAAT,SAAS,CAAS;QAClB,qBAAgB,GAAhB,gBAAgB,CAAkB;IACjD,CAAC;CACL;AALD,wDAKC"}

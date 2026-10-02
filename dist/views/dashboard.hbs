@@ -1,0 +1,388 @@
+<style>
+  .dashboard-header {
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95));
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow-md);
+  }
+  .dashboard-company-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0;
+  }
+  .dash-sub-card {
+    background: rgba(15, 23, 42, 0.5);
+    padding: 0.75rem;
+    border-radius: 6px;
+    border: 1px solid var(--color-border);
+  }
+  .dash-sub-card-title {
+    color: #f8fafc;
+  }
+  .dash-sub-card-subtitle {
+    font-size: 0.8rem;
+    color: #94a3b8;
+  }
+  .dash-card-heading {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #f8fafc;
+    margin: 0;
+  }
+
+  /* Light Theme Dashboard Overrides */
+  [data-theme="light"] .dashboard-header {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04) !important;
+  }
+  [data-theme="light"] .dashboard-company-title {
+    color: #0f172a !important;
+  }
+  [data-theme="light"] .dashboard-header p {
+    color: #64748b !important;
+  }
+  [data-theme="light"] .dashboard-header p strong {
+    color: #0f172a !important;
+  }
+  [data-theme="light"] .stat-card {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+  }
+  [data-theme="light"] .stat-card:hover {
+    transform: translateY(-3px) !important;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04) !important;
+    border-color: #cbd5e1 !important;
+  }
+  [data-theme="light"] .stat-card .stat-label {
+    color: #475569 !important;
+    font-weight: 600 !important;
+  }
+  [data-theme="light"] .stat-card .stat-footer {
+    border-top: 1px solid #f1f5f9 !important;
+  }
+  [data-theme="light"] .dash-sub-card {
+    background: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+  }
+  [data-theme="light"] .dash-sub-card-title {
+    color: #0f172a !important;
+    font-weight: 600 !important;
+  }
+  [data-theme="light"] .dash-sub-card-subtitle {
+    color: #64748b !important;
+  }
+  [data-theme="light"] .dash-card-heading {
+    color: #0f172a !important;
+  }
+  .dash-audit-btn {
+    background: #4f46e5 !important;
+    border: 1px solid #4f46e5 !important;
+    color: #ffffff !important;
+    font-weight: 600 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.4rem !important;
+    padding: 0.65rem 1rem !important;
+    border-radius: var(--radius-md) !important;
+  }
+  .dash-audit-btn:hover {
+    background: #4338ca !important;
+    border-color: #4338ca !important;
+    color: #ffffff !important;
+  }
+  [data-theme="light"] .dash-audit-btn {
+    background: #4f46e5 !important;
+    border-color: #4f46e5 !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25) !important;
+  }
+  [data-theme="light"] .dash-audit-btn:hover {
+    background: #4338ca !important;
+    border-color: #4338ca !important;
+    color: #ffffff !important;
+  }
+</style>
+
+<div style="padding-top: 1rem; padding-bottom: 2rem;">
+  <!-- Dashboard Hero Header -->
+  <div class="dashboard-header">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+      <div>
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.35rem; flex-wrap: wrap;">
+          <h1 class="dashboard-company-title">{{company.companyName}}</h1>
+          {{{roleBadge user.role}}}
+        </div>
+        <p style="color: var(--color-text-muted); margin: 0; font-size: 0.9rem;">
+          {{t 'common.loggedInAs'}} <strong>{{user.name}}</strong> &bull; {{t 'common.portalTitle'}}
+        </p>
+      </div>
+      <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; width: auto;" class="header-actions">
+        {{#if canCreate}}
+        <a href="/bills/new" class="btn btn-primary" style="background: #10b981; border-color: #10b981;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          {{t 'nav.newBill'}}
+        </a>
+        <a href="/customers/new" class="btn btn-secondary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <line x1="19" y1="8" x2="19" y2="14"/>
+            <line x1="22" y1="11" x2="16" y2="11"/>
+          </svg>
+          {{t 'nav.addCustomer'}}
+        </a>
+        {{/if}}
+      </div>
+    </div>
+  </div>
+
+  {{#unless hasAssignedGarages}}
+  <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: var(--radius-md); padding: 1.25rem 1.5rem; margin-bottom: 1.5rem; display: flex; align-items: flex-start; gap: 1rem;">
+    <div style="color: #f59e0b; font-size: 1.5rem; line-height: 1;">⚠️</div>
+    <div>
+      <h4 style="color: #fbbf24; font-size: 1rem; font-weight: 600; margin: 0 0 0.25rem 0;">{{t 'garages.noGaragesAssigned'}}</h4>
+      <p style="color: var(--color-text-muted); font-size: 0.875rem; margin: 0;">
+        {{t 'garages.noGaragesAssignedDesc'}}
+      </p>
+    </div>
+  </div>
+  {{/unless}}
+
+  <!-- Financial KPI Metrics (Matching ASP.NET Core EGMS) -->
+  <div class="kpi-grid-4" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.25rem; margin-bottom: 2rem;">
+    <!-- Total Advance Money -->
+    <div class="stat-card" style="border-top: 3px solid #10b981;">
+      <div class="stat-card-header">
+        <span class="stat-label">{{t 'dashboard.totalAdvance'}}</span>
+        <div class="stat-icon" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="5" width="20" height="14" rx="2"/>
+            <line x1="2" y1="10" x2="22" y2="10"/>
+          </svg>
+        </div>
+      </div>
+      <div class="stat-value" style="color: #10b981;">৳{{bnMoney totalAdvanceMoney}}</div>
+      <div class="stat-footer">
+        <span class="stat-trend positive" style="line-height: 1.4;">{{t 'dashboard.totalAdvanceSub'}}</span>
+      </div>
+    </div>
+
+    <!-- Total Present Dues -->
+    <div class="stat-card" style="border-top: 3px solid #ef4444;">
+      <div class="stat-card-header">
+        <span class="stat-label">{{t 'dashboard.totalDues'}}</span>
+        <div class="stat-icon" style="background: rgba(239, 68, 68, 0.15); color: #ef4444;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+        </div>
+      </div>
+      <div class="stat-value" style="color: #ef4444;">৳{{bnMoney totalPresentDues}}</div>
+      <div class="stat-footer">
+        <span style="color: #ef4444; line-height: 1.4;">{{t 'dashboard.totalDuesSub'}}</span>
+      </div>
+    </div>
+
+    <!-- Net Balance -->
+    <div class="stat-card" style="border-top: 3px solid {{#if (ne balance 0)}}#38bdf8{{else}}#94a3b8{{/if}};">
+      <div class="stat-card-header">
+        <span class="stat-label">{{t 'dashboard.netBalance'}}</span>
+        <div class="stat-icon" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+          </svg>
+        </div>
+      </div>
+      <div class="stat-value" style="color: #38bdf8;">৳{{bnNum balance}}</div>
+      <div class="stat-footer">
+        <span style="line-height: 1.4;">{{t 'dashboard.netBalanceSub'}}</span>
+      </div>
+    </div>
+
+    <!-- Total Customers Breakdown -->
+    <div class="stat-card" style="border-top: 3px solid #8b5cf6;">
+      <div class="stat-card-header">
+        <span class="stat-label">{{t 'dashboard.activeSubscribers'}}</span>
+        <div class="stat-icon" style="background: rgba(139, 92, 246, 0.15); color: #8b5cf6;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+          </svg>
+        </div>
+      </div>
+      <div class="stat-value">{{bnNum customerCount}}</div>
+      <div class="stat-footer">
+        <span style="color: #10b981; font-weight: 600;">{{bnNum customersWithBills}} {{t 'dashboard.billedSubscribers'}}</span> &bull; 
+        <span style="color: var(--color-text-muted);">{{bnNum customersWithoutBills}} {{t 'dashboard.unbilledSubscribers'}}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Customer Billing Status Table -->
+  <div class="card" style="margin-bottom: 2rem;">
+    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+      <div>
+        <h2 class="card-title">{{t 'dashboard.subscribersRoster'}}</h2>
+        <p style="color: var(--color-text-muted); font-size: 0.85rem; margin: 0.2rem 0 0 0;">{{t 'customers.subtitle'}}</p>
+      </div>
+      <div style="display: flex; gap: 0.5rem;">
+        <a href="/customers" class="btn btn-secondary btn-sm">{{t 'customers.title'}}</a>
+        <a href="/bills" class="btn btn-secondary btn-sm">{{t 'bills.title'}}</a>
+      </div>
+    </div>
+
+    {{#if customers.length}}
+      <div class="table-responsive">
+        <table class="data-table table-dense">
+          <thead>
+            <tr>
+              <th>{{t 'customers.name'}}</th>
+              <th>{{t 'customers.mobile'}}</th>
+              <th>{{t 'customers.advanceMoney'}} (৳)</th>
+              <th>{{t 'customers.presentDues'}} (৳)</th>
+              <th>{{t 'customers.lastBill'}}</th>
+              <th>{{t 'common.status'}}</th>
+              <th style="text-align: right;">{{t 'common.actions'}}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each customers}}
+              <tr>
+                <td>
+                  <a href="/customers/{{this.id}}" style="font-weight: 600; text-decoration: none;">
+                    {{this.name}}
+                  </a>
+                </td>
+                <td>{{this.mobileNumber}}</td>
+                <td style="color: #10b981; font-weight: 600;">৳{{bnNum this.advanceMoney}}</td>
+                <td>
+                  <span style="font-weight: 700; {{#if (ne this.presentDues 0)}}color: #ef4444;{{else}}color: #10b981;{{/if}}">
+                    ৳{{bnNum this.presentDues}}
+                  </span>
+                </td>
+                <td style="color: #94a3b8; font-size: 0.85rem;">{{tDate this.lastBillDate}}</td>
+                <td>
+                  {{#unless this.isActive}}
+                    <span class="badge" style="background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); font-weight: 700;">
+                      🚫 {{t 'customers.suspended'}}
+                    </span>
+                  {{else}}
+                    {{#if this.hasBills}}
+                      <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">{{t 'common.billed'}}</span>
+                    {{else}}
+                      <span class="badge" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24;">{{t 'common.noBills'}}</span>
+                    {{/if}}
+                  {{/unless}}
+                </td>
+                <td style="text-align: right;">
+                  <div class="table-actions-group">
+                    {{#if ../canCreate}}
+                      {{#if (and this.isActive (not this.isGarageSuspended))}}
+                      <a href="/bills/new?customerId={{this.id}}" class="btn btn-primary btn-icon-action" style="background: #10b981; border-color: #10b981;" title="{{t 'bills.newBill'}}" aria-label="{{t 'bills.newBill'}}">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                      </a>
+                      {{else}}
+                      <button type="button" class="btn btn-secondary btn-icon-action" style="opacity: 0.35; cursor: not-allowed;" title="{{#if this.isGarageSuspended}}{{t 'bills.garageSuspendedNotice'}}{{else}}{{t 'customers.suspendedNoticeShort'}}{{/if}}" disabled>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                      </button>
+                      {{/if}}
+                    {{/if}}
+                    <a href="/customers/{{this.id}}" class="btn btn-secondary btn-icon-action" title="{{t 'common.view'}}" aria-label="{{t 'common.view'}}">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </a>
+                  </div>
+                </td>
+              </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      </div>
+    {{else}}
+      <div style="text-align: center; padding: 3rem 1rem;">
+        <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🚗⚡</div>
+        <h3 style="font-size: 1.15rem; font-weight: 600; margin-bottom: 0.5rem;">{{t 'customers.noCustomers'}}</h3>
+        <p style="color: #94a3b8; margin-bottom: 1.5rem;">{{t 'customers.noCustomersSub'}}</p>
+        {{#if canCreate}}
+        <a href="/customers/new" class="btn btn-primary">{{t 'customers.addCustomer'}}</a>
+        {{/if}}
+      </div>
+    {{/if}}
+  </div>
+
+  <!-- Operational Facilities & Staff Summary -->
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem;">
+    <!-- Garages Quick Card -->
+    <div class="card" style="padding: 1.5rem;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h3 class="dash-card-heading">{{t 'garages.title'}} ({{bnNum garages.length}})</h3>
+        {{#if (or isSuperAdmin hasAssignedGarages)}}
+        <a href="/garages" class="btn btn-secondary btn-sm">{{#if isSuperAdmin}}{{t 'common.manage'}}{{else}}{{t 'common.view'}}{{/if}}</a>
+        {{/if}}
+      </div>
+      {{#if garages.length}}
+        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+          {{#each garages}}
+            <div class="dash-sub-card">
+              <strong class="dash-sub-card-title">{{this.garageName}}</strong>
+              <div class="dash-sub-card-subtitle">{{this.address}}</div>
+            </div>
+          {{/each}}
+        </div>
+      {{else}}
+        <p style="color: var(--color-text-muted); font-size: 0.85rem;">{{t 'garages.noGaragesRegistered'}}</p>
+      {{/if}}
+    </div>
+
+    <!-- Employees Quick Card -->
+    <div class="card" style="padding: 1.5rem;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h3 class="dash-card-heading">{{t 'common.staffAndTechnicians'}} ({{bnNum employees.length}})</h3>
+        {{#if isSuperAdmin}}
+        <a href="/employees" class="btn btn-secondary btn-sm">{{t 'common.manage'}}</a>
+        {{/if}}
+      </div>
+      {{#if employees.length}}
+        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+          {{#each employees}}
+            <div class="dash-sub-card" style="display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <strong class="dash-sub-card-title">{{this.name}}</strong>
+                <div class="dash-sub-card-subtitle">{{this.phoneNumber}}</div>
+              </div>
+              {{{roleBadge this.role}}}
+            </div>
+          {{/each}}
+        </div>
+      {{else}}
+        <p style="color: var(--color-text-muted); font-size: 0.85rem;">{{t 'common.noEmployeesRegistered'}}</p>
+      {{/if}}
+    </div>
+
+    {{#if isSuperAdmin}}
+    <!-- Audit & Security Quick Card -->
+    <div class="card" style="padding: 1.5rem;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h3 class="dash-card-heading">🛡️ {{t 'nav.auditLogs'}}</h3>
+        <a href="/audit-logs" class="btn btn-secondary btn-sm">{{t 'common.view'}}</a>
+      </div>
+      <p style="color: var(--color-text-muted); font-size: 0.85rem; margin-bottom: 1.25rem;">
+        {{t 'common.auditCardDesc'}}
+      </p>
+      <a href="/audit-logs" class="btn btn-primary dash-audit-btn" style="width: 100%; text-decoration: none;">
+        <span>📜</span> <span>{{t 'audit.viewLogs'}} &rarr;</span>
+      </a>
+    </div>
+    {{/if}}
+  </div>
+</div>

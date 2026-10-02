@@ -1,0 +1,51 @@
+import { AuditableEntity, AuditableProps } from '../common/auditable.entity';
+import { ContactPhone } from '../common/contact-phone.interface';
+import { AttachedDocument } from '../common/attached-document.interface';
+export interface CreateEmployeeProps extends AuditableProps {
+    id: string;
+    companyId: string;
+    name: string;
+    address: string;
+    email: string;
+    password: string;
+    phoneNumber?: string;
+    phoneNumbers?: ContactPhone[];
+    documents?: AttachedDocument[];
+    role?: string;
+    nidNumber: string;
+    canCreate?: boolean;
+    canEdit?: boolean;
+    canDelete?: boolean;
+    canView?: boolean;
+    permittedGarageIds?: string[];
+}
+export declare class Employee extends AuditableEntity {
+    readonly id: string;
+    readonly companyId: string;
+    name: string;
+    address: string;
+    email: string;
+    password: string;
+    phoneNumber: string;
+    phoneNumbers: ContactPhone[];
+    documents: AttachedDocument[];
+    role: string;
+    nidNumber: string;
+    canCreate: boolean;
+    canEdit: boolean;
+    canDelete: boolean;
+    canView: boolean;
+    permittedGarageIds: string[];
+    constructor(props: CreateEmployeeProps);
+    static create(props: CreateEmployeeProps): Employee;
+    updateDetails(name: string, address: string, phoneNumber: string, nidNumber: string, updatedByStamp?: string, phoneNumbers?: ContactPhone[]): void;
+    updatePassword(hashedPassword: string, updatedByStamp?: string): void;
+    updateRole(newRole: string, updatedByStamp?: string): void;
+    updatePermissions(canCreate: boolean, canEdit: boolean, canDelete: boolean, canView: boolean, garageIds: string[], updatedByStamp?: string): void;
+    addDocument(doc: AttachedDocument): void;
+    removeDocument(docId: string): AttachedDocument | null;
+    setDocuments(docs: AttachedDocument[]): void;
+    hasGarageAccess(garageId?: string | null): boolean;
+    canPerform(action: 'create' | 'edit' | 'delete' | 'view'): boolean;
+    private validate;
+}

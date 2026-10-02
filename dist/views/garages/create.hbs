@@ -1,0 +1,69 @@
+<div class="container" style="max-width: 600px; padding-top: 2rem; padding-bottom: 3rem;">
+  <div class="card" style="box-shadow: var(--shadow-lg);">
+    <div class="card-header" style="border-bottom: 1px solid var(--color-border); padding: 1.5rem 2rem;">
+      <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <div style="width: 42px; height: 42px; background: rgba(59, 130, 246, 0.15); color: #3b82f6; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            <line x1="12" y1="9" x2="12" y2="15"/>
+            <line x1="9" y1="12" x2="15" y2="12"/>
+          </svg>
+        </div>
+        <div>
+          <h1 style="font-size: 1.35rem; font-weight: 700; margin: 0; color: #fff;">{{t 'garages.createTitle'}}</h1>
+          <p style="font-size: 0.85rem; color: var(--color-text-muted); margin: 0.2rem 0 0 0;">
+            {{t 'garages.createSubtitle'}}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-body" style="padding: 2rem;">
+      {{#if error}}
+        <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: var(--radius-md); padding: 0.75rem 1rem; margin-bottom: 1.5rem; font-size: 0.85rem; color: #f87171;">
+          {{error}}
+        </div>
+      {{/if}}
+
+      <form action="/garages" method="POST">
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+          <label class="form-label" for="garageName" style="display: block; margin-bottom: 0.4rem; font-size: 0.875rem; font-weight: 600;">
+            {{t 'garages.garageName'}} *
+          </label>
+          <input
+            type="text"
+            id="garageName"
+            name="garageName"
+            class="form-control"
+            required
+            placeholder="{{#if isBn}}যেমন: উত্তর সার্ভিস সেন্টার{{else}}e.g. Apex North Diagnostic Center{{/if}}"
+            value="{{formData.garageName}}"
+            style="width: 100%; padding: 0.75rem; border-radius: var(--radius-md); background: rgba(15, 23, 42, 0.8); border: 1px solid var(--color-border); color: #fff;"
+          />
+        </div>
+
+        <div class="form-group" style="margin-bottom: 2rem;">
+          <label class="form-label" for="garageAddress" style="display: block; margin-bottom: 0.4rem; font-size: 0.875rem; font-weight: 600;">
+            {{t 'garages.address'}} *
+          </label>
+          <textarea
+            id="garageAddress"
+            name="address"
+            class="form-control"
+            rows="3"
+            required
+            placeholder="{{#if isBn}}যেমন: প্লট ৪৪, উত্তর হাইওয়ে, বাণিজ্যিক এলাকা{{else}}e.g. Plot 44, North Highway, Commercial Hub{{/if}}"
+            style="width: 100%; padding: 0.75rem; border-radius: var(--radius-md); background: rgba(15, 23, 42, 0.8); border: 1px solid var(--color-border); color: #fff; resize: vertical;"
+          >{{formData.address}}</textarea>
+        </div>
+
+        <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+          <a href="/garages" class="btn btn-secondary">{{t 'common.cancel'}}</a>
+          <button type="submit" class="btn btn-primary" style="padding: 0.75rem 1.75rem; font-weight: 600;">
+            {{t 'garages.saveGarage'}}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

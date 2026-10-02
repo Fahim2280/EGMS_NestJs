@@ -1,0 +1,527 @@
+<div class="page-header" style="margin-bottom: 1.5rem;">
+  <div class="header-content">
+    <a href="/bills" style="color: var(--color-text-muted); text-decoration: none; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 0.35rem; margin-bottom: 0.5rem; transition: color 0.15s ease;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+      {{t 'bills.backToBills'}}
+    </a>
+    <h1 class="page-title" style="display: flex; align-items: center; gap: 0.65rem;">
+      <span style="display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 10px; background: rgba(16, 185, 129, 0.15); color: #10b981;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      </span>
+      {{t 'bills.createTitle'}}
+    </h1>
+    <p class="page-subtitle">{{t 'bills.createSubtitle'}}</p>
+  </div>
+</div>
+
+{{#if error}}
+  <div style="background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 10px; padding: 1rem 1.25rem; margin-bottom: 1.5rem; color: #f87171; font-size: 0.9rem; display: flex; align-items: center; gap: 0.75rem;">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <span>{{error}}</span>
+  </div>
+{{/if}}
+
+<div class="bill-create-grid" style="display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 1.75rem; align-items: start;">
+  <!-- Bill Creation Form -->
+  <div class="card" style="padding: 1.75rem; border-top: 3px solid #10b981; margin-bottom: 0;">
+    <div style="display: flex; align-items: center; justify-content: space-between; padding-bottom: 1rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--color-border);">
+      <h2 style="font-size: 1.15rem; font-weight: 700; color: var(--color-text-primary); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        {{t 'bills.billDetails'}}
+      </h2>
+      <span class="badge" style="background: rgba(16, 185, 129, 0.12); color: #34d399; font-size: 0.72rem;">{{t 'bills.step1'}}</span>
+    </div>
+
+    <form action="/bills" method="POST" id="billForm">
+      <!-- Section 1: Customer & Date -->
+      <div style="background: rgba(15, 23, 42, 0.4); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 1.25rem;">
+        <div style="font-size: 0.76rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #94a3b8; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.4rem;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          {{t 'bills.customerAndDate'}}
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label class="form-label" for="customerId">
+            <span>{{t 'bills.selectCustomer'}} <span style="color: #f43f5e;">*</span></span>
+          </label>
+          <select id="customerId" name="customerId" class="form-input" required>
+            <option value="">{{t 'bills.chooseCustomer'}}</option>
+            {{#each customers}}
+              <option value="{{this.id}}" data-subtext="📱 {{this.mobileNumber}}" data-active="{{this.isActive}}" data-garage-suspended="{{this.isGarageSuspended}}" {{#if (or (not this.isActive) this.isGarageSuspended)}}disabled style="color: #ef4444; background: rgba(239, 68, 68, 0.06);"{{/if}} {{#if (eq ../preselectedCustomerId this.id)}}selected{{/if}}>
+                {{this.name}}{{#if this.customerCode}} ({{this.customerCode}}){{/if}}{{#unless this.isActive}} [🚫 {{t 'customers.suspended'}}]{{else}}{{#if this.isGarageSuspended}} [🚫 {{t 'garages.suspended'}}]{{/if}}{{/unless}}
+              </option>
+            {{/each}}
+          </select>
+          <div id="customerSuspendedWarning" style="display: none; margin-top: 0.75rem; background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; padding: 0.75rem 1rem; color: #f87171; font-size: 0.88rem;">
+            🚫 <strong>{{t 'customers.suspendedNoticeShort'}}:</strong> {{t 'customers.suspendedNotice'}}
+          </div>
+          <div id="garageSuspendedWarning" style="display: none; margin-top: 0.75rem; background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; padding: 0.75rem 1rem; color: #f87171; font-size: 0.88rem;">
+            🚫 <strong>{{t 'bills.garageSuspendedNoticeShort'}}:</strong> {{t 'bills.garageSuspendedNotice'}}
+          </div>
+        </div>
+
+        <div class="form-grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label" for="date">
+              <span>{{t 'bills.billingDate'}} <span style="color: #f43f5e;">*</span></span>
+            </label>
+            <input type="date" id="date" name="date" class="form-input" required value="{{todayDate}}">
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label" for="unitRate">
+              <span>{{t 'bills.ratePerUnit'}} ({{t 'common.currency'}}) <span style="color: #f43f5e;">*</span></span>
+              {{#if (eq user.role 'SUPER_ADMIN')}}
+              <span style="font-size: 0.7rem; color: #10b981; font-weight: 600;">{{t 'bills.editable'}}</span>
+              {{else}}
+              <span style="font-size: 0.7rem; color: var(--color-text-dim);">{{t 'bills.locked'}}</span>
+              {{/if}}
+            </label>
+            <input type="number" step="0.01" min="0.01" id="unitRate" name="unitRate" class="form-input" required 
+              value="{{#if formData.unitRate}}{{formData.unitRate}}{{else}}{{defaultUnitRate}}{{/if}}"
+              {{#unless (eq user.role 'SUPER_ADMIN')}}readonly title="{{t 'bills.superAdminRateHint'}}"{{/unless}}>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2: Meter Readings -->
+      <div style="background: rgba(15, 23, 42, 0.4); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 1.25rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+          <div style="font-size: 0.76rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #94a3b8; display: flex; align-items: center; gap: 0.4rem;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            {{t 'bills.electricityMeterReadings'}}
+          </div>
+          <span style="font-size: 0.72rem; color: #38bdf8; background: rgba(56, 189, 248, 0.1); padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(56, 189, 248, 0.25);">
+            {{#if isBn}}💡 বর্তমান রিডিং বা ব্যবহৃত ইউনিট যেকোনো একটি লিখুন{{else}}💡 Enter current reading or consumed units{{/if}}
+          </span>
+        </div>
+
+        <div class="form-grid-3" style="display: grid; grid-template-columns: 1fr 1.15fr 1fr; gap: 1rem;">
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label">
+              <span>{{#if isBn}}পূর্ববর্তী রিডিং{{else}}{{t 'bills.prevUnit'}}{{/if}}</span>
+              <span style="font-size: 0.7rem; color: var(--color-text-dim);">{{t 'bills.autoLoaded'}}</span>
+            </label>
+            <input type="text" id="displayPreviousUnit" class="form-input" readonly value="0.00" style="background: rgba(15, 23, 42, 0.6); font-family: monospace; font-weight: 600;">
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label" for="currentUnit">
+              <span>{{#if isBn}}বর্তমান মিটার রিডিং{{else}}{{t 'bills.currUnit'}}{{/if}} <span style="color: #f43f5e;">*</span></span>
+            </label>
+            <input type="number" step="0.01" min="0" id="currentUnit" name="currentUnit" class="form-input" required placeholder="0.00" value="{{formData.currentUnit}}" style="font-family: monospace; font-weight: 700;">
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label" for="consumedUnitInput">
+              <span style="color: #38bdf8;">{{#if isBn}}ব্যবহৃত ইউনিট{{else}}{{t 'bills.consumedUnits'}}{{/if}}</span>
+              <span style="font-size: 0.7rem; color: #34d399;">{{#if isBn}}স্বয়ংক্রিয়{{else}}Auto{{/if}}</span>
+            </label>
+            <input type="number" step="0.01" min="0" id="consumedUnitInput" class="form-input" placeholder="0.00" style="border-color: rgba(56, 189, 248, 0.35); background: rgba(56, 189, 248, 0.05); color: #38bdf8; font-family: monospace; font-weight: 700;">
+          </div>
+        </div>
+
+        <!-- Real-time Warning & 1-Click Fix Suggestion Card -->
+        <div id="unitReadingWarning" style="display: none; margin-top: 0.85rem; background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; padding: 0.85rem 1rem; color: #f87171; font-size: 0.86rem;">
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; flex-wrap: wrap;">
+            <div>
+              <div style="font-weight: 700; margin-bottom: 0.25rem;">
+                ⚠️ {{#if isBn}}বর্তমান মিটার রিডিং পূর্ববর্তী রিডিংয়ের চেয়ে কম হতে পারে না!{{else}}Current reading cannot be less than previous reading!{{/if}}
+              </div>
+              <div style="font-size: 0.82rem; color: #fca5a5;" id="unitWarningSuggestion"></div>
+            </div>
+            <button type="button" id="btnFixReading" class="btn btn-sm" style="background: #10b981; color: #fff; border: none; padding: 0.4rem 0.85rem; border-radius: 6px; font-size: 0.82rem; font-weight: 700; cursor: pointer; white-space: nowrap; display: none; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);">
+              {{#if isBn}}✓ এটি মিটার রিডিং হিসেবে সেট করুন{{else}}Apply as Reading{{/if}}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 3: Rent, Loan & Payment Settlement -->
+      <div style="background: rgba(15, 23, 42, 0.4); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 1.5rem;">
+        <div style="font-size: 0.76rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #94a3b8; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.4rem;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+          {{t 'bills.chargesAndSettlement'}}
+        </div>
+
+        <!-- Rent & Loan row -->
+        <div class="form-grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label" for="rentBill">{{t 'bills.rent'}} ({{t 'common.currency'}})</label>
+            <input type="number" step="0.01" min="0" id="rentBill" name="rentBill" class="form-input" required value="{{#if formData.rentBill}}{{formData.rentBill}}{{else}}0.00{{/if}}">
+          </div>
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label" for="loan">{{t 'bills.loan'}} ({{t 'common.currency'}})</label>
+            <input type="number" step="0.01" min="0" id="loan" name="loan" class="form-input" required value="{{#if formData.loan}}{{formData.loan}}{{else}}0.00{{/if}}">
+          </div>
+        </div>
+
+        <!-- Payment row -->
+        <div class="form-group" style="margin-bottom: 0;">
+          <label class="form-label" for="clearMoney">
+            <span>{{#if isBn}}পরিশোধিত টাকা{{else}}{{t 'bills.paid'}}{{/if}} ({{t 'common.currency'}}) <span style="color: #f43f5e;">*</span></span>
+            <span style="font-size: 0.7rem; color: #10b981;">{{t 'bills.customerHandover'}}</span>
+          </label>
+          <input type="number" step="0.01" min="0" id="clearMoney" name="clearMoney" class="form-input" required placeholder="0.00" value="{{#if formData.clearMoney}}{{formData.clearMoney}}{{else}}0.00{{/if}}" style="font-size: 1.05rem; font-weight: 700; color: #34d399;">
+        </div>
+      </div>
+
+      <div class="form-actions" style="display: flex; gap: 0.75rem; justify-content: flex-end; align-items: center;">
+        <a href="/bills" class="btn btn-secondary" style="padding: 0.65rem 1.25rem;">{{t 'common.cancel'}}</a>
+        <button type="submit" class="btn btn-primary" style="background: #10b981; border-color: #10b981; padding: 0.65rem 1.5rem; display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 700; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          {{t 'bills.saveBill'}}
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Live Automatic Calculation Preview Card -->
+  <div class="bill-create-preview" style="position: sticky; top: 84px;">
+    <div class="card" style="padding: 1.75rem; border-top: 3px solid #38bdf8; box-shadow: var(--shadow-md);">
+      <!-- Header -->
+      <div style="display: flex; align-items: center; justify-content: space-between; padding-bottom: 1rem; margin-bottom: 1.25rem; border-bottom: 1px solid var(--color-border);">
+        <div>
+          <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--color-text-primary); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+            <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #10b981; box-shadow: 0 0 10px #10b981;"></span>
+            {{t 'bills.livePreview'}}
+          </h3>
+          <span style="font-size: 0.72rem; color: var(--color-text-dim);">{{t 'bills.realtimeBreakdown'}}</span>
+        </div>
+        <span class="badge" id="previewRateBadge" style="background: rgba(56, 189, 248, 0.15); color: #0284c7; border: 1px solid rgba(56, 189, 248, 0.3); font-size: 0.75rem; font-weight: 700;">
+          {{t 'bills.ratePerUnitLabel'}} {{t 'common.currency'}}{{bnNum defaultUnitRate}}/{{t 'common.units'}}
+        </span>
+      </div>
+
+      <!-- Customer Name Pill -->
+      <div style="background: var(--color-bg-subtle); border: 1px solid var(--color-border); border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: space-between;">
+        <span style="font-size: 0.8rem; color: var(--color-text-muted);">{{t 'bills.customer'}}</span>
+        <strong id="previewCustomerName" style="color: var(--color-text-primary); font-size: 0.92rem;">{{t 'bills.chooseCustomer'}}</strong>
+      </div>
+
+      <!-- Meter Reading Bar -->
+      <div style="background: var(--color-bg-subtle); border: 1px solid var(--color-border); border-radius: 8px; padding: 0.85rem 1rem; margin-bottom: 1.25rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+          <span style="font-size: 0.76rem; font-weight: 700; text-transform: uppercase; color: var(--color-text-muted);">
+            {{#if isBn}}ব্যবহৃত বিদ্যুৎ ইউনিট{{else}}{{t 'bills.consumedUnits'}}{{/if}}
+          </span>
+          <span style="font-size: 0.85rem; color: #0284c7; font-weight: 800;" id="previewConsumedUnits">{{bnNum '0.00'}} {{t 'common.units'}}</span>
+        </div>
+        <div style="display: flex; align-items: center; justify-content: space-between; font-family: monospace; font-size: 0.95rem; font-weight: 700; color: var(--color-text-primary);">
+          <div>
+            <span style="font-size: 0.68rem; color: var(--color-text-muted); display: block; font-weight: 500; font-family: inherit;">{{#if isBn}}পূর্ববর্তী রিডিং{{else}}Previous{{/if}}</span>
+            <span id="previewPrevUnit" style="color: var(--color-text-muted);">{{bnNum '0.00'}}</span>
+          </div>
+          <span style="color: #0284c7; font-size: 1.15rem;">&rarr;</span>
+          <div style="text-align: right;">
+            <span style="font-size: 0.68rem; color: var(--color-text-muted); display: block; font-weight: 500; font-family: inherit;">{{#if isBn}}বর্তমান রিডিং{{else}}Current{{/if}}</span>
+            <span id="previewCurrUnit" style="color: #38bdf8;">{{bnNum '0.00'}}</span>
+          </div>
+        </div>
+        <div id="previewReadingError" style="display: none; margin-top: 0.5rem; padding-top: 0.45rem; border-top: 1px dashed rgba(239, 68, 68, 0.3); color: #f87171; font-size: 0.76rem; font-weight: 600;">
+          ⚠️ {{#if isBn}}বর্তমান রিডিং পূর্ববর্তী রিডিংয়ের চেয়ে কম হতে পারে না{{else}}Current reading cannot be lower than previous reading{{/if}}
+        </div>
+      </div>
+
+      <!-- Breakdown Table Rows -->
+      <div style="display: flex; flex-direction: column; gap: 0.65rem; font-size: 0.88rem; margin-bottom: 1.25rem;">
+        <div style="display: flex; justify-content: space-between; padding-bottom: 0.45rem; border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+          <span style="color: var(--color-text-muted);" id="previewElectricLabel">{{t 'bills.electricBill'}}:</span>
+          <strong id="previewElectricBill" style="color: #ffffff; font-family: monospace;">{{t 'common.currency'}}{{bnNum '0.00'}}</strong>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; padding-bottom: 0.45rem; border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+          <span style="color: var(--color-text-muted);">{{t 'bills.prevDues'}}:</span>
+          <strong id="previewPrevDues" style="color: #fbbf24; font-family: monospace;">{{t 'common.currency'}}{{bnNum '0.00'}}</strong>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; padding-bottom: 0.45rem; border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+          <span style="color: var(--color-text-muted);">{{t 'bills.rentLoan'}}:</span>
+          <strong id="previewRentLoan" style="color: #ffffff; font-family: monospace;">{{t 'common.currency'}}{{bnNum '0.00'}}</strong>
+        </div>
+      </div>
+
+      <!-- Total Bill Card -->
+      <div style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(56, 189, 248, 0.1)); border: 1px solid rgba(99, 102, 241, 0.3); border-radius: 10px; padding: 1rem 1.15rem; margin-bottom: 0.85rem; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <div style="font-size: 0.76rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #a5b4fc;">{{t 'bills.totalBill'}}</div>
+          <div style="font-size: 0.72rem; color: var(--color-text-dim);">{{t 'bills.combinedObligation'}}</div>
+        </div>
+        <strong id="previewTotalBill" style="font-size: 1.5rem; font-weight: 800; color: #ffffff; letter-spacing: -0.02em;">{{t 'common.currency'}}{{bnNum '0.00'}}</strong>
+      </div>
+
+      <!-- Paid Amount Row -->
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.55rem 0.85rem; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 8px; margin-bottom: 0.85rem;">
+        <span style="font-size: 0.82rem; font-weight: 600; color: #34d399;">{{#if isBn}}পরিশোধিত টাকা{{else}}{{t 'bills.paid'}}{{/if}}</span>
+        <strong id="previewPaidAmount" style="font-size: 1.05rem; color: #34d399; font-weight: 800; font-family: monospace;">{{t 'common.currency'}}{{bnNum '0.00'}}</strong>
+      </div>
+
+      <!-- Present Net Dues Alert -->
+      <div id="presentDuesCard" style="display: flex; justify-content: space-between; align-items: center; padding: 0.85rem 1rem; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 10px;">
+        <div>
+          <div style="font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #f87171;">{{t 'bills.presentDues'}}</div>
+          <div style="font-size: 0.7rem; color: #fca5a5;">{{t 'bills.outstandingCarryover'}}</div>
+        </div>
+        <strong id="previewPresentDues" style="font-size: 1.5rem; font-weight: 800; color: #ef4444; letter-spacing: -0.02em;">{{t 'common.currency'}}{{bnNum '0.00'}}</strong>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const customerSelect = document.getElementById('customerId');
+    const displayPreviousUnit = document.getElementById('displayPreviousUnit');
+    const currentUnitInput = document.getElementById('currentUnit');
+    const consumedUnitInput = document.getElementById('consumedUnitInput');
+    const unitReadingWarning = document.getElementById('unitReadingWarning');
+    const unitWarningSuggestion = document.getElementById('unitWarningSuggestion');
+    const btnFixReading = document.getElementById('btnFixReading');
+    const previewReadingError = document.getElementById('previewReadingError');
+    const unitRateInput = document.getElementById('unitRate');
+    const rentBillInput = document.getElementById('rentBill');
+    const loanInput = document.getElementById('loan');
+    const clearMoneyInput = document.getElementById('clearMoney');
+    const previewRateBadge = document.getElementById('previewRateBadge');
+    const previewElectricLabel = document.getElementById('previewElectricLabel');
+    const submitBtn = document.querySelector('#billForm button[type="submit"]');
+
+    let previousUnit = 0;
+    let previousDues = 0;
+    let customerName = '';
+
+    const isBn = {{#if isBn}}true{{else}}false{{/if}};
+    const bnDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+    function toBn(val) {
+      if (!isBn) return String(val);
+      return String(val).replace(/[0-9]/g, (d) => bnDigits[d]);
+    }
+
+    async function fetchCustomerSummary(id) {
+      const warningEl = document.getElementById('customerSuspendedWarning');
+      const garageWarningEl = document.getElementById('garageSuspendedWarning');
+
+      if (!id) {
+        previousUnit = 0;
+        previousDues = 0;
+        if (displayPreviousUnit) displayPreviousUnit.value = '0.00';
+        const custNameEl = document.getElementById('previewCustomerName');
+        if (custNameEl) custNameEl.textContent = '{{t "bills.chooseCustomer"}}';
+        if (warningEl) warningEl.style.display = 'none';
+        if (garageWarningEl) garageWarningEl.style.display = 'none';
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.style.opacity = '1';
+          submitBtn.style.cursor = 'pointer';
+        }
+        recalc();
+        return;
+      }
+      try {
+        const res = await fetch(`/bills/api/customer-summary/${id}`);
+        if (!res.ok) return;
+        const json = await res.json();
+        if (json.success) {
+          const isSuspended = json.data.isActive === false;
+          const isGarageSuspended = json.data.isGarageSuspended === true;
+          if (warningEl) warningEl.style.display = isSuspended ? 'block' : 'none';
+          if (garageWarningEl) garageWarningEl.style.display = isGarageSuspended ? 'block' : 'none';
+
+          if ((isSuspended || isGarageSuspended) && submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.style.opacity = '0.5';
+            submitBtn.style.cursor = 'not-allowed';
+          } else if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.style.opacity = '1';
+            submitBtn.style.cursor = 'pointer';
+          }
+
+          previousUnit = Number(json.data.lastMeterReading) || 0;
+          previousDues = Number(json.data.previousDues) || 0;
+          customerName = json.data.customerName || '';
+          if (displayPreviousUnit) displayPreviousUnit.value = previousUnit.toFixed(2);
+          const custNameEl = document.getElementById('previewCustomerName');
+          let statusSuffix = '';
+          if (isSuspended) statusSuffix = ' [🚫 {{t "customers.suspended"}}]';
+          else if (isGarageSuspended) statusSuffix = ' [🚫 {{t "garages.suspended"}}]';
+          if (custNameEl) custNameEl.textContent = customerName + statusSuffix;
+          recalc();
+        }
+      } catch (err) {
+        console.error('Error fetching customer summary:', err);
+      }
+    }
+
+    // Bidirectional sync: when user enters consumed units directly
+    if (consumedUnitInput) {
+      consumedUnitInput.addEventListener('input', () => {
+        const valStr = consumedUnitInput.value.trim();
+        if (valStr !== '') {
+          const consumedVal = parseFloat(valStr);
+          if (!isNaN(consumedVal) && consumedVal >= 0) {
+            const calculatedReading = previousUnit + consumedVal;
+            if (currentUnitInput) {
+              currentUnitInput.value = calculatedReading.toFixed(2);
+            }
+          }
+        }
+        recalc(false); // don't sync back to consumedUnitInput while user is typing in it
+      });
+    }
+
+    // 1-Click Auto-Fix reading button handler
+    if (btnFixReading) {
+      btnFixReading.addEventListener('click', () => {
+        const currentVal = parseFloat(currentUnitInput ? currentUnitInput.value : '0');
+        if (!isNaN(currentVal) && currentVal > 0 && currentVal < previousUnit) {
+          const corrected = (previousUnit + currentVal).toFixed(2);
+          if (currentUnitInput) currentUnitInput.value = corrected;
+          if (consumedUnitInput) consumedUnitInput.value = currentVal.toFixed(2);
+          recalc(false);
+        }
+      });
+    }
+
+    function recalc(syncConsumedInput = true) {
+      const currentValStr = currentUnitInput ? currentUnitInput.value.trim() : '';
+      const currentUnit = parseFloat(currentValStr || '0') || 0;
+      const rent = Number(rentBillInput ? rentBillInput.value : 0) || 0;
+      const loan = Number(loanInput ? loanInput.value : 0) || 0;
+      const clearMoney = Number(clearMoneyInput ? clearMoneyInput.value : 0) || 0;
+      const rate = Number(unitRateInput ? unitRateInput.value : 15) || 15;
+
+      const hasValue = currentValStr !== '';
+      const isUnderPrevious = hasValue && (currentUnit < previousUnit);
+      const consumed = isUnderPrevious ? 0 : Math.max(0, currentUnit - previousUnit);
+
+      // Sync Consumed Units field if valid
+      if (syncConsumedInput && consumedUnitInput) {
+        if (hasValue && !isUnderPrevious) {
+          consumedUnitInput.value = (currentUnit - previousUnit).toFixed(2);
+        } else if (!hasValue || isUnderPrevious) {
+          consumedUnitInput.value = '';
+        }
+      }
+
+      // Warning & suggestion
+      if (unitReadingWarning && unitWarningSuggestion && btnFixReading) {
+        if (isUnderPrevious && currentUnit > 0) {
+          const suggestedReading = (previousUnit + currentUnit).toFixed(2);
+          unitReadingWarning.style.display = 'block';
+          unitWarningSuggestion.innerHTML = isBn 
+            ? `আপনি কি <strong>${toBn(currentUnit.toFixed(2))}</strong> ইউনিট বিদ্যুৎ ব্যবহার বুঝিয়েছেন? তাহলে বর্তমান মিটার রিডিং হবে: <strong>${toBn(suggestedReading)}</strong> (${toBn(previousUnit.toFixed(2))} + ${toBn(currentUnit.toFixed(2))})।`
+            : `Did you mean <strong>${currentUnit.toFixed(2)}</strong> units consumed? Then current meter reading should be: <strong>${suggestedReading}</strong> (${previousUnit.toFixed(2)} + ${currentUnit.toFixed(2)}).`;
+          btnFixReading.textContent = isBn ? `✓ রিডিং ${toBn(suggestedReading)} সেট করুন` : `✓ Set Reading to ${suggestedReading}`;
+          btnFixReading.style.display = 'inline-block';
+          if (currentUnitInput) currentUnitInput.style.borderColor = '#f43f5e';
+        } else {
+          unitReadingWarning.style.display = 'none';
+          btnFixReading.style.display = 'none';
+          if (currentUnitInput) currentUnitInput.style.borderColor = '';
+        }
+      }
+
+      if (previewReadingError) {
+        previewReadingError.style.display = isUnderPrevious ? 'block' : 'none';
+      }
+
+      // Check suspension and negative constraint for submit button
+      const selectedOpt = customerSelect && customerSelect.selectedOptions[0];
+      const isSuspended = selectedOpt && selectedOpt.dataset.active === 'false';
+      if (submitBtn) {
+        if (isUnderPrevious || isSuspended) {
+          submitBtn.disabled = true;
+          submitBtn.style.opacity = '0.5';
+          submitBtn.style.cursor = 'not-allowed';
+          submitBtn.title = isUnderPrevious 
+            ? (isBn ? 'বর্তমান মিটার রিডিং অবশ্যই পূর্ববর্তী রিডিংয়ের চেয়ে বড় বা সমান হতে হবে' : 'Current reading cannot be lower than previous reading')
+            : (isBn ? 'স্থগিত গ্রাহকের জন্য বিল তৈরি সম্ভব নয়' : 'Billing blocked for suspended customer');
+        } else {
+          submitBtn.disabled = false;
+          submitBtn.style.opacity = '1';
+          submitBtn.style.cursor = 'pointer';
+          submitBtn.title = '';
+        }
+      }
+
+      const electric = consumed * rate;
+      const total = previousDues + electric + rent + loan;
+      const presentDues = total - clearMoney;
+
+      if (previewRateBadge) {
+        previewRateBadge.textContent = (isBn ? 'রেট: ৳' : 'Rate: ৳') + toBn(rate.toFixed(2)) + (isBn ? '/ইউনিট' : '/Unit');
+      }
+
+      if (previewElectricLabel) {
+        if (isUnderPrevious) {
+          previewElectricLabel.innerHTML = `<span style="color: #f87171;">⚠️ ${isBn ? 'অকার্যকর রিডিং' : 'Invalid Reading'}:</span>`;
+        } else {
+          previewElectricLabel.innerHTML = (isBn ? 'বিদ্যুৎ বিল (' : 'Electric Bill (') + toBn(consumed.toFixed(1)) + (isBn ? ' ইউ &times; ৳' : 'u &times; ৳') + toBn(rate.toFixed(2)) + '):';
+        }
+      }
+
+      const prevUnitEl = document.getElementById('previewPrevUnit');
+      const currUnitEl = document.getElementById('previewCurrUnit');
+      const consumedEl = document.getElementById('previewConsumedUnits');
+      const elecBillEl = document.getElementById('previewElectricBill');
+      const prevDuesEl = document.getElementById('previewPrevDues');
+      const rentLoanEl = document.getElementById('previewRentLoan');
+      const totalBillEl = document.getElementById('previewTotalBill');
+      const paidAmountEl = document.getElementById('previewPaidAmount');
+      const duesEl = document.getElementById('previewPresentDues');
+
+      if (prevUnitEl) prevUnitEl.textContent = toBn(previousUnit.toFixed(2));
+      if (currUnitEl) currUnitEl.textContent = toBn(currentUnit.toFixed(2));
+      
+      if (consumedEl) {
+        if (isUnderPrevious) {
+          consumedEl.innerHTML = `<span style="color: #f87171;">⚠️ ${isBn ? 'রিডিং কম' : 'Invalid'} (${toBn((currentUnit - previousUnit).toFixed(2))})</span>`;
+        } else {
+          consumedEl.textContent = toBn(consumed.toFixed(2)) + (isBn ? ' ইউনিট' : ' Units');
+        }
+      }
+
+      if (elecBillEl) {
+        if (isUnderPrevious) {
+          elecBillEl.innerHTML = `<span style="color: #f87171;">${isBn ? 'সংশোধন করুন' : 'Fix Reading'}</span>`;
+        } else {
+          elecBillEl.textContent = '৳' + toBn(electric.toFixed(2));
+        }
+      }
+
+      if (prevDuesEl) prevDuesEl.textContent = '৳' + toBn(previousDues.toFixed(2));
+      if (rentLoanEl) rentLoanEl.textContent = '৳' + toBn((rent + loan).toFixed(2));
+      if (totalBillEl) totalBillEl.textContent = '৳' + toBn(total.toFixed(2));
+      if (paidAmountEl) paidAmountEl.textContent = '৳' + toBn(clearMoney.toFixed(2));
+      
+      if (duesEl) {
+        duesEl.textContent = '৳' + toBn(presentDues.toFixed(2));
+        if (presentDues <= 0) {
+          duesEl.style.color = '#34d399';
+          if (duesEl.parentElement) {
+            duesEl.parentElement.style.background = 'rgba(16, 185, 129, 0.1)';
+            duesEl.parentElement.style.borderColor = 'rgba(16, 185, 129, 0.25)';
+          }
+        } else {
+          duesEl.style.color = '#ef4444';
+          if (duesEl.parentElement) {
+            duesEl.parentElement.style.background = 'rgba(239, 68, 68, 0.1)';
+            duesEl.parentElement.style.borderColor = 'rgba(239, 68, 68, 0.25)';
+          }
+        }
+      }
+    }
+
+    if (customerSelect) customerSelect.addEventListener('change', () => fetchCustomerSummary(customerSelect.value));
+    if (currentUnitInput) currentUnitInput.addEventListener('input', () => recalc(true));
+    if (unitRateInput) unitRateInput.addEventListener('input', () => recalc(false));
+    if (rentBillInput) rentBillInput.addEventListener('input', () => recalc(false));
+    if (loanInput) loanInput.addEventListener('input', () => recalc(false));
+    if (clearMoneyInput) clearMoneyInput.addEventListener('input', () => recalc(false));
+
+    if (customerSelect && customerSelect.value) {
+      fetchCustomerSummary(customerSelect.value);
+    }
+  });
+</script>

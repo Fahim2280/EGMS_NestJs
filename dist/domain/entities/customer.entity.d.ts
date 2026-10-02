@@ -1,0 +1,50 @@
+import { AuditableEntity, AuditableProps } from '../common/auditable.entity';
+import { ContactPhone } from '../common/contact-phone.interface';
+import { AttachedDocument } from '../common/attached-document.interface';
+export interface CreateCustomerProps extends AuditableProps {
+    id: string;
+    cId?: number;
+    companyId: string;
+    customerCode?: string | null;
+    name: string;
+    fatherName: string;
+    motherName: string;
+    address: string;
+    mobileNumber?: string;
+    phoneNumbers?: ContactPhone[];
+    documents?: AttachedDocument[];
+    nidNumber: string;
+    previousUnit: number;
+    advanceMoney: number;
+    garageId?: string;
+    garageName?: string;
+    createdDate?: Date;
+}
+export declare class Customer extends AuditableEntity {
+    readonly id: string;
+    cId?: number;
+    companyId: string;
+    customerCode?: string | null;
+    name: string;
+    fatherName: string;
+    motherName: string;
+    address: string;
+    mobileNumber: string;
+    phoneNumbers: ContactPhone[];
+    documents: AttachedDocument[];
+    nidNumber: string;
+    previousUnit: number;
+    advanceMoney: number;
+    garageId?: string;
+    garageName?: string;
+    constructor(props: CreateCustomerProps);
+    static create(props: CreateCustomerProps): Customer;
+    updateDetails(name: string, fatherName: string, motherName: string, address: string, mobileNumber: string, nidNumber: string, previousUnit: number, advanceMoney: number, garageId?: string, customerCode?: string | null, updatedByStamp?: string, phoneNumbers?: ContactPhone[]): void;
+    addDocument(doc: AttachedDocument): void;
+    removeDocument(docId: string): AttachedDocument | null;
+    setDocuments(docs: AttachedDocument[]): void;
+    suspend(byStamp?: string): void;
+    reactivate(byStamp?: string): void;
+    toggleStatus(byStamp?: string): boolean;
+    private validate;
+}
