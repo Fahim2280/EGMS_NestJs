@@ -19,7 +19,7 @@ services:
       - JWT_SECRET=${JWT_SECRET:-please_change_this_to_a_random_32_char_secret}
       - JWT_EXPIRES_IN=7d
       - HTTPS=false
-      - APP_URL=${APP_URL:-http://localhost:3000}
+      - APP_URL=${APP_URL:-https://emgs.shop}
       - UPLOAD_DIR=storage/uploads
       - ADMIN_APPROVAL_EMAIL=${ADMIN_APPROVAL_EMAIL:-kfahim2280@gmail.com}
       - APPROVAL_TOKEN_EXPIRY_HOURS=${APPROVAL_TOKEN_EXPIRY_HOURS:-48}
