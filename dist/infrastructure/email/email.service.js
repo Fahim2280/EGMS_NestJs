@@ -95,10 +95,25 @@ let EmailService = EmailService_1 = class EmailService {
         try {
             const transporter = this.getTransporter();
             await transporter.verify();
+            const adminEmail = this.config.get('ADMIN_APPROVAL_EMAIL') ||
+                process.env.ADMIN_APPROVAL_EMAIL ||
+                'kfahim2280@gmail.com';
+            const from = this.getFromAddress();
+            const sendResult = await transporter.sendMail({
+                from,
+                to: adminEmail,
+                subject: '🧪 [TEST EMAIL] EGMS Portal SMTP Test',
+                text: `This is a test email sent from EGMS Portal via ${host}:${port} at ${new Date().toISOString()}.`,
+                html: `<div style="font-family:sans-serif;padding:20px;background:#f8fafc;border-radius:10px;">
+          <h2 style="color:#059669;">✅ EGMS SMTP is Working!</h2>
+          <p>This test email was successfully dispatched from <strong>${from}</strong> to <strong>${adminEmail}</strong>.</p>
+          <p style="color:#64748b;font-size:12px;">Timestamp: ${new Date().toLocaleString('en-BD', { timeZone: 'Asia/Dhaka' })}</p>
+        </div>`,
+            });
             return {
                 success: true,
                 config: configSummary,
-                message: `SMTP connection and authentication verified successfully with ${host}:${port}!`,
+                message: `SMTP verified AND test email dispatched to ${adminEmail}! MessageId: ${sendResult.messageId}. Response: ${sendResult.response}`,
             };
         }
         catch (err) {
