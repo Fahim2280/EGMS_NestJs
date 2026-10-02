@@ -47,7 +47,7 @@ let EmailService = EmailService_1 = class EmailService {
     getResendApiKey() {
         const key = this.config.get('RESEND_API_KEY') ||
             process.env.RESEND_API_KEY ||
-            're_49QbsC1R_M1srbXhgqy5WMUu4tzDJHmgG';
+            '';
         return (key || '').trim();
     }
     getFromAddress() {
