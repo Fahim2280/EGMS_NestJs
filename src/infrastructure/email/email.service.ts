@@ -40,6 +40,9 @@ export class EmailService implements OnModuleInit {
   }
 
   private getResendApiKey(): string {
+    if (!process.env.RESEND_API_KEY) {
+      dotenv.config();
+    }
     const key =
       this.config.get<string>('RESEND_API_KEY') ||
       process.env.RESEND_API_KEY ||
@@ -215,6 +218,8 @@ export class EmailService implements OnModuleInit {
 
     const maskedPass = rawPass ? `${rawPass.substring(0, 3)}••••••••${rawPass.slice(-3)}` : '(not set)';
     const configSummary = {
+      buildVersion: '2026-10-03-v3',
+      resendKeyDetected: !!resendKey,
       host,
       port,
       secure,
