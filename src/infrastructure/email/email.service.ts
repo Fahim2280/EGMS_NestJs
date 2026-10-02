@@ -1,14 +1,38 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
-
 import * as dotenv from 'dotenv';
 
 @Injectable()
-export class EmailService {
+export class EmailService implements OnModuleInit {
   private readonly logger = new Logger(EmailService.name);
 
   constructor(private readonly config: ConfigService) {}
+
+  async onModuleInit() {
+    const rawUser = this.config.get<string>('SMTP_USER') || process.env.SMTP_USER || '';
+    const rawPass = this.config.get<string>('SMTP_PASS') || process.env.SMTP_PASS || '';
+    const host = this.config.get<string>('SMTP_HOST') || process.env.SMTP_HOST || 'smtp.gmail.com';
+    const port = Number(this.config.get<number>('SMTP_PORT') || process.env.SMTP_PORT || 587);
+
+    if (!rawUser || !rawPass) {
+      this.logger.warn(`⚠️ [EMAIL] SMTP_USER or SMTP_PASS is NOT configured! Outgoing emails will NOT be sent.`);
+      return;
+    }
+
+    try {
+      const transporter = this.getTransporter();
+      await transporter.verify();
+      this.logger.log(`✅ [EMAIL] SMTP connection verified successfully with ${host}:${port} for ${rawUser}`);
+    } catch (err: any) {
+      this.logger.error(`❌ [EMAIL] SMTP verification failed with ${host}:${port}: ${err.message}`);
+      if (err.message?.includes('535') || err.message?.includes('Username and Password not accepted')) {
+        this.logger.error(`💡 [EMAIL HINT] Gmail requires an App Password (16 chars with 2-Step Verification). Normal account password will be rejected.`);
+      } else if (err.code === 'ETIMEDOUT' || err.code === 'ECONNREFUSED') {
+        this.logger.error(`💡 [EMAIL HINT] Port ${port} may be blocked by your VPS hosting firewall. Try port 465 with SMTP_SECURE=true or open port ${port}.`);
+      }
+    }
+  }
 
   private getTransporter(): nodemailer.Transporter {
     // Reload from .env if variables aren't loaded in older running process
@@ -24,13 +48,18 @@ export class EmailService {
 
     const host = this.config.get<string>('SMTP_HOST') || process.env.SMTP_HOST || 'smtp.gmail.com';
     const port = Number(this.config.get<number>('SMTP_PORT') || process.env.SMTP_PORT || 587);
-    const secure = (this.config.get<string>('SMTP_SECURE') || process.env.SMTP_SECURE || 'false') === 'true';
+    const secure =
+      (this.config.get<string>('SMTP_SECURE') || process.env.SMTP_SECURE || 'false') === 'true' ||
+      port === 465;
 
     return nodemailer.createTransport({
       host,
       port,
       secure,
       auth: user && pass ? { user, pass } : undefined,
+      connectionTimeout: 10000,
+      greetingTimeout: 10000,
+      socketTimeout: 15000,
     });
   }
 
