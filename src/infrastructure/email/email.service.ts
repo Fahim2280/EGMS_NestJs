@@ -109,11 +109,28 @@ export class EmailService implements OnModuleInit {
     }
   }
 
-  async sendPasswordResetEmail(to: string, resetLink: string): Promise<void> {
-    const fromAddress =
+  private getFromAddress(): string {
+    const rawFrom =
       this.config.get<string>('SMTP_FROM') ||
       process.env.SMTP_FROM ||
-      'EGMS Portal <noreply@egms.app>';
+      '';
+    const userEmail =
+      this.config.get<string>('SMTP_USER') ||
+      process.env.SMTP_USER ||
+      'noreply@egms.shop';
+
+    const trimmed = rawFrom.trim();
+    if (!trimmed) {
+      return `EGMS Portal <${userEmail}>`;
+    }
+    if (trimmed.includes('@')) {
+      return trimmed;
+    }
+    return `"${trimmed}" <${userEmail}>`;
+  }
+
+  async sendPasswordResetEmail(to: string, resetLink: string): Promise<void> {
+    const fromAddress = this.getFromAddress();
 
     const html = `
 <!DOCTYPE html>
@@ -196,10 +213,7 @@ export class EmailService implements OnModuleInit {
   }
 
   async sendWelcomeEmail(to: string, companyName: string): Promise<void> {
-    const fromAddress =
-      this.config.get<string>('SMTP_FROM') ||
-      process.env.SMTP_FROM ||
-      'EGMS Portal <noreply@egms.app>';
+    const fromAddress = this.getFromAddress();
     const appUrl =
       this.config.get<string>('APP_URL') ||
       process.env.APP_URL ||
@@ -288,10 +302,7 @@ export class EmailService implements OnModuleInit {
     approveUrl: string,
     rejectUrl: string,
   ): Promise<void> {
-    const fromAddress =
-      this.config.get<string>('SMTP_FROM') ||
-      process.env.SMTP_FROM ||
-      'EGMS Portal <noreply@egms.app>';
+    const fromAddress = this.getFromAddress();
 
     const registeredAt = new Date().toLocaleString('en-BD', {
       timeZone: 'Asia/Dhaka',

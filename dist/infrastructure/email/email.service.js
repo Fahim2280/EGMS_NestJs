@@ -109,10 +109,24 @@ let EmailService = EmailService_1 = class EmailService {
             };
         }
     }
-    async sendPasswordResetEmail(to, resetLink) {
-        const fromAddress = this.config.get('SMTP_FROM') ||
+    getFromAddress() {
+        const rawFrom = this.config.get('SMTP_FROM') ||
             process.env.SMTP_FROM ||
-            'EGMS Portal <noreply@egms.app>';
+            '';
+        const userEmail = this.config.get('SMTP_USER') ||
+            process.env.SMTP_USER ||
+            'noreply@egms.shop';
+        const trimmed = rawFrom.trim();
+        if (!trimmed) {
+            return `EGMS Portal <${userEmail}>`;
+        }
+        if (trimmed.includes('@')) {
+            return trimmed;
+        }
+        return `"${trimmed}" <${userEmail}>`;
+    }
+    async sendPasswordResetEmail(to, resetLink) {
+        const fromAddress = this.getFromAddress();
         const html = `
 <!DOCTYPE html>
 <html lang="en">
@@ -192,9 +206,7 @@ let EmailService = EmailService_1 = class EmailService {
         }
     }
     async sendWelcomeEmail(to, companyName) {
-        const fromAddress = this.config.get('SMTP_FROM') ||
-            process.env.SMTP_FROM ||
-            'EGMS Portal <noreply@egms.app>';
+        const fromAddress = this.getFromAddress();
         const appUrl = this.config.get('APP_URL') ||
             process.env.APP_URL ||
             'https://localhost:3000';
@@ -274,9 +286,7 @@ let EmailService = EmailService_1 = class EmailService {
         }
     }
     async sendCompanyApprovalRequestEmail(to, companyName, companyEmail, approveUrl, rejectUrl) {
-        const fromAddress = this.config.get('SMTP_FROM') ||
-            process.env.SMTP_FROM ||
-            'EGMS Portal <noreply@egms.app>';
+        const fromAddress = this.getFromAddress();
         const registeredAt = new Date().toLocaleString('en-BD', {
             timeZone: 'Asia/Dhaka',
             dateStyle: 'full',
