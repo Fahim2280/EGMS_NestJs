@@ -15,6 +15,8 @@ const common_1 = require("@nestjs/common");
 const config_1 = require("@nestjs/config");
 const nodemailer = require("nodemailer");
 const dotenv = require("dotenv");
+const fs_1 = require("fs");
+const path_1 = require("path");
 let EmailService = EmailService_1 = class EmailService {
     config;
     logger = new common_1.Logger(EmailService_1.name);
@@ -45,10 +47,37 @@ let EmailService = EmailService_1 = class EmailService {
         }
     }
     getResendApiKey() {
-        const key = this.config.get('RESEND_API_KEY') ||
+        let key = this.config.get('RESEND_API_KEY') ||
             process.env.RESEND_API_KEY ||
             '';
-        return (key || '').trim();
+        if (!key) {
+            try {
+                const candidatePaths = [
+                    (0, path_1.join)(process.cwd(), '.env'),
+                    (0, path_1.join)(__dirname, '../../..', '.env'),
+                    (0, path_1.join)(__dirname, '../..', '.env'),
+                    (0, path_1.join)(__dirname, '..', '.env'),
+                    '/home/egmsshop/egms.shop/.env',
+                    '/home/egmsshop/repositories/EGMS_NestJs/.env',
+                ];
+                for (const p of candidatePaths) {
+                    if ((0, fs_1.existsSync)(p)) {
+                        const raw = (0, fs_1.readFileSync)(p, 'utf8');
+                        const match = raw.match(/^\s*RESEND_API_KEY\s*=\s*([^\r\n#]+)/m);
+                        if (match && match[1]) {
+                            const parsed = match[1].trim().replace(/^["']|["']$/g, '');
+                            if (parsed) {
+                                key = parsed;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            catch {
+            }
+        }
+        return (key || '').trim().replace(/^["']|["']$/g, '');
     }
     getFromAddress() {
         const resendKey = this.getResendApiKey();
@@ -190,6 +219,8 @@ let EmailService = EmailService_1 = class EmailService {
             port === 465;
         const maskedPass = rawPass ? `${rawPass.substring(0, 3)}••••••••${rawPass.slice(-3)}` : '(not set)';
         const configSummary = {
+            buildVersion: '2026-10-03-v3',
+            resendKeyDetected: !!resendKey,
             host,
             port,
             secure,

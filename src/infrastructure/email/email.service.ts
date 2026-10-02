@@ -2,6 +2,8 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
 import * as dotenv from 'dotenv';
+import { existsSync, readFileSync } from 'fs';
+import { join } from 'path';
 
 @Injectable()
 export class EmailService implements OnModuleInit {
@@ -40,14 +42,40 @@ export class EmailService implements OnModuleInit {
   }
 
   private getResendApiKey(): string {
-    if (!process.env.RESEND_API_KEY) {
-      dotenv.config();
-    }
-    const key =
+    let key =
       this.config.get<string>('RESEND_API_KEY') ||
       process.env.RESEND_API_KEY ||
       '';
-    return (key || '').trim();
+
+    if (!key) {
+      try {
+        const candidatePaths = [
+          join(process.cwd(), '.env'),
+          join(__dirname, '../../..', '.env'),
+          join(__dirname, '../..', '.env'),
+          join(__dirname, '..', '.env'),
+          '/home/egmsshop/egms.shop/.env',
+          '/home/egmsshop/repositories/EGMS_NestJs/.env',
+        ];
+        for (const p of candidatePaths) {
+          if (existsSync(p)) {
+            const raw = readFileSync(p, 'utf8');
+            const match = raw.match(/^\s*RESEND_API_KEY\s*=\s*([^\r\n#]+)/m);
+            if (match && match[1]) {
+              const parsed = match[1].trim().replace(/^["']|["']$/g, '');
+              if (parsed) {
+                key = parsed;
+                break;
+              }
+            }
+          }
+        }
+      } catch {
+        // ignore
+      }
+    }
+
+    return (key || '').trim().replace(/^["']|["']$/g, '');
   }
 
   private getFromAddress(): string {
