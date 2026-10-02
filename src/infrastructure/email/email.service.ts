@@ -63,6 +63,49 @@ export class EmailService implements OnModuleInit {
     });
   }
 
+  async testSmtpConnection(): Promise<{ success: boolean; config: any; message: string }> {
+    const rawUser = this.config.get<string>('SMTP_USER') || process.env.SMTP_USER || '';
+    const rawPass = this.config.get<string>('SMTP_PASS') || process.env.SMTP_PASS || '';
+    const host = this.config.get<string>('SMTP_HOST') || process.env.SMTP_HOST || 'smtp.gmail.com';
+    const port = Number(this.config.get<number>('SMTP_PORT') || process.env.SMTP_PORT || 587);
+    const secure =
+      (this.config.get<string>('SMTP_SECURE') || process.env.SMTP_SECURE || 'false') === 'true' ||
+      port === 465;
+
+    const maskedPass = rawPass ? `${rawPass.substring(0, 3)}••••••••${rawPass.slice(-3)}` : '(not set)';
+    const configSummary = {
+      host,
+      port,
+      secure,
+      user: rawUser || '(not set)',
+      password: maskedPass,
+    };
+
+    if (!rawUser || !rawPass) {
+      return {
+        success: false,
+        config: configSummary,
+        message: 'SMTP_USER or SMTP_PASS is missing or empty in environment.',
+      };
+    }
+
+    try {
+      const transporter = this.getTransporter();
+      await transporter.verify();
+      return {
+        success: true,
+        config: configSummary,
+        message: `SMTP connection and authentication verified successfully with ${host}:${port}!`,
+      };
+    } catch (err: any) {
+      return {
+        success: false,
+        config: configSummary,
+        message: err.message || String(err),
+      };
+    }
+  }
+
   async sendPasswordResetEmail(to: string, resetLink: string): Promise<void> {
     const fromAddress =
       this.config.get<string>('SMTP_FROM') ||

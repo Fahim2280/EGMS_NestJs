@@ -25,6 +25,7 @@ import { RolesGuard } from '@infrastructure/auth/roles.guard';
 import { Roles } from '@infrastructure/auth/roles.decorator';
 import { AuditLogService } from '@application/services/audit-log.service';
 import { AuthRateLimiterGuard } from '@infrastructure/auth/auth-rate-limiter.guard';
+import { EmailService } from '@infrastructure/email/email.service';
 
 @Controller()
 export class AuthController {
@@ -32,6 +33,7 @@ export class AuthController {
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
     private readonly auditLogService: AuditLogService,
+    private readonly emailService: EmailService,
   ) {}
 
   @Get('login')
@@ -346,4 +348,17 @@ export class AuthController {
     res.clearCookie('jwt_token');
     return res.redirect('/login?message=msg.logoutSuccess');
   }
+
+  @Get('test-email')
+  async testEmailStatus(@Res() res: Response) {
+    const result = await this.emailService.testSmtpConnection();
+    return res.json({
+      status: result.success ? 'OK' : 'ERROR',
+      result,
+      troubleshooting: result.success
+        ? 'SMTP is working properly!'
+        : 'If error is ETIMEDOUT or ECONNREFUSED, your hosting firewall is blocking port 587. Try SMTP_PORT=465 with SMTP_SECURE=true, or use cPanel Webmail/SMTP (e.g. mail.egms.shop).',
+    });
+  }
 }
+
