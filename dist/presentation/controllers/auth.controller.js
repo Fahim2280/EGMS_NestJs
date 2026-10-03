@@ -268,16 +268,6 @@ let AuthController = class AuthController {
         res.clearCookie('jwt_token');
         return res.redirect('/login?message=msg.logoutSuccess');
     }
-    async testEmailStatus(res) {
-        const result = await this.emailService.testSmtpConnection();
-        return res.json({
-            status: result.success ? 'OK' : 'ERROR',
-            result,
-            troubleshooting: result.success
-                ? 'SMTP is working properly!'
-                : 'If error is ETIMEDOUT or ECONNREFUSED, your hosting firewall is blocking port 587. Try SMTP_PORT=465 with SMTP_SECURE=true, or use cPanel Webmail/SMTP (e.g. mail.egms.shop).',
-        });
-    }
 };
 exports.AuthController = AuthController;
 __decorate([
@@ -406,13 +396,6 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "handleLogout", null);
-__decorate([
-    (0, common_1.Get)('test-email'),
-    __param(0, (0, common_1.Res)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", Promise)
-], AuthController.prototype, "testEmailStatus", null);
 exports.AuthController = AuthController = __decorate([
     (0, common_1.Controller)(),
     __metadata("design:paramtypes", [cqrs_1.CommandBus,

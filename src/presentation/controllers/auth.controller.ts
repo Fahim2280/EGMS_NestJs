@@ -348,17 +348,6 @@ export class AuthController {
     res.clearCookie('jwt_token');
     return res.redirect('/login?message=msg.logoutSuccess');
   }
-
-  @Get('test-email')
-  async testEmailStatus(@Res() res: Response) {
-    const result = await this.emailService.testSmtpConnection();
-    return res.json({
-      status: result.success ? 'OK' : 'ERROR',
-      result,
-      troubleshooting: result.success
-        ? 'SMTP is working properly!'
-        : 'If error is ETIMEDOUT or ECONNREFUSED, your hosting firewall is blocking port 587. Try SMTP_PORT=465 with SMTP_SECURE=true, or use cPanel Webmail/SMTP (e.g. mail.egms.shop).',
-    });
-  }
 }
+
 

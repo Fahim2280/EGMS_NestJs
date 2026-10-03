@@ -24,5 +24,4 @@ export declare class AuthController {
     renderProfileEdit(req: Request, res: Response): Promise<void>;
     handleProfileEdit(body: any, req: Request, res: Response): Promise<void>;
     handleLogout(req: Request, res: Response): Promise<void>;
-    testEmailStatus(res: Response): Promise<Response<any, Record<string, any>>>;
 }
