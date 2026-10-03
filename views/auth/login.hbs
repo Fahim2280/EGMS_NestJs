@@ -77,22 +77,7 @@
         </button>
       </form>
 
-      <!-- Demo Quick Fill Buttons -->
-      <div style="margin-top: 1.75rem; padding-top: 1.5rem; border-top: 1px solid rgba(99,102,241,0.1);">
-        <p style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#475569;text-align:center;margin-bottom:0.75rem;">
-          {{t 'auth.demoAccounts'}}
-        </p>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
-          <button type="button" class="btn btn-secondary btn-sm quick-fill-btn" data-email="admin@apexauto.com" data-pass="Admin@123" style="font-size:0.8rem;">
-            🏢 {{t 'nav.superAdmin'}}
-          </button>
-          <button type="button" class="btn btn-secondary btn-sm quick-fill-btn" data-email="john.doe@apexauto.com" data-pass="Employee@123" style="font-size:0.8rem;">
-            👤 {{t 'nav.employees'}}
-          </button>
-        </div>
-      </div>
-
-      <p style="text-align:center;margin-top:1.5rem;font-size:0.85rem;color:#475569;">
+      <p style="text-align:center;margin-top:1.75rem;font-size:0.85rem;color:#475569;">
         {{t 'auth.newCompanyPrompt'}} <a href="/register" style="color:#818cf8;font-weight:600;text-decoration:none;">{{t 'auth.registerHere'}}</a>
       </p>
     </div>
@@ -100,15 +85,6 @@
 </div>
 
 <script>
-  // Quick-fill demo buttons
-  document.querySelectorAll('.quick-fill-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.getElementById('loginEmail').value = btn.dataset.email;
-      document.getElementById('loginPassword').value = btn.dataset.pass;
-      document.getElementById('loginEmail').dispatchEvent(new Event('input'));
-    });
-  });
-
   // Submit button loading state
   document.getElementById('loginForm').addEventListener('submit', () => {
     const btn = document.getElementById('loginSubmitBtn');
