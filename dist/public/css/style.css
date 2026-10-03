@@ -5049,6 +5049,87 @@ select.filter-select {
 /* Table scroll fade gradient hint */
 .table-responsive {
   position: relative;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ================================================================
+   DESKTOP TOP HORIZONTAL SCROLLBAR FOR DATA TABLES
+   ================================================================ */
+.table-scrollbar-top {
+  display: none;
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  height: 14px;
+  min-height: 14px;
+  background: rgba(15, 23, 42, 0.65);
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+  box-sizing: border-box;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(99, 102, 241, 0.65) rgba(15, 23, 42, 0.4);
+}
+
+.table-scrollbar-top-inner {
+  height: 1px;
+  min-height: 1px;
+}
+
+/* Custom modern scrollbars for both top and bottom table scrollbars */
+.table-scrollbar-top::-webkit-scrollbar,
+.table-responsive::-webkit-scrollbar {
+  height: 10px;
+}
+
+.table-scrollbar-top::-webkit-scrollbar-track,
+.table-responsive::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.5);
+  border-radius: 4px;
+}
+
+.table-scrollbar-top::-webkit-scrollbar-thumb,
+.table-responsive::-webkit-scrollbar-thumb {
+  background: rgba(99, 102, 241, 0.55);
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: background 0.15s;
+}
+
+.table-scrollbar-top::-webkit-scrollbar-thumb:hover,
+.table-responsive::-webkit-scrollbar-thumb:hover {
+  background: rgba(99, 102, 241, 0.85);
+}
+
+/* Light theme overrides */
+[data-theme="light"] .table-scrollbar-top {
+  background: #f1f5f9;
+  border-top-color: #cbd5e1;
+  border-bottom-color: #cbd5e1;
+  scrollbar-color: #94a3b8 #f1f5f9;
+}
+
+[data-theme="light"] .table-scrollbar-top::-webkit-scrollbar-track,
+[data-theme="light"] .table-responsive::-webkit-scrollbar-track {
+  background: #e2e8f0;
+}
+
+[data-theme="light"] .table-scrollbar-top::-webkit-scrollbar-thumb,
+[data-theme="light"] .table-responsive::-webkit-scrollbar-thumb {
+  background: #94a3b8;
+  border-color: #cbd5e1;
+}
+
+[data-theme="light"] .table-scrollbar-top::-webkit-scrollbar-thumb:hover,
+[data-theme="light"] .table-responsive::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+/* Hide top scrollbar on mobile devices */
+@media (max-width: 768px) {
+  .table-scrollbar-top {
+    display: none !important;
+  }
 }
 
 /* ================================================================
@@ -5186,15 +5267,15 @@ select.filter-select {
 
   /* Collapse the form by default */
   .dfb-form.dfb-collapse {
-    display: none;
+    display: none !important;
     overflow: hidden;
     padding-top: 0;
     margin-top: 0.5rem;
     border-top: 1px solid var(--color-border);
-    animation: dfbSlideIn 0.2s ease-out;
   }
   .dfb-form.dfb-collapse.dfb-open {
-    display: flex;
+    display: flex !important;
+    animation: dfbSlideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   }
   @keyframes dfbSlideIn {
     from { opacity: 0; transform: translateY(-6px); }

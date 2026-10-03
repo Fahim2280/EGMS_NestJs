@@ -17,6 +17,10 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
 
+    if (response.headersSent) {
+      return;
+    }
+
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
     let message: any = 'An unexpected internal error occurred';
     let errorType = 'InternalServerError';

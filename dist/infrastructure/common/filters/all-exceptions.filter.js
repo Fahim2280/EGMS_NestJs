@@ -15,6 +15,9 @@ let AllExceptionsFilter = AllExceptionsFilter_1 = class AllExceptionsFilter {
         const ctx = host.switchToHttp();
         const response = ctx.getResponse();
         const request = ctx.getRequest();
+        if (response.headersSent) {
+            return;
+        }
         let status = common_1.HttpStatus.INTERNAL_SERVER_ERROR;
         let message = 'An unexpected internal error occurred';
         let errorType = 'InternalServerError';

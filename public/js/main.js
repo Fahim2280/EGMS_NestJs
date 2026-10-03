@@ -669,9 +669,87 @@ window.toggleFilterDrawer = function toggleFilterDrawer(formId) {
   const wrapper  = form.closest('.card, .dfb-wrapper') || form.parentElement;
   const toggle   = wrapper ? wrapper.querySelector('.dfb-mobile-toggle') : null;
 
-  form.classList.toggle('dfb-open');
-  if (toggle) toggle.classList.toggle('open');
+  const isOpen = form.classList.toggle('dfb-open');
+  if (toggle) {
+    toggle.classList.toggle('open', isOpen);
+    toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+  }
 };
+
+// =======================================================
+// ============================================================
+// Desktop Top Horizontal Scrollbar for Responsive Data Tables
+// ============================================================
+function initTableTopScrollbars() {
+  const wrappers = document.querySelectorAll('.table-responsive');
+  if (!wrappers.length) return;
+
+  wrappers.forEach((wrapper) => {
+    if (wrapper.dataset.topScrollbarInit) return;
+    wrapper.dataset.topScrollbarInit = 'true';
+
+    const table = wrapper.querySelector('table');
+    if (!table) return;
+
+    // Create the top scrollbar container
+    const topBar = document.createElement('div');
+    topBar.className = 'table-scrollbar-top';
+    topBar.setAttribute('aria-hidden', 'true');
+
+    const topInner = document.createElement('div');
+    topInner.className = 'table-scrollbar-top-inner';
+    topBar.appendChild(topInner);
+
+    // Insert directly before the table-responsive wrapper
+    wrapper.parentNode.insertBefore(topBar, wrapper);
+
+    let activeScroller = null;
+    let scrollTimeout = null;
+
+    topBar.addEventListener('scroll', () => {
+      if (activeScroller === 'bottom') return;
+      activeScroller = 'top';
+      wrapper.scrollLeft = topBar.scrollLeft;
+      clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(() => { activeScroller = null; }, 100);
+    }, { passive: true });
+
+    wrapper.addEventListener('scroll', () => {
+      if (activeScroller === 'top') return;
+      activeScroller = 'bottom';
+      topBar.scrollLeft = wrapper.scrollLeft;
+      clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(() => { activeScroller = null; }, 100);
+    }, { passive: true });
+
+    const updateWidth = () => {
+      const scrollW = Math.max(table.scrollWidth, table.offsetWidth, wrapper.scrollWidth);
+      const clientW = wrapper.clientWidth;
+
+      topInner.style.width = scrollW + 'px';
+
+      // Only show on desktop screens (> 768px) when content actually overflows
+      if (window.innerWidth > 768 && scrollW > clientW + 2) {
+        topBar.style.display = 'block';
+        topBar.scrollLeft = wrapper.scrollLeft;
+      } else {
+        topBar.style.display = 'none';
+      }
+    };
+
+    updateWidth();
+
+    // ResizeObserver watches for dynamic content & window resize changes
+    if (window.ResizeObserver) {
+      const ro = new ResizeObserver(() => updateWidth());
+      ro.observe(table);
+      ro.observe(wrapper);
+    }
+
+    window.addEventListener('resize', updateWidth, { passive: true });
+    window.addEventListener('load', updateWidth, { passive: true });
+  });
+}
 
 // =======================================================
 // Password Visibility Toggle
@@ -712,11 +790,13 @@ if (document.readyState === 'loading') {
     initPasswordToggles();
     initAuditNotifications();
     initConfirmModal();
+    initTableTopScrollbars();
   });
 } else {
   initPasswordToggles();
   initAuditNotifications();
   initConfirmModal();
+  initTableTopScrollbars();
 }
 
 // ============================================================
