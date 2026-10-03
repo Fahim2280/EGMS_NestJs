@@ -166,9 +166,10 @@
         </div>
       </div>
 
-      <div class="form-actions bill-form-actions" style="display: flex; gap: 0.75rem; justify-content: flex-end; align-items: center;">
-        <a href="/bills" class="btn btn-secondary bill-btn-cancel" style="padding: 0.65rem 1.25rem;">{{t 'common.cancel'}}</a>
-        <button type="submit" class="btn btn-primary bill-btn-submit" style="background: #10b981; border-color: #10b981; padding: 0.65rem 1.5rem; display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 700; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);">
+      <!-- Desktop Action Buttons (Visible only on desktop screens) -->
+      <div class="form-actions desktop-bill-actions" style="display: flex; gap: 0.75rem; justify-content: flex-end; align-items: center; margin-top: 1.25rem;">
+        <a href="/bills" class="btn btn-secondary" style="padding: 0.65rem 1.25rem;">{{t 'common.cancel'}}</a>
+        <button type="submit" class="btn btn-primary" style="background: #10b981; border-color: #10b981; padding: 0.65rem 1.5rem; display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 700; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
           {{t 'bills.saveBill'}}
         </button>
@@ -264,6 +265,17 @@
         </div>
         <strong id="previewPresentDues" style="font-size: 1.5rem; font-weight: 800; color: #ef4444; letter-spacing: -0.02em;">{{t 'common.currency'}}{{bnNum '0.00'}}</strong>
       </div>
+
+      <!-- Mobile Action Buttons (Visible only on mobile screens, directly after বকেয়া ব্যালেন্সের স্থানান্তর) -->
+      <div class="mobile-bill-actions" style="margin-top: 1.25rem;">
+        <a href="/bills" class="btn btn-secondary bill-btn-cancel">
+          {{t 'common.cancel'}}
+        </a>
+        <button type="submit" form="billForm" class="btn btn-primary bill-btn-submit">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          {{t 'bills.saveBill'}}
+        </button>
+      </div>
     </div>
   </div>
 </div>
@@ -284,7 +296,7 @@
     const clearMoneyInput = document.getElementById('clearMoney');
     const previewRateBadge = document.getElementById('previewRateBadge');
     const previewElectricLabel = document.getElementById('previewElectricLabel');
-    const submitBtn = document.querySelector('#billForm button[type="submit"]');
+    const submitBtns = document.querySelectorAll('button[type="submit"]');
 
     let previousUnit = 0;
     let previousDues = 0;
@@ -309,11 +321,11 @@
         if (custNameEl) custNameEl.textContent = '{{t "bills.chooseCustomer"}}';
         if (warningEl) warningEl.style.display = 'none';
         if (garageWarningEl) garageWarningEl.style.display = 'none';
-        if (submitBtn) {
-          submitBtn.disabled = false;
-          submitBtn.style.opacity = '1';
-          submitBtn.style.cursor = 'pointer';
-        }
+        submitBtns.forEach(btn => {
+          btn.disabled = false;
+          btn.style.opacity = '1';
+          btn.style.cursor = 'pointer';
+        });
         recalc();
         return;
       }
@@ -327,14 +339,18 @@
           if (warningEl) warningEl.style.display = isSuspended ? 'block' : 'none';
           if (garageWarningEl) garageWarningEl.style.display = isGarageSuspended ? 'block' : 'none';
 
-          if ((isSuspended || isGarageSuspended) && submitBtn) {
-            submitBtn.disabled = true;
-            submitBtn.style.opacity = '0.5';
-            submitBtn.style.cursor = 'not-allowed';
-          } else if (submitBtn) {
-            submitBtn.disabled = false;
-            submitBtn.style.opacity = '1';
-            submitBtn.style.cursor = 'pointer';
+          if (isSuspended || isGarageSuspended) {
+            submitBtns.forEach(btn => {
+              btn.disabled = true;
+              btn.style.opacity = '0.5';
+              btn.style.cursor = 'not-allowed';
+            });
+          } else {
+            submitBtns.forEach(btn => {
+              btn.disabled = false;
+              btn.style.opacity = '1';
+              btn.style.cursor = 'pointer';
+            });
           }
 
           previousUnit = Number(json.data.lastMeterReading) || 0;
@@ -429,20 +445,23 @@
       // Check suspension and negative constraint for submit button
       const selectedOpt = customerSelect && customerSelect.selectedOptions[0];
       const isSuspended = selectedOpt && selectedOpt.dataset.active === 'false';
-      if (submitBtn) {
-        if (isUnderPrevious || isSuspended) {
-          submitBtn.disabled = true;
-          submitBtn.style.opacity = '0.5';
-          submitBtn.style.cursor = 'not-allowed';
-          submitBtn.title = isUnderPrevious 
-            ? (isBn ? 'বর্তমান মিটার রিডিং অবশ্যই পূর্ববর্তী রিডিংয়ের চেয়ে বড় বা সমান হতে হবে' : 'Current reading cannot be lower than previous reading')
-            : (isBn ? 'স্থগিত গ্রাহকের জন্য বিল তৈরি সম্ভব নয়' : 'Billing blocked for suspended customer');
-        } else {
-          submitBtn.disabled = false;
-          submitBtn.style.opacity = '1';
-          submitBtn.style.cursor = 'pointer';
-          submitBtn.title = '';
-        }
+      if (isUnderPrevious || isSuspended) {
+        const titleText = isUnderPrevious 
+          ? (isBn ? 'বর্তমান মিটার রিডিং অবশ্যই পূর্ববর্তী রিডিংয়ের চেয়ে বড় বা সমান হতে হবে' : 'Current reading cannot be lower than previous reading')
+          : (isBn ? 'স্থগিত গ্রাহকের জন্য বিল তৈরি সম্ভব নয়' : 'Billing blocked for suspended customer');
+        submitBtns.forEach(btn => {
+          btn.disabled = true;
+          btn.style.opacity = '0.5';
+          btn.style.cursor = 'not-allowed';
+          btn.title = titleText;
+        });
+      } else {
+        submitBtns.forEach(btn => {
+          btn.disabled = false;
+          btn.style.opacity = '1';
+          btn.style.cursor = 'pointer';
+          btn.title = '';
+        });
       }
 
       const electric = consumed * rate;
